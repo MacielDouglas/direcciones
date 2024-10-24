@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "vite.config.js",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "dist"
@@ -13,10 +13,6 @@
     {
       "src": "/(.*)",
       "dest": "/index.html"
-    },
-    {
-      "src": "/graphql",
-      "dest": "https://minha-api-nine.vercel.app"
     }
   ]
 }
