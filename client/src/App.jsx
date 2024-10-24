@@ -3,14 +3,22 @@ import React, { useState } from "react";
 
 // Definição da query GraphQL
 const GET_USER = gql`
-  query getUser($getUserId: ID!) {
-    getUser(id: $getUserId) {
-      name
-      group
-      isAdmin
-      isSS
-      profilePicture
-      myCards
+  query user($action: String!, $userId: ID!) {
+    user(action: $action, id: $userId) {
+      message
+      success
+      user {
+        name
+        id
+        group
+        isAdmin
+        isSS
+        profilePicture
+        comments {
+          cardId
+          text
+        }
+      }
     }
   }
 `;
@@ -22,12 +30,14 @@ function App() {
   // Utilizando useLazyQuery para buscar quando o usuário enviar o ID
   const [getUser, { loading, data, error }] = useLazyQuery(GET_USER);
 
+  console.log(data?.user.user);
+
   // Função para lidar com a submissão do formulário
   const handleSubmit = (e) => {
     e.preventDefault();
     // Faz a busca quando o formulário for enviado
     if (inputValue) {
-      getUser({ variables: { getUserId: inputValue } });
+      getUser({ variables: { action: "get", userId: inputValue } });
     }
   };
 
@@ -53,17 +63,21 @@ function App() {
       </form>
 
       {/* Renderizando os dados do usuário se a busca tiver sucesso */}
-      {data && data.getUser && (
+      {data && data?.user.user && (
         <div>
           <h2>Informações do Usuário:</h2>
-          <p>Nome: {data.getUser.name}</p>
-          <p>Grupo: {data.getUser.group}</p>
-          <p>Admin: {data.getUser.isAdmin ? "Sim" : "Não"}</p>
-          <p>SS: {data.getUser.isSS ? "Sim" : "Não"}</p>
+          <p>Nome: {data?.user.user.name}</p>
+          <p>Grupo: {data?.user.user.group}</p>
+          <p>Admin: {data?.user.user.isAdmin ? "Sim" : "Não"}</p>
+          <p>SS: {data?.user.user.isSS ? "Sim" : "Não"}</p>
           <p>
-            <img src={data.getUser.profilePicture} alt="Profile" width="100" />
+            <img
+              src={data?.user.user.profilePicture}
+              alt="Profile"
+              width="100"
+            />
           </p>
-          <p>Meus Cartões: {data.getUser.myCards.join(", ")}</p>
+          {/* <p>Meus Cartões: {data?.user.user.myCards.join(", ")}</p> */}
         </div>
       )}
     </div>

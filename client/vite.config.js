@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/graphql": {
-        target: "http://localhost:8000",
+        target: "https://minha-api-nine.vercel.app",
         changeOrigin: true,
         secure: false,
       },
