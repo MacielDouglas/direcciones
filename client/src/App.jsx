@@ -1,85 +1,46 @@
-import { gql, useLazyQuery } from "@apollo/client";
-import React, { useState } from "react";
-
-// Definição da query GraphQL
-const GET_USER = gql`
-  query user($action: String!, $userId: ID!) {
-    user(action: $action, id: $userId) {
-      message
-      success
-      user {
-        name
-        id
-        group
-        isAdmin
-        isSS
-        profilePicture
-        comments {
-          cardId
-          text
-        }
-      }
-    }
-  }
-`;
+import { useLazyQuery } from "@apollo/client";
+import { useState } from "react";
+import { LOGIN_USER } from "./graphql/queries/user.query.js";
 
 function App() {
-  // Estado para armazenar o valor do input
-  const [inputValue, setInputValue] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  // Utilizando useLazyQuery para buscar quando o usuário enviar o ID
-  const [getUser, { loading, data, error }] = useLazyQuery(GET_USER);
+  const [loginUser, { data, loading }] = useLazyQuery(LOGIN_USER, {
+    onCompleted: (data) => {
+      console.log(data.user.user);
+    },
+    onError: (error) => {
+      console.error(`Deu erro: ${error.message}`);
+    },
+  });
 
-  console.log(data?.user.user);
-
-  // Função para lidar com a submissão do formulário
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Faz a busca quando o formulário for enviado
-    if (inputValue) {
-      getUser({ variables: { action: "get", userId: inputValue } });
-    }
+  const handleLogin = () => {
+    loginUser({ variables: { action: "login", email, password } });
   };
-
-  // Tratamento de erros e loading
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  console.log(data);
 
   return (
     <div>
-      <h1>Buscar Usuário</h1>
-
-      {/* Formulário para digitar o ID */}
-      <form onSubmit={handleSubmit}>
-        <label>
-          Digite o ID do Usuário:
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)} // Atualiza o estado do input
-          />
-        </label>
-        <button type="submit">Buscar</button>
-      </form>
-
-      {/* Renderizando os dados do usuário se a busca tiver sucesso */}
-      {data && data?.user.user && (
-        <div>
-          <h2>Informações do Usuário:</h2>
-          <p>Nome: {data?.user.user.name}</p>
-          <p>Grupo: {data?.user.user.group}</p>
-          <p>Admin: {data?.user.user.isAdmin ? "Sim" : "Não"}</p>
-          <p>SS: {data?.user.user.isSS ? "Sim" : "Não"}</p>
-          <p>
-            <img
-              src={data?.user.user.profilePicture}
-              alt="Profile"
-              width="100"
-            />
-          </p>
-          {/* <p>Meus Cartões: {data?.user.user.myCards.join(", ")}</p> */}
-        </div>
-      )}
+      <input
+        type="email"
+        placeholder="Correo electrónico"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="my-2 w-full p-2 border rounded"
+      />
+      <input
+        type="password"
+        placeholder="Contraseña"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="my-2 w-full p-2 border rounded"
+      />
+      <button
+        onClick={handleLogin}
+        className="my-10 bg-red-700 w-full py-2 text-white rounded disabled:bg-red-300 hover:bg-red-500"
+        disabled={loading}
+      ></button>
     </div>
   );
 }
