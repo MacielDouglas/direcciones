@@ -4,9 +4,8 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/graphql(.*)",
+      "source": "/graphql",
       "destination": "/api/index.js"
-    },
-    { "source": "/(.*)", "destination": "/" }
+    }
   ]
 }
