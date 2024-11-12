@@ -11,9 +11,16 @@ import { useServer } from "graphql-ws/lib/use/ws";
 import http from "http";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
+import userTypeDef from "./graphql/typeDefs/user.typeDef.js";
+import cardTypeDef from "./graphql/typeDefs/card.typeDef.js";
+import addressTypeDef from "./graphql/typeDefs/address.typeDef.js";
+import userResolver from "./graphql/resolvers/user.resolver.js";
+import cardResolver from "./graphql/resolvers/card.resolver.js";
+import addressResolver from "./graphql/resolvers/address.resolver.js";
 
-import mergedTypeDefs from "./graphql/typeDefs/index.js";
-import mergeResolvers from "./graphql/resolvers/index.js";
+// import mergedTypeDefs from "./graphql/typeDefs/index.js";
+// import mergeResolvers from "./graphql/resolvers/index.js";
 
 dotenv.config();
 
@@ -31,6 +38,18 @@ mongoose
 
 const app = express();
 
+const mergedTypeDefs = mergeTypeDefs([
+  userTypeDef,
+  cardTypeDef,
+  addressTypeDef,
+]);
+
+const mergedResolvers = mergeResolvers([
+  userResolver,
+  cardResolver,
+  addressResolver,
+]);
+
 const startServer = async () => {
   const httpServer = http.createServer(app);
 
@@ -41,7 +60,7 @@ const startServer = async () => {
 
   const schema = makeExecutableSchema({
     typeDefs: mergedTypeDefs,
-    resolvers: mergeResolvers,
+    resolvers: mergedResolvers,
   });
 
   const serverCleanup = useServer({ schema }, wsServer);
