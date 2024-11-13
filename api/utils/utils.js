@@ -86,17 +86,11 @@ export const validateUserCredentials = async (email, password) => {
 };
 
 export const verifyAuthorization = (req) => {
-  const authorizationHeader = req.headers.authorization || req.headers.cookie;
+  const authorizationHeader = req.headers.cookie;
   if (!authorizationHeader)
-    throw new Error("Acesso negado. Token não fornecido.");
+    throw new Error("Token de autorização não fornecido.");
 
-  let token;
-  if (authorizationHeader.startsWith("Bearer ")) {
-    token = authorizationHeader.slice(7);
-  } else if (authorizationHeader.includes("access_token=")) {
-    const tokenPart = authorizationHeader.split("access_token=")[1];
-    token = tokenPart.split(";")[0];
-  }
+  const token = authorizationHeader.split("access_token=")[1];
 
   if (!token) throw new Error("Acesso negado. Token inválido ou ausente.");
 
