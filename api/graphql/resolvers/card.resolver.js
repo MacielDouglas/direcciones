@@ -1,10 +1,10 @@
 import Card from "../../models/card.models.js";
-import { verifyAuthorization } from "../../utils/utils.js";
 import {
   findCardById,
   findNextNumber,
   validateObjectId,
-} from "../../utils/card.utils.js";
+  verifyAuthorization,
+} from "../../utils/utils.js";
 
 const cardResolver = {
   Query: {

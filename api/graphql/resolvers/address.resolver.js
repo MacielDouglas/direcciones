@@ -1,8 +1,7 @@
-// import validator from "validator";
+import validator from "validator";
 import mongoose from "mongoose";
 import Address from "../../models/address.models.js";
-import { verifyAuthorization } from "../../utils/utils.js";
-import { validateObjectId } from "../../utils/card.utils.js";
+import { validateObjectId, verifyAuthorization } from "../../utils/utils.js";
 
 const addressResolver = {
   Query: {

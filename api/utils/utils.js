@@ -1,6 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User from "../models/user.models.js";
+import Card from "../models/card.models.js";
+
+// ======= Funções de Utilidade de Usuário =======
 
 export const createToken = (user) => {
   return jwt.sign(
@@ -16,45 +20,26 @@ export const createToken = (user) => {
 };
 
 export const existing = async (id, type) => {
-  const models = {
-    user: User,
-  };
-
+  validateObjectId(id);
+  const models = { user: User, card: Card };
   const Model = models[type];
 
-  if (!Model) {
-    throw new Error("Tipo inválido!");
-  }
+  if (!Model) throw new Error("Tipo inválido!");
 
-  let document;
   try {
-    document = await Model.findById(id);
+    const document = await Model.findById(id);
+    if (!document) throw new Error(`${capitalize(type)} não encontrado.`);
+    return document;
   } catch (error) {
     throw new Error("Erro ao buscar o documento.");
   }
-
-  if (!document) {
-    throw new Error(
-      `${type.charAt(0).toUpperCase() + type.slice(1)} não encontrado.`
-    );
-  }
-  return document;
 };
-
-// export const setTokenCookie = (res, token) => {
-//   res.cookie("access_token", token, {
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === "production",
-//     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-//     maxAge: 3600000, // 1 hora
-//   });
-// };
 
 export const setTokenCookie = (res, token) => {
   res.cookie("access_token", token, {
     httpOnly: true,
-    secure: true, // 'true' para produção, requer HTTPS
-    sameSite: "none", // Permite envio cross-origin
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     maxAge: 3600000, // 1 hora
   });
 };
@@ -85,64 +70,223 @@ export const sanitizeUser = (user) => {
 };
 
 export const validateUserCredentials = async (email, password) => {
-  let user;
   try {
-    user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) throw new Error("Credenciais inválidas.");
+
+    if (password !== "google") {
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) throw new Error("Credenciais inválidas.");
+    }
+
+    return user;
   } catch (error) {
     throw new Error("Erro ao buscar o usuário.");
   }
-
-  if (!user) throw new Error("Credenciais inválidas.");
-
-  if (password !== "google") {
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) throw new Error("Credenciais inválidas.");
-  }
-
-  return user;
 };
 
 export const verifyAuthorization = (req) => {
-  // Recupera o cabeçalho de autorização ou cookies
   const authorizationHeader = req.headers.authorization || req.headers.cookie;
-
-  // Verifica se o cabeçalho foi fornecido
-  if (!authorizationHeader) {
+  if (!authorizationHeader)
     throw new Error("Acesso negado. Token não fornecido.");
-  }
 
-  // Inicializa a variável do token
   let token;
-
-  // Verifica o formato do Bearer Token no cabeçalho Authorization
   if (authorizationHeader.startsWith("Bearer ")) {
-    token = authorizationHeader.slice(7); // Usa slice para extrair o token sem dividir arrays
-  }
-  // Verifica se o token está nos cookies (acessível no formato access_token)
-  else if (authorizationHeader.includes("access_token=")) {
+    token = authorizationHeader.slice(7);
+  } else if (authorizationHeader.includes("access_token=")) {
     const tokenPart = authorizationHeader.split("access_token=")[1];
-    token = tokenPart.split(";")[0]; // Garante que apenas o valor do token seja extraído, sem o resto dos cookies
+    token = tokenPart.split(";")[0];
   }
 
-  // Se o token não for válido
-  if (!token) {
-    throw new Error("Acesso negado. Token inválido ou ausente.");
-  }
+  if (!token) throw new Error("Acesso negado. Token inválido ou ausente.");
 
   try {
-    // Verifica e decodifica o token JWT
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Retorna o token decodificado
-    return decoded;
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
-    // Especifica se o erro é de expiração ou outro tipo de erro
     const errorMessage =
       error.name === "TokenExpiredError"
         ? "Sessão expirada. Faça login novamente."
         : "Acesso negado. Token inválido.";
-
-    // Lança um erro genérico para segurança
     throw new Error(errorMessage);
   }
 };
+
+// ======= Funções de Utilidade de Cartão =======
+
+export const validateObjectId = (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("ID inválido.");
+};
+
+export const findCardById = async (id) => {
+  validateObjectId(id);
+  const card = await Card.findById(id).lean();
+  if (!card) throw new Error("Cartão não encontrado.");
+  return { ...card, id: card._id.toString() };
+};
+
+export const findNextNumber = async () => {
+  const existingNumbers = await Card.find().distinct("number").exec();
+
+  if (existingNumbers.length === 0) return 1;
+
+  const uniqueNumbers = existingNumbers.map(Number).sort((a, b) => a - b);
+  for (let i = 0; i < uniqueNumbers.length - 1; i++) {
+    if (uniqueNumbers[i + 1] !== uniqueNumbers[i] + 1)
+      return uniqueNumbers[i] + 1;
+  }
+
+  return uniqueNumbers[uniqueNumbers.length - 1] + 1;
+};
+
+// ======= Funções Auxiliares =======
+
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+// import bcrypt from "bcryptjs";
+// import jwt from "jsonwebtoken";
+// import User from "../models/user.models.js";
+
+// export const createToken = (user) => {
+//   return jwt.sign(
+//     {
+//       userId: user._id,
+//       isAdmin: user.isAdmin,
+//       name: user.name,
+//       isSS: user.isSS,
+//     },
+//     process.env.JWT_SECRET,
+//     { expiresIn: "1h" }
+//   );
+// };
+
+// export const existing = async (id, type) => {
+//   const models = {
+//     user: User,
+//   };
+
+//   const Model = models[type];
+
+//   if (!Model) {
+//     throw new Error("Tipo inválido!");
+//   }
+
+//   let document;
+//   try {
+//     document = await Model.findById(id);
+//   } catch (error) {
+//     throw new Error("Erro ao buscar o documento.");
+//   }
+
+//   if (!document) {
+//     throw new Error(
+//       `${type.charAt(0).toUpperCase() + type.slice(1)} não encontrado.`
+//     );
+//   }
+//   return document;
+// };
+
+// // export const setTokenCookie = (res, token) => {
+// //   res.cookie("access_token", token, {
+// //     httpOnly: true,
+// //     secure: process.env.NODE_ENV === "production",
+// //     sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+// //     maxAge: 3600000, // 1 hora
+// //   });
+// // };
+
+// export const setTokenCookie = (res, token) => {
+//   res.cookie("access_token", token, {
+//     httpOnly: true,
+//     secure: true, // 'true' para produção, requer HTTPS
+//     sameSite: "none", // Permite envio cross-origin
+//     maxAge: 3600000, // 1 hora
+//   });
+// };
+
+// export const sanitizeUser = (user) => {
+//   const {
+//     _id,
+//     isAdmin,
+//     name,
+//     profilePicture,
+//     group,
+//     isSS,
+//     myCards,
+//     myTotalCards,
+//     comments,
+//   } = user;
+//   return {
+//     id: _id,
+//     isAdmin,
+//     name,
+//     profilePicture,
+//     group,
+//     isSS,
+//     myCards,
+//     myTotalCards,
+//     comments,
+//   };
+// };
+
+// export const validateUserCredentials = async (email, password) => {
+//   let user;
+//   try {
+//     user = await User.findOne({ email }).select("+password");
+//   } catch (error) {
+//     throw new Error("Erro ao buscar o usuário.");
+//   }
+
+//   if (!user) throw new Error("Credenciais inválidas.");
+
+//   if (password !== "google") {
+//     const isValidPassword = await bcrypt.compare(password, user.password);
+//     if (!isValidPassword) throw new Error("Credenciais inválidas.");
+//   }
+
+//   return user;
+// };
+
+// export const verifyAuthorization = (req) => {
+//   // Recupera o cabeçalho de autorização ou cookies
+//   const authorizationHeader = req.headers.authorization || req.headers.cookie;
+
+//   // Verifica se o cabeçalho foi fornecido
+//   if (!authorizationHeader) {
+//     throw new Error("Acesso negado. Token não fornecido.");
+//   }
+
+//   // Inicializa a variável do token
+//   let token;
+
+//   // Verifica o formato do Bearer Token no cabeçalho Authorization
+//   if (authorizationHeader.startsWith("Bearer ")) {
+//     token = authorizationHeader.slice(7); // Usa slice para extrair o token sem dividir arrays
+//   }
+//   // Verifica se o token está nos cookies (acessível no formato access_token)
+//   else if (authorizationHeader.includes("access_token=")) {
+//     const tokenPart = authorizationHeader.split("access_token=")[1];
+//     token = tokenPart.split(";")[0]; // Garante que apenas o valor do token seja extraído, sem o resto dos cookies
+//   }
+
+//   // Se o token não for válido
+//   if (!token) {
+//     throw new Error("Acesso negado. Token inválido ou ausente.");
+//   }
+
+//   try {
+//     // Verifica e decodifica o token JWT
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+//     // Retorna o token decodificado
+//     return decoded;
+//   } catch (error) {
+//     // Especifica se o erro é de expiração ou outro tipo de erro
+//     const errorMessage =
+//       error.name === "TokenExpiredError"
+//         ? "Sessão expirada. Faça login novamente."
+//         : "Acesso negado. Token inválido.";
+
+//     // Lança um erro genérico para segurança
+//     throw new Error(errorMessage);
+//   }
+// };
