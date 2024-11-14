@@ -25,7 +25,7 @@ export default function Home() {
       </motion.div>
 
       {/* Opções de Menu */}
-      <div className="flex flex-col gap-4 w-full max-w-2xl mt-10  ">
+      <div className="flex flex-col  w-full max-w-2xl mt-10  ">
         {Object.entries(menuOptions).map(([key, item]) => (
           <motion.div
             key={key}

@@ -1,9 +1,4 @@
-import {
-  FaRoute,
-  FaRegUser,
-  FaRegRectangleList,
-  FaRegMap,
-} from "react-icons/fa6";
+import { FaRegUser, FaRegRectangleList, FaRegMap } from "react-icons/fa6";
 import { IoHomeOutline } from "react-icons/io5";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -13,8 +8,8 @@ function Footer() {
 
   const menuItems = [
     { to: "/", icon: <IoHomeOutline />, label: "home" },
-    { to: "/address", icon: <FaRegMap />, label: "direcciones" },
     { to: "/cards", icon: <FaRegRectangleList />, label: "tarjetas" },
+    { to: "/address", icon: <FaRegMap />, label: "dirección" },
     { to: "/user", icon: <FaRegUser />, label: "usuario" },
   ];
 

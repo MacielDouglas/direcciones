@@ -16,7 +16,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loginUser, { loading, data }] = useLazyQuery(LOGIN_USER, {
+  const [loginUser, { loading }] = useLazyQuery(LOGIN_USER, {
     onCompleted: (data) => {
       if (data?.user?.success) {
         dispatch(setUser({ user: data.user.user }));

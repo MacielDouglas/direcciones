@@ -8,6 +8,8 @@ import { useSelector } from "react-redux";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ToastContainer } from "react-toastify";
+import Tarjetas from "./pages/Tarjetas";
+import Direcciones from "./pages/Direcciones";
 
 function App() {
   const user = useSelector((state) => state.user);
@@ -21,6 +23,9 @@ function App() {
           <Route path="/token" element={<TokenPage />} />
           <Route element={<OnlyGroupPrivateRoute />}>
             <Route path="/" element={<Home />} />
+            <Route path="/cards" element={<Tarjetas />} />
+            <Route path="/address" element={<Direcciones />} />
+            <Route path="/user" element={<Home />} />
           </Route>
         </Route>
       </Routes>

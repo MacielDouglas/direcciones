@@ -5,7 +5,7 @@ const menuOptions = {
     info: "Acesse las tarjetas asignadas",
   },
   direcciones: {
-    label: "Direcciones",
+    label: "Dirección",
     path: "/address",
     info: "Puede enviar una nueva dirreción o corfirmar si ya existe esta dirección.",
   },
