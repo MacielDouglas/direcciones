@@ -1,4 +1,3 @@
-// pages/TokenPage.jsx
 import { useSelector } from "react-redux";
 import { FaCopy } from "react-icons/fa";
 import { toast } from "react-toastify";

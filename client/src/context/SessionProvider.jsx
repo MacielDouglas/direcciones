@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-// import { clearUser } from "../../store/userSlice";
 import { FaClock } from "react-icons/fa6";
 import { clearUser } from "../store/userSlice";
 
@@ -48,10 +47,10 @@ const SessionProvider = ({ text }) => {
     <div>
       {timeRemaining > 0 ? (
         <p className={`flex gap-2 items-center ${text}`}>
+          <FaClock />{" "}
           <span className={`${timeRemaining < 600000 && "text-orange-500"}`}>
             {formatTime(timeRemaining)}
           </span>
-          <FaClock />{" "}
         </p>
       ) : (
         <p>Sessão expirada</p>
@@ -61,44 +60,3 @@ const SessionProvider = ({ text }) => {
 };
 
 export default SessionProvider;
-
-// // context/SessionProvider.jsx
-// import { createContext, useContext, useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import { toast } from "react-toastify";
-
-// const SessionContext = createContext();
-
-// // Hook personalizado para usar o contexto
-// export const useSession = () => useContext(SessionContext);
-
-// const SessionProvider = ({ children }) => {
-//   const [sessionTimeLeft, setSessionTimeLeft] = useState(600); // Exemplo: 10 minutos
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const interval = setInterval(() => {
-//       setSessionTimeLeft((prev) => prev - 1);
-//     }, 1000);
-
-//     if (sessionTimeLeft <= 0) {
-//       clearInterval(interval);
-//       toast.info("Sessão expirada. Redirecionando para login.");
-//       navigate("/login");
-//     }
-
-//     return () => clearInterval(interval);
-//   }, [sessionTimeLeft, navigate]);
-
-//   const resetSession = () => {
-//     setSessionTimeLeft(600); // Renova o tempo para 10 minutos
-//   };
-
-//   return (
-//     <SessionContext.Provider value={{ sessionTimeLeft, resetSession }}>
-//       {children}
-//     </SessionContext.Provider>
-//   );
-// };
-
-// export default SessionProvider;

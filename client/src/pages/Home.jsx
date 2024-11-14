@@ -2,7 +2,7 @@ import SessionProvider from "../context/SessionProvider";
 
 function Home() {
   return (
-    <div>
+    <div className="">
       Home
       <SessionProvider />
     </div>

@@ -16,8 +16,10 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loginUser, { loading }] = useLazyQuery(LOGIN_USER, {
+  console.log(user);
+  const [loginUser, { loading, data }] = useLazyQuery(LOGIN_USER, {
     onCompleted: (data) => {
+      console.log("login");
       console.log(data);
       if (data?.user?.success) {
         dispatch(setUser({ user: data.user.user }));
@@ -40,6 +42,7 @@ function Login() {
   const handleLogin = () => {
     loginUser({ variables: { action: "login", email, password } });
   };
+  console.log(data);
 
   return (
     <div
