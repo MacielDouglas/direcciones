@@ -6,6 +6,7 @@ import { ApolloProvider } from "@apollo/client";
 import "./index.css";
 import { client } from "./apollo/client.js";
 import { persistor, store } from "./store/index.js";
+import "react-toastify/dist/ReactToastify.css";
 
 // import "react-toastify/dist/ReactToastify.css";
 

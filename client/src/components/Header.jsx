@@ -37,8 +37,8 @@ function Header() {
   }, [logoutUser]);
 
   return (
-    <div className="p-6 flex items-center justify-between text-3xl relative">
-      <Link to={"/"} className="uppercase font-semibold tracking-widest">
+    <div className="p-6 flex items-center justify-between text-xl relative">
+      <Link to={"/"} className="uppercase font-medium tracking-[0.5rem]">
         direcciones
       </Link>
 
