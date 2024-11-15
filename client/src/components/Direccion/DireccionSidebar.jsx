@@ -18,7 +18,7 @@ function DireccionSidebar() {
         <Link
           to="/address?tab=new-address"
           className={`p-4 w-full ${
-            currentTab === "new-address" ? "bg-tertiary" : "bg-details"
+            currentTab === "new-address" ? "bg-primary" : "bg-details"
           }`}
         >
           Nueva Dirección
@@ -28,7 +28,7 @@ function DireccionSidebar() {
         <Link
           to="/address?tab=search-address"
           className={`p-4 w-full ${
-            currentTab === "search-address" ? "bg-tertiary" : "bg-details"
+            currentTab === "search-address" ? "bg-primary" : "bg-details"
           }`}
         >
           Buscar Dirección
