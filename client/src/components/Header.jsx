@@ -42,12 +42,19 @@ function Header() {
         direcciones
       </Link>
 
-      <button
-        className="fixed top-5 right-5 border rounded-full bg-slate-300 p-2 z-50"
-        onClick={handleMenuToggle}
-      >
-        {isMenuOpen ? <RiCloseLine /> : <RiMenu3Line />}
-      </button>
+      {/* <div className="fixed top-5 right-5 border rounded-full bg-slate-300 p-2 z-50 flex flex-col items-center "> */}
+      <div className="fixed top-5 right-5 z-50 flex flex-col items-center w-10 ">
+        <button
+          className="border rounded-full bg-slate-300 p-2 "
+          onClick={handleMenuToggle}
+        >
+          {isMenuOpen ? <RiCloseLine /> : <RiMenu3Line />}
+        </button>
+        <div className="text-xs text-secondary">
+          <SessionProvider />
+        </div>
+      </div>
+      {/* <SessionProvider /> */}
 
       <AnimatePresence>
         {isMenuOpen && (
@@ -61,6 +68,7 @@ function Header() {
             <h1 className="uppercase font-medium tracking-widest text-3xl">
               Direcciones
             </h1>
+
             {/* <div> */}
             <ul className="space-y-8 md:text-center">
               <li>
@@ -90,7 +98,7 @@ function Header() {
               onClick={handleLogout}
               className="hover:underline text-orange-500 flex items-center gap-2"
             >
-              Sair <RiLogoutBoxRLine />{" "}
+              <RiLogoutBoxRLine /> Sair
             </button>
 
             <SessionProvider />

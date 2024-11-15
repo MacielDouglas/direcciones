@@ -11,7 +11,7 @@ const persistConfig = {
   storage,
   transforms: [
     expireReducer("user", {
-      expireSeconds: 900, // 15 minutos
+      expireSeconds: 3600, // 15 minutos
       autoExpire: true, // Limpa automaticamente após expiração
     }),
   ],

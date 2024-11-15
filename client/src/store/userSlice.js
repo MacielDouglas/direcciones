@@ -12,7 +12,7 @@ const userSlice = createSlice({
       state.userData = action.payload.user;
       state.isAuthenticated = true;
       // Defina a expiração para 10 minutos a partir do login
-      state.sessionExpiry = Date.now() + 15 * 60 * 1000;
+      state.sessionExpiry = Date.now() + 60 * 60 * 1000;
     },
     clearUser: (state) => {
       state.userData = null;
