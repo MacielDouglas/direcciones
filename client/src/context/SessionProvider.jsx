@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { FaClock } from "react-icons/fa6";
 import { clearUser } from "../store/userSlice";
 
 const SessionProvider = ({ text }) => {
@@ -47,7 +46,6 @@ const SessionProvider = ({ text }) => {
     <div>
       {timeRemaining > 0 ? (
         <p className={`flex gap-2 items-center ${text}`}>
-          <FaClock />{" "}
           <span className={`${timeRemaining < 600000 && "text-orange-500"}`}>
             {formatTime(timeRemaining)}
           </span>

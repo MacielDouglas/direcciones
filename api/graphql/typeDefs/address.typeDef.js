@@ -6,9 +6,11 @@ type Address {
     number: String!
     neighborhood: String
     city: String!
-    gps: String!
+    gps: String
     complement: String
     userId: String!
+    type: String!
+    photo: String
     confirmed: Boolean!
     active: Boolean!
     visited: String
@@ -16,15 +18,15 @@ type Address {
 
 type Query {
     address(action: String!, id: ID, input: FilterAddressInput): AddressResponse
-
 }
+
 input FilterAddressInput {
     street: String
     neighborhood: String
     city: String!
+    type: String
     confirmed: Boolean!
     active: Boolean!
-
 }
 
 type AddressResponse {
@@ -33,11 +35,13 @@ type AddressResponse {
     message: String
 }
 
-
-
-
 type Mutation {
-    addressMutation(action: String!, newAddress: NewAddressInput, id: ID, updateAddressInput: UpdateAddressInput): AddressMutationResponse!
+    addressMutation(
+        action: String!, 
+        newAddress: NewAddressInput, 
+        id: ID, 
+        updateAddressInput: UpdateAddressInput
+    ): AddressMutationResponse!
 }
 
 input NewAddressInput {
@@ -48,10 +52,13 @@ input NewAddressInput {
     city: String!
     gps: String
     complement: String
+    type: String!
+    photo: String
     confirmed: Boolean!
     active: Boolean!
     visited: String
 }
+
 input UpdateAddressInput {
     userId: String
     street: String
@@ -60,6 +67,8 @@ input UpdateAddressInput {
     city: String
     gps: String
     complement: String
+    type: String
+    photo: String
     confirmed: Boolean
     active: Boolean
     visited: String
@@ -69,8 +78,8 @@ type AddressMutationResponse {
     success: Boolean
     message: String
     address: Address
-
 }
+
 `;
 
 export default addressTypeDef;

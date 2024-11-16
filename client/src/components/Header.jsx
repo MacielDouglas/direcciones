@@ -9,7 +9,7 @@ import { LOGOUT } from "../graphql/queries/user.query.js";
 import { useDispatch } from "react-redux";
 import { clearUser } from "../store/userSlice.js";
 import { toast } from "react-toastify";
-
+import { FaClock } from "react-icons/fa6";
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
@@ -68,7 +68,6 @@ function Header() {
             <h1 className="uppercase font-medium tracking-widest text-3xl">
               Direcciones
             </h1>
-
             {/* <div> */}
             <ul className="space-y-8 md:text-center">
               <li>
@@ -100,8 +99,10 @@ function Header() {
             >
               <RiLogoutBoxRLine /> Sair
             </button>
-
-            <SessionProvider />
+            <p className="flex gap-4">
+              <FaClock />
+              <SessionProvider />
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

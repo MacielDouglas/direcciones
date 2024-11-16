@@ -14,7 +14,7 @@ function Footer() {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-0 w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20">
+    <footer className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20">
       {menuItems.map((item) => {
         const isActive = location.pathname === item.to;
 

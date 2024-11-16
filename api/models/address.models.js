@@ -4,8 +4,8 @@ const addressSchema = new Schema(
   {
     street: {
       type: String,
-      required: [true, "O campo 'street' é obrigatório."], // Mensagem de erro personalizada
-      trim: true, // Remove espaços em branco no início e no fim
+      required: [true, "O campo 'street' é obrigatório."],
+      trim: true,
       minlength: [3, "O campo 'street' deve ter no mínimo 3 caracteres."],
       maxlength: [100, "O campo 'street' deve ter no máximo 100 caracteres."],
     },
@@ -15,7 +15,7 @@ const addressSchema = new Schema(
       match: [
         /^\d+[a-zA-Z]?$/,
         "O campo 'number' deve conter um número válido.",
-      ], // Valida números e possíveis letras
+      ],
     },
     city: {
       type: String,
@@ -38,7 +38,6 @@ const addressSchema = new Schema(
       type: String,
       validate: {
         validator: function (v) {
-          // Verifica se o valor do GPS está no formato correto (latitude e longitude)
           return /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d+)?|180(\.0+)?)$/.test(
             v
           );
@@ -55,28 +54,37 @@ const addressSchema = new Schema(
         "O campo 'complement' deve ter no máximo 250 caracteres.",
       ],
       set: function (v) {
-        // Regex para identificar as palavras proibidas, ignorando maiúsculas/minúsculas
         const regex =
-          /\b(homem(ens)?|hombre(s)?|mulher(es)?|mujer(es)?|criança|jovem|niño|niña|muchacho|muchacha|peru(ano|ana)?|argentin(a|o)?|chile(no|na)?|urugua(y|i)(o|a)?|paragua(y|i)(o|a)?|venezuela(no|na)?|bolivia(no|na)?|cuba(no|na)?|equador(iano|iana)?|colombia(no|na)?)\b/gi;
-
-        // Substitui todas as ocorrências das palavras encontradas por "******"
+          /\b(homem(ens)?|hombre(s)?|mulher(es)?|mujer(es)?|criança|jovem|niño|niña|muchacho|muchacha|peru(ano|ana|anos|anas)?|argentin(a|o|as|os)?|chile(no|na|nos|nas)?|urugua(y|i)(o|a|os|as)?|paragua(y|i)(o|a|os|as)?|venezuela(no|na|as|os)?|bolivia(no|na|nos|nas)?|cuba(no|na|nos|nas)?|equator(iano|iana|ianos|ianas)?|colombia(no|na|nos|nas)?ecuator(iano|iana|ianos|ianas)?)\b/gi;
         return v.replace(regex, "******");
       },
     },
-
+    type: {
+      type: String,
+      required: [true, "O campo 'type' é obrigatório."],
+      enum: {
+        values: ["house", "department", "store", "hotel", "restaurant"],
+        message:
+          "O campo 'type' deve ser 'house', 'department', 'store', 'hotel' ou 'restaurant'.",
+      },
+    },
+    photo: {
+      type: String,
+      required: false,
+      maxlength: [500, "O campo 'photo' deve ter no máximo 500 caracteres."],
+    },
     userId: {
       type: String,
-      required: [true],
+      required: [true, "O campo 'userId' é obrigatório."],
       trim: true,
     },
     active: {
       type: Boolean,
-      required: [true],
+      required: [true, "O campo 'active' é obrigatório."],
     },
     confirmed: {
       type: Boolean,
-      required: [true],
-      default: false,
+      required: [true, "O campo 'confirmed' é obrigatório."],
     },
     visited: {
       type: String,
@@ -84,11 +92,10 @@ const addressSchema = new Schema(
         values: ["yes", "no", null],
         message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
       },
-      default: null,
     },
   },
-  { timestamps: true }
-); // Adiciona createdAt e updatedAt automaticamente
+  { timestamps: true } // Adiciona createdAt e updatedAt automaticamente
+);
 
 const Address = model("Address", addressSchema);
 

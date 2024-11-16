@@ -4,7 +4,7 @@ import DireccionSidebar from "../components/Direccion/DireccionSidebar";
 import NewAddress from "../components/Direccion/NewAddress";
 import SearchAddress from "../components/Direccion/SearchAddress";
 import { useQuery } from "@apollo/client";
-import { GET_ADDRESS } from "./../graphql/mutation/address.mutation";
+import { GET_ADDRESS } from "../graphql/queries/address.query.js";
 
 function Direcciones() {
   const location = useLocation();
@@ -17,9 +17,9 @@ function Direcciones() {
       addressId: "",
       input: {
         street: "",
-        active: false,
+        active: true,
         city: "",
-        confirmed: false,
+        confirmed: true,
         neighborhood: "",
       },
     },
@@ -27,7 +27,7 @@ function Direcciones() {
       console.log("Dados recebidos:", response);
     },
     onError: (err) => {
-      console.error("Erro na consulta:", err);
+      console.error("Erro na consulta:", err.message);
     },
   });
 
@@ -54,7 +54,7 @@ function Direcciones() {
     <div>
       <div>{<DireccionSidebar />}</div>
       {tab === "new-address" && <NewAddress addresses={addresses} />}
-      {tab === "search-address" && <SearchAddress />}
+      {tab === "search-address" && <SearchAddress addresses={addresses} />}
     </div>
   );
 }
