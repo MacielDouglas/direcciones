@@ -6,10 +6,12 @@ import {
   MdOutlineStorefront,
   MdOutlineApartment,
 } from "react-icons/md";
-import PropTypes from "prop-types";
 import SearchModal from "./SearchModal";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-function SearchAddress({ addresses }) {
+function SearchAddress() {
+  const addresses = useSelector((state) => state.addresses.addressesData);
   const [currentPage, setCurrentPage] = useState(1);
   const [userLocation, setUserLocation] = useState(null); // Localização do usuário
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -116,7 +118,10 @@ function SearchAddress({ addresses }) {
                     !address.confirmed ? "bg-primary" : ""
                   }`}
                 >
-                  <div className="grid grid-cols-7 w-full ">
+                  <Link
+                    to={`/address?tab=/address/${address.id}`}
+                    className="grid grid-cols-7 w-full "
+                  >
                     <p className="text-3xl col-span-1 w-10">
                       {(address.type === "house" && <MdHouse />) ||
                         (address.type === "department" && (
@@ -153,7 +158,7 @@ function SearchAddress({ addresses }) {
                         ? `${(distance / 1000).toFixed(2)}km`
                         : `${distance}m`}
                     </p>
-                  </div>
+                  </Link>
                 </li>
               );
             })
@@ -192,7 +197,3 @@ function SearchAddress({ addresses }) {
 }
 
 export default SearchAddress;
-
-SearchAddress.propTypes = {
-  addresses: PropTypes.array.isRequired,
-};

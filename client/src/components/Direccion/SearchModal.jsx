@@ -10,8 +10,10 @@ import {
 } from "react-icons/md";
 import { RiCloseLine } from "react-icons/ri";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
 
-function SearchModal({ addresses, isOpen, onClose }) {
+function SearchModal({ isOpen, onClose }) {
+  const addresses = useSelector((state) => state.addresses.addressesData);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -172,23 +174,6 @@ function SearchModal({ addresses, isOpen, onClose }) {
 export default SearchModal;
 
 SearchModal.propTypes = {
-  addresses: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      street: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-      neighborhood: PropTypes.string.isRequired,
-      city: PropTypes.string.isRequired,
-      confirmed: PropTypes.bool.isRequired,
-      type: PropTypes.oneOf([
-        "house",
-        "department",
-        "store",
-        "restaurant",
-        "hotel",
-      ]).isRequired,
-    })
-  ).isRequired,
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
 };

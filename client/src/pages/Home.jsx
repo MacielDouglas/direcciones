@@ -1,12 +1,21 @@
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import menuOptions from "../constants/menu";
+import { useLazyQuery } from "@apollo/client";
 import { motion } from "framer-motion";
 import { FaRegUser, FaRegRectangleList, FaRegMap } from "react-icons/fa6";
+import menuOptions from "../constants/menu";
+import { GET_ADDRESS } from "../graphql/queries/address.query";
+import { setAddresses } from "../store/addressesSlice";
 
 export default function Home() {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { name } = user.userData;
+  const addresses = useSelector((state) => state.addresses);
+  const { name, group } = user.userData;
+
+  console.log(addresses);
+  // console.log(addresses);
 
   // Mapeamento de ícones
   const iconsMap = {
@@ -14,6 +23,35 @@ export default function Home() {
     Dirección: FaRegMap,
     Perfil: FaRegUser,
   };
+
+  // Lazy Query para obter endereços
+  const [fetchAddresses, { data, loading, error }] = useLazyQuery(GET_ADDRESS, {
+    variables: {
+      action: "get",
+      addressId: "",
+      input: {
+        street: "",
+        active: true,
+        city: "",
+        confirmed: true,
+        neighborhood: "",
+      },
+    },
+    onCompleted: (data) => {
+      if (data) {
+        console.log("DATA: ", data.address.address);
+        dispatch(setAddresses({ addresses: data.address.address }));
+      }
+    },
+  });
+
+  // Realiza a consulta somente uma vez na montagem se não houver dados e o grupo for diferente de 0
+  useEffect(() => {
+    // Verifica apenas uma vez na montagem e quando addresses estiver vazio
+    if (group !== 0 && (!addresses || addresses.length === 0)) {
+      fetchAddresses();
+    }
+  }, [group, addresses]);
 
   return (
     <div className="w-full min-h-screen text-black pb-32 px-6 flex flex-col items-center">
@@ -32,10 +70,19 @@ export default function Home() {
         </p>
       </motion.div>
 
+      {/* Botão para atualizar os dados manualmente */}
+      {group !== 0 && (
+        <button
+          onClick={fetchAddresses}
+          className="mt-4 py-2 px-6 bg-blue-500 text-white font-medium rounded hover:bg-blue-600"
+        >
+          {loading ? "Atualizando..." : "Atualizar Endereços"}
+        </button>
+      )}
+
       {/* Opções de Menu */}
       <div className="flex flex-col w-full max-w-2xl mt-4">
         {Object.entries(menuOptions).map(([key, item]) => {
-          // Obtém o componente do ícone correspondente
           const IconComponent = iconsMap[item.label];
 
           return (
@@ -55,7 +102,6 @@ export default function Home() {
                 to={item.path}
                 className="flex gap-7 pt-10  h-full border-t border-details"
               >
-                {/* Ícone Dinâmico */}
                 {IconComponent && (
                   <IconComponent
                     size={38}
@@ -63,7 +109,6 @@ export default function Home() {
                     className="flex-shrink-0"
                   />
                 )}
-                {/* Texto do Menu */}
                 <p className="font-medium text-4xl tracking-widest ">
                   {item.label}
                 </p>
@@ -72,6 +117,13 @@ export default function Home() {
           );
         })}
       </div>
+
+      {/* Exibe erros se houver */}
+      {error && (
+        <p className="text-red-500 mt-4">
+          Ocorreu um erro ao atualizar os endereços.
+        </p>
+      )}
     </div>
   );
 }
