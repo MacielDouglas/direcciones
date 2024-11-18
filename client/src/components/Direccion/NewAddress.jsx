@@ -315,6 +315,26 @@ function NewAddress({ addresses }) {
             isTextarea
             maxLength="250"
           />
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="photo"
+              className="text-sm text-gray-600 font-medium mb-1"
+            >
+              Foto (opcional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {formData.photo && (
+              <p className="text-green-500 text-sm">
+                Foto selecionada: {formData.photo.name}
+              </p>
+            )}
+          </div>
           <button
             type="submit"
             disabled={isButtonDisabled}

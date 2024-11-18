@@ -28,6 +28,7 @@ function App() {
             <Route path="/user" element={<Home />} />
           </Route>
         </Route>
+        <Route path="*" element={<Login />} /> {/* Rota 404 */}
       </Routes>
       {user.userData && user.userData.group !== "0" && <Footer />}
     </BrowserRouter>
