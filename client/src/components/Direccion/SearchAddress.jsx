@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   MdHouse,
@@ -8,13 +7,15 @@ import {
   MdOutlineApartment,
 } from "react-icons/md";
 import PropTypes from "prop-types";
+import SearchModal from "./SearchModal";
 
 function SearchAddress({ addresses }) {
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [userLocation, setUserLocation] = useState(null); // Localização do usuário
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const navigate = useNavigate();
+  const openSearchModal = () => setIsSearchOpen(true);
+  const closeSearchModal = () => setIsSearchOpen(false);
 
   // Captura a localização do usuário
   useEffect(() => {
@@ -51,23 +52,17 @@ function SearchAddress({ addresses }) {
     return R * c; // Distância em metros
   };
 
-  // Filtra os endereços com base no termo de busca
-  const filteredAddresses = addresses.filter((address) =>
-    address.street.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Ordena os endereços em ordem decrescente (por id ou outra propriedade relevante)
+  const sortedAddresses = [...addresses].sort((a, b) => b - a);
 
   // Configuração da paginação
   const itemsPerPage = 10;
-  const totalPages = Math.ceil(filteredAddresses.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedAddresses.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedAddresses = filteredAddresses.slice(
+  const paginatedAddresses = sortedAddresses.slice(
     startIndex,
     startIndex + itemsPerPage
   );
-
-  const handleAddNewAddress = () => {
-    navigate("/new-address");
-  };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -82,32 +77,20 @@ function SearchAddress({ addresses }) {
   };
 
   return (
-    <div className="">
+    <div>
       <div className="flex items-center justify-center my-6">
-        <input
-          type="text"
-          placeholder="Buscar dirección"
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full max-w-xs p-2 border border-stone-400 rounded-lg text-gray-800 shadow focus:outline-none focus:ring-2 focus:ring-sky-500"
-        />
-      </div>
-      <div className="flex items-center justify-center mb-6">
         <button
-          onClick={handleAddNewAddress}
+          onClick={openSearchModal}
           className="w-full max-w-xs bg-secondary text-white font-semibold py-2 rounded-lg shadow-md hover:bg-sky-700 transition-colors"
         >
-          Nueva Dirección
+          Pesquisar direcciones
         </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-4 space-y-6">
         <h2 className="text-center">
-          Encontrado, {addresses.length && filteredAddresses.length}{" "}
-          {filteredAddresses.length <= 1 ? "dirección" : "direcciones"}
+          Encontrado, {sortedAddresses.length}{" "}
+          {sortedAddresses.length <= 1 ? "dirección" : "direcciones"}
         </h2>
         <ul className="space-y-4">
           {paginatedAddresses.length > 0 ? (
@@ -199,6 +182,11 @@ function SearchAddress({ addresses }) {
           Próxima
         </button>
       </div>
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={closeSearchModal}
+        addresses={addresses}
+      />
     </div>
   );
 }
