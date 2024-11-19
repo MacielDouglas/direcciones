@@ -1,8 +1,29 @@
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { useState, useEffect } from "react";
+import {
+  MdHouse,
+  MdRestaurant,
+  MdHotel,
+  MdOutlineStorefront,
+  MdOutlineApartment,
+} from "react-icons/md";
+
+// Ícones personalizados para os marcadores
+const personIcon = new L.Icon({
+  iconUrl: "person.svg",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+
+const pinMapIcon = new L.Icon({
+  iconUrl: "pinMap.svg",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
 
 function Address({ id }) {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -38,43 +59,40 @@ function Address({ id }) {
     }
   }, []);
 
-  // Componente para centralizar no mapa
-  const SetMapView = ({ coords }) => {
-    const map = useMap();
-    if (coords) {
-      map.setView(coords, 13);
-    }
-    return null;
-  };
-
   return (
     <div className="w-full max-w-lg p-4 border rounded shadow-md mb-52">
-      <h2 className="text-xl font-bold mb-4">Informações do Endereço</h2>
-      <ul className="mb-6">
-        <li>
-          <strong>Rua:</strong> {street}
-        </li>
-        <li>
-          <strong>Número:</strong> {number}
-        </li>
-        <li>
-          <strong>Bairro:</strong> {neighborhood}
-        </li>
-        <li>
-          <strong>Cidade:</strong> {city}
-        </li>
-        <li>
-          <strong>Tipo:</strong> {type}
-        </li>
-        <li>
-          <strong>Coordenadas:</strong> {latitude}, {longitude}
-        </li>
-      </ul>
+      <h2 className="text-xl font-medium text-center mb-4">
+        Informações do Endereço
+      </h2>
+      <div className="bg-white p-5 rounded-md drop-shadow-lg mb-4 space-y-3 flex items-center gap-4">
+        <span className="text-5xl">
+          {(type === "house" && <MdHouse />) ||
+            (type === "department" && <MdOutlineApartment />) ||
+            (type === "store" && <MdOutlineStorefront />) ||
+            (type === "restaurant" && <MdRestaurant />) ||
+            (type === "hotel" && <MdHotel />)}
+        </span>
+        <div>
+          <p>
+            Rua:{" "}
+            <strong>
+              {street}, {number}
+            </strong>
+          </p>
+          <p className="text-sm">
+            Bairro: <strong>{neighborhood}, </strong>
+          </p>
+          <p className="text-sm">
+            Cidade: <strong>{city}</strong>
+          </p>
+        </div>
+      </div>
+
       <div className="mb-6">
         <MapContainer
-          center={[latitude, longitude]}
+          center={[latitude, longitude]} // Centraliza o mapa no destino
           zoom={13}
-          style={{ height: "350px", width: "100%" }}
+          style={{ height: "200px", width: "100%" }}
           className="rounded border z-0"
         >
           <TileLayer
@@ -84,27 +102,20 @@ function Address({ id }) {
             attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> & <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {/* Marcador do endereço */}
-          <Marker position={[latitude, longitude]}>
+          <Marker position={[latitude, longitude]} icon={pinMapIcon}>
             <Popup>
               Endereço: {street}, {number}, {neighborhood}, {city}
             </Popup>
           </Marker>
           {/* Marcador do usuário */}
           {userLocation && (
-            <Marker position={[userLocation.lat, userLocation.lng]}>
+            <Marker
+              position={[userLocation.lat, userLocation.lng]}
+              icon={personIcon}
+            >
               <Popup>Você está aqui!</Popup>
             </Marker>
           )}
-          <SetMapView
-            coords={
-              userLocation
-                ? [
-                    (latitude + userLocation.lat) / 2,
-                    (longitude + userLocation.lng) / 2,
-                  ]
-                : [latitude, longitude]
-            }
-          />
         </MapContainer>
       </div>
       <div className="flex justify-around">
@@ -114,7 +125,7 @@ function Address({ id }) {
           rel="noopener noreferrer"
           className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
-          Caminhar até o Endereço
+          Caminhar
         </a>
         <a
           href={`https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=driving`}
@@ -122,7 +133,7 @@ function Address({ id }) {
           rel="noopener noreferrer"
           className="py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600"
         >
-          Dirigir até o Endereço
+          Dirigir
         </a>
       </div>
     </div>
@@ -134,19 +145,3 @@ export default Address;
 Address.propTypes = {
   id: PropTypes.string.isRequired,
 };
-
-// import { useSelector } from "react-redux";
-// import PropTypes from "prop-types";
-
-// function Address({ id }) {
-//   const addresses = useSelector((state) => state.addresses.addressesData);
-
-//   const address = addresses.find((address) => address.id === id);
-//   console.log(address);
-//   return <div>Address</div>;
-// }
-
-// export default Address;
-// Address.propTypes = {
-//   id: PropTypes.string.isRequired,
-// };
