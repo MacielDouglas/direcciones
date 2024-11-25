@@ -100,7 +100,10 @@ function SearchModal({ isOpen, onClose }) {
                       transition={{ duration: 0.3 }}
                       className="flex flex-col sm:flex-row items-start sm:items-center pb-4 border-b"
                     >
-                      <Link to={`/address/${address.id}`} className="w-full">
+                      <Link
+                        to={`/address?tab=/address/${address.id}`}
+                        className="w-full"
+                      >
                         <div className="flex items-center gap-4">
                           <span className="text-3xl">
                             {(address.type === "house" && <MdHouse />) ||
