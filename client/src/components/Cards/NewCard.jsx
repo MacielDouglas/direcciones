@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import NewCardManual from "./newCard/NewCardManual";
 import NewCarAutomatic from "./newCard/NewCarAutomatic";
-import NewCardsuggestion from "./newCard/newCardsuggestion";
+import NewCardsuggestion from "./newCard/NewCardSuggestion";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
