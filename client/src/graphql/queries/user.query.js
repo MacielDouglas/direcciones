@@ -11,6 +11,7 @@ export const LOGIN_USER = gql`
         group
         isAdmin
         isSS
+        myCards
         profilePicture
         comments {
           cardId

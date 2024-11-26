@@ -1,7 +1,6 @@
-import React from "react";
 import { useSelector } from "react-redux";
 
-function Tarjetas() {
+function Card() {
   const user = useSelector((state) => state.user);
   const { myCards } = user;
 
@@ -16,4 +15,4 @@ function Tarjetas() {
   );
 }
 
-export default Tarjetas;
+export default Card;

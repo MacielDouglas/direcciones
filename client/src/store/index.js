@@ -4,6 +4,7 @@ import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
 import userReducer from "./userSlice.js";
 import addressesReducer from "./addressesSlice.js";
+import cardsReducer from "./cardsSlice.js";
 import expireReducer from "redux-persist-expire";
 
 // Configuração de persistência
@@ -21,6 +22,11 @@ const persistConfig = {
       {
         expireSeconds: 3600,
         autoExpire: true,
+      },
+      "cards",
+      {
+        expireSeconds: 3600,
+        autoExpire: true,
       }
     ),
   ],
@@ -29,6 +35,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   user: userReducer,
   addresses: addressesReducer,
+  cards: cardsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -14,9 +14,6 @@ export default function Home() {
   const addresses = useSelector((state) => state.addresses);
   const { name, group } = user.userData;
 
-  console.log(addresses);
-  // console.log(addresses);
-
   // Mapeamento de ícones
   const iconsMap = {
     Tarjetas: FaRegRectangleList,

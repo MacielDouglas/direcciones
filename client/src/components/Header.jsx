@@ -10,6 +10,8 @@ import { useDispatch } from "react-redux";
 import { clearUser } from "../store/userSlice.js";
 import { toast } from "react-toastify";
 import { FaClock } from "react-icons/fa6";
+import { clearCards } from "../store/cardsSlice.js";
+import { clearAddresses } from "../store/addressesSlice.js";
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
@@ -18,6 +20,8 @@ function Header() {
     onCompleted: (data) => {
       if (data.user.success) {
         dispatch(clearUser());
+        dispatch(clearCards());
+        dispatch(clearAddresses());
         toast.success("¡Cierre de sesión exitoso!");
       } else {
         toast.error(`Erro ao fazer logout: ${data.user.message}`);

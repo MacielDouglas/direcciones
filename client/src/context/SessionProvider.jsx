@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "../store/userSlice";
+import { clearCards } from "../store/cardsSlice";
+import { clearAddresses } from "../store/addressesSlice";
 
 const SessionProvider = ({ text }) => {
   const dispatch = useDispatch();
@@ -20,7 +22,9 @@ const SessionProvider = ({ text }) => {
 
       if (timeLeft <= 0) {
         clearInterval(interval);
-        dispatch(clearUser()); // Desloga o usuário
+        dispatch(clearUser());
+        dispatch(clearCards());
+        dispatch(clearAddresses());
         window.location.reload(); // Atualiza a página
       }
     }, 1000);
