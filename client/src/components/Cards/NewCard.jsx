@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import NewCardManual from "./newCard/NewCardManual";
 import NewCarAutomatic from "./newCard/NewCarAutomatic";
 import NewCardsuggestion from "./newCard/NewCardSuggestion";
@@ -7,41 +8,54 @@ import NewCardsuggestion from "./newCard/NewCardSuggestion";
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
   const cards = useSelector((state) => state.cards.cardsData.card);
-  console.log("DATACARDS", cards.length);
-  console.log(addresses);
 
-  // Estado para controlar a aba ativa
   const [activeTab, setActiveTab] = useState("manual");
 
-  // Renderiza o conteúdo com base na aba ativa
   const renderTabContent = () => {
     switch (activeTab) {
       case "manual":
         return (
-          <div className="">
-            <p>
-              Você escolheu criar cartões manualmente. Selecione as direções
-              desejadas.
+          <motion.div
+            key="manual"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+          >
+            <p className="py-3">
+              Elegiste crear tarjetas manualmente. Seleccionar direcciones
+              deseado.
             </p>
             <NewCardManual />
-          </div>
+          </motion.div>
         );
       case "automatic":
         return (
-          <div>
+          <motion.div
+            key="automatic"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+          >
             <p>
-              Modo automático selecionado. Cartões serão criados
-              automaticamente.
+              Modo automático seleccionado. Se crearán tarjetas automáticamente.
             </p>
             <NewCarAutomatic />
-          </div>
+          </motion.div>
         );
       case "suggestion":
         return (
-          <div>
+          <motion.div
+            key="suggestion"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            transition={{ duration: 0.3 }}
+          >
             <p>Sugestões disponíveis com base nos dados existentes.</p>
             <NewCardsuggestion />
-          </div>
+          </motion.div>
         );
       default:
         return null;
@@ -49,20 +63,26 @@ function NewCard() {
   };
 
   return (
-    <div className="text-start text-lg w-full h-screen ">
+    <div className="text-start text-lg w-full h-screen">
       <div className="space-y-5 px-4 pt-3">
         <h1 className="text-4xl font-medium">Crear Tarjetas</h1>
-        {addresses && <p>Actualmente hay {addresses.length} direcciones.</p>}
-        {cards && <p>Actualmente hay {cards.length} tarjetas.</p>}
+        {addresses && (
+          <p>
+            Actualmente hay {addresses.length} direcciones y{" "}
+            {cards && cards.length} tarjetas.
+          </p>
+        )}
       </div>
 
       <div>
-        <h2>Para criar uma nova tarjeta, elija uma de las seguintes opções:</h2>
+        <h2 className="px-4">
+          Para crear una nueva tarjeta, elija una de las siguientes opciones:
+        </h2>
         <div className="border-b flex justify-around">
           {/* Abas */}
           <button
             onClick={() => setActiveTab("manual")}
-            className={`px-4 py-2 border-b-2  w-full ${
+            className={`px-4 py-2 border-b-2 w-full ${
               activeTab === "manual"
                 ? "border-blue-500 text-blue-500 bg-details"
                 : "border-transparent"
@@ -70,22 +90,22 @@ function NewCard() {
           >
             Manual
           </button>
-          <button
+          {/* <button
             onClick={() => setActiveTab("automatic")}
-            className={`px-4 py-2 border-b-2  w-full ${
+            className={`px-4 py-2 border-b-2 w-full ${
               activeTab === "automatic"
-                ? "border-blue-500 text-blue-500  bg-details"
+                ? "border-blue-500 text-blue-500 bg-details"
                 : "border-transparent"
             }`}
           >
             Automático
-          </button>
+          </button> */}
 
           <button
             onClick={() => setActiveTab("suggestion")}
-            className={`px-4 py-2 border-b-2 w-full  ${
+            className={`px-4 py-2 border-b-2 w-full ${
               activeTab === "suggestion"
-                ? "border-blue-500 text-blue-500  bg-details"
+                ? "border-blue-500 text-blue-500 bg-details"
                 : "border-transparent"
             }`}
           >
@@ -93,8 +113,10 @@ function NewCard() {
           </button>
         </div>
 
-        {/* Conteúdo da aba ativa */}
-        <div className="p-4 bg-details">{renderTabContent()}</div>
+        {/* Conteúdo da aba ativa com animação */}
+        <div className="p-4 bg-details">
+          <AnimatePresence mode="wait">{renderTabContent()}</AnimatePresence>
+        </div>
       </div>
     </div>
   );

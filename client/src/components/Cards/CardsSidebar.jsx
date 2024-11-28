@@ -84,7 +84,7 @@ function CardsSidebar() {
       </div>
 
       {/* Mobile Navbar */}
-      <div className="flex md:hidden bg-secondary w-full h-[70px] justify-around items-center">
+      <div className="flex md:hidden bg-secondary w-full h-[50px] justify-around items-center">
         {menuOptions.map((item) => {
           const isActive =
             location.search.includes(item.to.split("?tab=")[1]) ||
@@ -97,7 +97,7 @@ function CardsSidebar() {
               className="flex flex-col items-center text-xs relative"
             >
               <motion.div
-                className={`text-xl flex flex-col ${
+                className={`text-xl flex items-center gap-2 ${
                   isActive ? "text-yellow-400" : "text-gray-500"
                 }`}
                 animate={{ opacity: isActive ? 1 : 0.6 }}
@@ -106,7 +106,7 @@ function CardsSidebar() {
                 {item.icon}
                 <span
                   className={`mt-1 text-xs font-medium ${
-                    isActive ? "text-yellow-400" : "text-gray-500"
+                    isActive ? "text-yellow-400 text-base" : "text-gray-500"
                   }`}
                 >
                   {item.label}

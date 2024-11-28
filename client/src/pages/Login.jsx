@@ -53,16 +53,18 @@ function Login() {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.h1
-          className="text-4xl font-bold mb-6 text-gray-800"
+          className="text-2xl font-bold mb-6 text-gray-800"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
           Bienvenido a{" "}
-          <span className="text-bold text-orange-600">Direcciones</span>
+          <span className="text-bold text-orange-600 text-4xl">
+            Direcciones
+          </span>
         </motion.h1>
         <motion.p
-          className="text-gray-600 mb-6 text-center"
+          className="text-gray-600 mb-6 "
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
@@ -138,123 +140,3 @@ function Login() {
 }
 
 export default Login;
-
-// import { useLazyQuery, useMutation } from "@apollo/client";
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useNavigate } from "react-router-dom";
-// import { LOGIN_USER } from "./../graphql/queries/user.query";
-// import { toast } from "react-toastify";
-// import { FaGoogle, FaUserAlt, FaLock } from "react-icons/fa";
-
-// function Login() {
-//   const user = useSelector((state) => state.user);
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-
-//   const [loginUser, { loading }] = useLazyQuery(LOGIN_USER, {
-//     onCompleted: (data) => {
-//       if (data?.user?.success) {
-//         dispatch(setUser({ user: data.user.user }));
-//         toast.success("¡Inicio de sesión exitoso!");
-//       } else {
-//         toast.error(`Error de inicio de sesión: ${data.user.message}`);
-//       }
-//     },
-//     onError: (error) => {
-//       toast.error(`Error en la solicitud de ingreso: ${error.message}`);
-//     },
-//   });
-
-//   // Simulação do login com Google
-//   //   const [userMutation] = useMutation(LOGIN_GOOGLE, {
-//   //     onCompleted: (data) => {
-//   //       if (data?.userMutation?.success) {
-//   //         dispatch(setUser({ user: data.userMutation.user }));
-//   //         toast.success("¡Inicio de sesión exitoso!");
-//   //       } else {
-//   //         toast.error(`Error de inicio de sesión: ${data.userMutation.message}`);
-//   //       }
-//   //     },
-//   //     onError: (error) => {
-//   //       toast.error(`Error en la solicitud de ingreso: ${error.message}`);
-//   //     },
-//   //   });
-
-//   useEffect(() => {
-//     if (user.isAuthenticated) {
-//       navigate("/");
-//     }
-//   }, [user.isAuthenticated, navigate]);
-
-//   const handleLogin = () => {
-//     loginUser({ variables: { email, password } });
-//   };
-
-//   //   const handleGoogleLogin = () => {
-//   //     userMutation();
-//   //   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 flex flex-col justify-center items-center ">
-//       <div className="bg-stone-100 shadow-lg rounded-lg p-8 max-w-md w-full py-20">
-//         <h1 className="text-4xl font-semibold  mb-6 text-stone-800">
-//           Bienvenido a Direcciones.
-//         </h1>
-//         <p className="text-wrap text-stone-500">
-//           Para comenzar, debe iniciar sesión con una cuenta de{" "}
-//           <span className="text-red-500 font-semibold">Google</span>.
-//         </p>
-
-//         <div className="mb-4">
-//           <label className="block text-gray-600 text-sm mb-2">Email</label>
-//           <div className="flex items-center border border-gray-300 rounded-md p-2">
-//             <FaUserAlt className="text-gray-500 mr-2" />
-//             <input
-//               type="email"
-//               placeholder="Digite seu email"
-//               value={email}
-//               onChange={(e) => setEmail(e.target.value)}
-//               className="flex-grow outline-none text-gray-700 bg-stone-100"
-//             />
-//           </div>
-//         </div>
-
-//         <div className="mb-6">
-//           <label className="block text-gray-600 text-sm mb-2">Senha</label>
-//           <div className="flex items-center border border-gray-300 rounded-md p-2">
-//             <FaLock className="text-gray-500 mr-2" />
-//             <input
-//               type="password"
-//               placeholder="Digite sua senha"
-//               value={password}
-//               onChange={(e) => setPassword(e.target.value)}
-//               className="flex-grow outline-none text-gray-700 bg-stone-100"
-//             />
-//           </div>
-//         </div>
-
-//         <button
-//           onClick={handleLogin}
-//           disabled={loading}
-//           className="bg-blue-500 text-white font-semibold py-2 rounded-md w-full mb-4 hover:bg-blue-600 transition"
-//         >
-//           {loading ? "Entrando..." : "Entrar"}
-//         </button>
-
-//         <button
-//           //   onClick={handleGoogleLogin}
-//           className="flex items-center justify-center border border-gray-300 text-gray-600 py-2 rounded-md w-full hover:bg-gray-100 transition"
-//         >
-//           <FaGoogle className="mr-2" />
-//           Entrar com Google
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Login;
