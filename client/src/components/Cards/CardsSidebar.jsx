@@ -43,7 +43,7 @@ function CardsSidebar() {
       ];
 
   return (
-    <div className="md:flex md:flex-col md:h-full md:w-[250px] bg-secondary text-primary">
+    <div className="md:flex md:flex-col md:h-full md:w-[170px] lg:w-[250px] bg-secondary text-primary">
       {/* Desktop Sidebar */}
       <div className="hidden md:flex flex-col gap-4 p-4">
         {menuOptions.map((item) => {
@@ -73,7 +73,7 @@ function CardsSidebar() {
               </motion.div>
               <span
                 className={`text-lg md:text-sm lg:text-lg font-medium ${
-                  isActive ? "text-yellow-800" : "text-gray-300"
+                  isActive ? "text-yellow-500" : "text-gray-300"
                 }`}
               >
                 {item.label}

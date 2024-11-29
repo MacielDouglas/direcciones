@@ -4,13 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyQuery } from "@apollo/client";
 import { GET_CARDS } from "../graphql/queries/cards.query";
 import { setCards } from "../store/cardsSlice";
-import { Player } from "@lottiefiles/react-lottie-player";
 
 import CardsSidebar from "../components/Cards/CardsSidebar";
 import Card from "../components/Cards/Card";
 import UpdateCard from "../components/Cards/UpdateCard";
 import NewCard from "../components/Cards/NewCard";
 import AssignCard from "../components/Cards/AssignCard";
+import Loading from "../context/Loading";
 
 function Cards() {
   const cards = useSelector((state) => state.cards);
@@ -51,18 +51,7 @@ function Cards() {
   }, [location.search, navigate, tab]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-primary">
-        <Player
-          autoplay
-          loop
-          // src="https://assets3.lottiefiles.com/packages/lf20_YNs7Ld.json"
-          src="https://lottie.host/f4160263-ae92-43c0-8d0c-cfd14cf2896d/Q86AWuCDYM.json"
-          style={{ height: "400px", width: "400px" }}
-        />
-        <p className="mt-4 text-2xl text-blue-500">Cargando direcciones...</p>
-      </div>
-    );
+    return <Loading text={"Cargando direcciones..."} w />;
   }
 
   if (error) {

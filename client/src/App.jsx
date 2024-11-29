@@ -8,15 +8,16 @@ import { useSelector } from "react-redux";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ToastContainer } from "react-toastify";
-// import Tarjetas from "./pages/Tarjetas";
 import Direcciones from "./pages/Direcciones";
 import Cards from "./pages/Cards";
+import ScrollToTop from "./context/ScrollTotop";
 
 function App() {
   const user = useSelector((state) => state.user);
   return (
     <BrowserRouter>
       <ToastContainer position="top-center" theme="dark" />
+      <ScrollToTop />
       {user.userData && <Header />}
       <Routes>
         <Route path="/login" element={<Login />} />
