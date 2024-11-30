@@ -43,7 +43,7 @@ function CardsSidebar() {
       ];
 
   return (
-    <div className="md:flex md:flex-col md:h-full md:w-[170px] lg:w-[250px] bg-secondary text-primary">
+    <div className="md:flex md:flex-col md:h-full md:w-[170px] lg:w-[250px] bg-secondary text-primary md:fixed z-20">
       {/* Desktop Sidebar */}
       <div className="hidden md:flex flex-col gap-4 p-4">
         {menuOptions.map((item) => {

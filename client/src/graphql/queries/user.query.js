@@ -30,3 +30,16 @@ export const LOGOUT = gql`
     }
   }
 `;
+
+export const GET_USERS = gql`
+  query GET_USERS($group: String!) {
+    getUsers(group: $group) {
+      message
+      success
+      users {
+        id
+        name
+      }
+    }
+  }
+`;

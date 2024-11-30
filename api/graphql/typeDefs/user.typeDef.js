@@ -20,8 +20,14 @@ type User {
     idToken: String
 }
 
+type UserSummary {
+    id: ID!
+    name: String!
+}
+
 type Query {
-    user(action: String!, id:ID, email:String, password: String, ): UserResponse
+    user(action: String!, id: ID, email: String, password: String, group: String): UserResponse
+    getUsers(group: String!): UsersResponse
     firebaseConfig: EncryptedConfig
 }
 
@@ -32,6 +38,12 @@ type Mutation {
 type UserResponse {
     user: User
     success: Boolean
+    message: String
+}
+
+type UsersResponse {
+    users: [UserSummary]
+    success: Boolean!
     message: String
 }
 
