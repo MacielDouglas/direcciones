@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema, Types } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -36,16 +36,24 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    myCards: {
-      type: [String],
-    },
-    myTotalCards: {
-      type: [String],
-    },
+    myCards: [
+      {
+        // type: Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Card", // Referência ao modelo Cardmodelo Card
+      },
+    ],
+    myTotalCards: [
+      {
+        type: Types.ObjectId,
+        ref: "Card", // Referência para o modelo Card
+      },
+    ],
     comments: [
       {
         cardId: {
-          type: Schema.Types.ObjectId,
+          type: Types.ObjectId,
+          ref: "Card", // Referência para o modelo Card
         },
         text: {
           type: String,
@@ -54,8 +62,25 @@ const userSchema = new Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true } // Adiciona createdAt e updatedAt automaticamente
 );
+
+// Middleware para sincronizar mudanças no campo `group`
+userSchema.pre("save", function (next) {
+  const user = this;
+
+  // Reseta privilégios caso o grupo seja alterado
+  if (user.isModified("group")) {
+    user.isAdmin = false;
+    user.isSS = false;
+    user.isSCards = false;
+    user.myCards = [];
+    user.myTotalCards = [];
+    user.comments = [];
+  }
+
+  next();
+});
 
 const User = model("User", userSchema);
 

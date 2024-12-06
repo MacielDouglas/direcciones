@@ -1,4 +1,6 @@
 import User from "../../models/user.models.js";
+import Card from "../../models/card.models.js";
+import Address from "../../models/address.models.js";
 import bcrypt from "bcryptjs";
 import {
   createToken,
@@ -14,14 +16,39 @@ const userResolver = {
     user: async (_, { action, id, email, password }, { req, res }) => {
       switch (action) {
         case "get":
+          const decodedToken = verifyAuthorization(req);
+          if (!decodedToken) {
+            throw new Error("Você não tem permissão para acessar os usuários.");
+          }
+
           try {
             const user = await existing(id, "user");
-            console.log(user);
+
+            const cards = await Card.find({ userId: user.id });
+
+            const myCards = await Promise.all(
+              cards.map(async (card) => {
+                const streets = await Address.find({
+                  street: { $in: card.street },
+                });
+
+                return {
+                  id: card.id,
+                  number: card.number,
+                  startDate: card.startDate,
+                  endDate: card.endDate,
+                  streets,
+                };
+              })
+            );
 
             return {
               success: true,
               message: `Usuário: ${user.name}, encontrado.`,
-              user: sanitizeUser(user),
+              user: {
+                ...sanitizeUser(user),
+                myCards,
+              },
             };
           } catch (error) {
             throw new Error(`Error get User: ${error.message}`);
@@ -32,11 +59,32 @@ const userResolver = {
             const user = await validateUserCredentials(email, password);
             const token = createToken(user);
             setTokenCookie(res, token);
-            console.log(`User connected: ${user.name}, ${user.id}`);
+
+            const cards = await Card.find({ userId: user.id });
+
+            const myCards = await Promise.all(
+              cards.map(async (card) => {
+                const streets = await Address.find({
+                  street: { $in: card.street },
+                });
+
+                return {
+                  id: card.id,
+                  number: card.number,
+                  startDate: card.startDate,
+                  endDate: card.endDate,
+                  streets,
+                };
+              })
+            );
+
             return {
               success: true,
               message: `Usuário: ${user.name}, encontrado.`,
-              user: sanitizeUser(user),
+              user: {
+                ...sanitizeUser(user),
+                myCards,
+              },
             };
           } catch (error) {
             throw new Error(`Error login User: ${error.message}`);
@@ -45,7 +93,6 @@ const userResolver = {
         case "logout":
           try {
             res.clearCookie("access_token");
-            console.log("User logged out");
             return {
               success: true,
               message: "User logged out successfully!!!",
@@ -58,19 +105,30 @@ const userResolver = {
           throw new Error("Ação inválida.");
       }
     },
-
-    getUsers: async (_, { group }, { req }) => {
+    getUsers: async (_, __, { req }) => {
       const decodedToken = verifyAuthorization(req);
+
       if (!decodedToken) {
-        throw new Error("Você não tem permissão para excluir esse usuário.");
+        throw new Error("Você não tem permissão para acessar os usuários.");
       }
+
       try {
-        if (!group) {
-          throw new Error("O parâmetro 'group' é obrigatório.");
+        let filter = {};
+
+        // Condições para definir o filtro baseado nas permissões do usuário
+        if (decodedToken.isAdmin) {
+          // Admin pode buscar todos os usuários
+          filter = {}; // Filtro vazio para pegar todos os usuários
+        } else if (decodedToken.isSS) {
+          // SS pode buscar usuários do seu grupo ou de group = 0
+          filter = { $or: [{ group: decodedToken.group }, { group: 0 }] };
+        } else {
+          // Usuário normal pode buscar apenas usuários do seu grupo
+          filter = { group: decodedToken.group };
         }
 
-        // Filtrar usuários pelo grupo
-        const users = await User.find({ group }, "id name"); // Seleciona apenas `id` e `name`
+        // Buscar usuários conforme o filtro
+        const users = await User.find(filter, "id name group");
 
         if (!users || users.length === 0) {
           return {
@@ -82,7 +140,7 @@ const userResolver = {
 
         return {
           success: true,
-          message: `Usuários encontrados no grupo: ${group}.`,
+          message: `Usuários encontrados.`,
           users, // A lista já contém apenas `id` e `name`
         };
       } catch (error) {
@@ -94,8 +152,8 @@ const userResolver = {
   Mutation: {
     userMutation: async (
       _,
-      { action, user, id, updateUserInput },
-      { res, req }
+      { action, user, id, updateUserInput, cardIds },
+      { req, res }
     ) => {
       switch (action) {
         case "create":
@@ -128,6 +186,7 @@ const userResolver = {
               name: sanitizedName,
               password: hashedPassword,
               profilePicture: defaultProfilePicture,
+              group: "0",
             });
 
             await newUser.save();
@@ -151,7 +210,13 @@ const userResolver = {
             }
             const user = await existing(id, "user");
 
-            if (decodedToken.userId !== user.id && !decodedToken.isAdmin) {
+            // Validação das permissões: pode deletar se for o próprio usuário ou se for admin ou SS
+            const hasPermission =
+              decodedToken.userId === user.id ||
+              decodedToken.isAdmin ||
+              decodedToken.isSS;
+
+            if (!hasPermission) {
               throw new Error(
                 "Você não tem permissão para excluir este usuário."
               );
@@ -174,41 +239,84 @@ const userResolver = {
             throw new Error(`Erro ao excluir usuário: ${error.message}`);
           }
 
+        case "addGroup":
+          try {
+            const userToUpdate = await existing(id, "user"); // Inicializa primeiro
+            const decodedToken = verifyAuthorization(req);
+
+            if (!decodedToken || !decodedToken.isSS) {
+              throw new Error(
+                "Você não tem permissão para alterar esse usuário."
+              );
+            }
+
+            if (
+              decodedToken.group === userToUpdate.group ||
+              userToUpdate.group !== "0"
+            ) {
+              throw new Error(
+                "Esse usuário já pertence ao seu grupo ou esta em um outro grupo."
+              );
+            }
+
+            const userUpdate = {};
+            const group = decodedToken.group;
+
+            // Valida e atualiza o grupo apenas se o usuário tiver permissão
+            if (group && group.trim()) {
+              if (!decodedToken.isSS && !decodedToken.isSCards) {
+                throw new Error(
+                  "Você não tem permissão para alterar o campo 'group'."
+                );
+              }
+
+              userUpdate.group = group;
+            } else if (!group) {
+              // Removendo o grupo implica em resetar as informações associadas
+              userUpdate.group = null;
+              userUpdate.myCards = [];
+              userUpdate.myTotalCards = [];
+              userUpdate.comments = [];
+              userUpdate.isAdmin = false;
+              userUpdate.isSS = false;
+              userUpdate.isSCards = false;
+            }
+
+            const updatedUser = await User.findByIdAndUpdate(id, userUpdate, {
+              new: true,
+            });
+
+            return {
+              success: true,
+              message: `Usuário foi adicionado ao grupo com sucesso.`,
+              user: sanitizeUser(updatedUser),
+            };
+          } catch (error) {
+            throw new Error(`Erro ao atualizar o usuário: ${error.message}`);
+          }
+
         case "update":
           try {
-            const decodedToken = verifyAuthorization(req);
-            const user = await existing(id, "user");
+            const userToUpdate = await existing(id, "user"); // Inicializa primeiro
 
-            if (!decodedToken || decodedToken.userId !== user.id) {
+            const decodedToken = verifyAuthorization(req);
+            if (!decodedToken || decodedToken.userId !== userToUpdate.id) {
               throw new Error(
                 "Você não tem permissão para alterar esse usuário."
               );
             }
 
             const userUpdate = {};
-            const { name, profilePicture } = updateUserInput;
+            const { name } = updateUserInput;
 
+            // Atualiza o nome, se fornecido
             if (name && name.trim()) {
               userUpdate.name = name;
             }
 
-            if (profilePicture && profilePicture.trim()) {
-              userUpdate.profilePicture = profilePicture;
-            }
-
-            if (Object.keys(userUpdate).length === 0) {
-              throw new Error("Nenhuma alteração foi detectada.");
-            }
-
-            const updateResult = await User.updateOne({ _id: id }, userUpdate);
-            if (updateResult.nModified === 0) {
-              throw new Error("Falha ao atualizar o usuário.");
-            }
-
-            const updatedUser = {
-              ...user._doc,
-              ...userUpdate,
-            };
+            const updatedUser = await User.findByIdAndUpdate(id, userUpdate, {
+              new: true,
+            });
 
             return {
               success: true,
@@ -219,6 +327,58 @@ const userResolver = {
             throw new Error(`Erro ao atualizar o usuário: ${error.message}`);
           }
 
+        case "designateIss":
+          try {
+            const decodedToken = verifyAuthorization(req);
+
+            if (!decodedToken || !decodedToken.isAdmin) {
+              throw new Error("Apenas administradores podem designar 'isSS'.");
+            }
+
+            const userToDesignate = await existing(id, "user");
+
+            userToDesignate.isSS = true;
+            await userToDesignate.save();
+
+            return {
+              success: true,
+              message: `Usuário ${userToDesignate.name} agora é SS.`,
+              user: sanitizeUser(userToDesignate),
+            };
+          } catch (error) {
+            throw new Error(`Erro ao designar 'isSS': ${error.message}`);
+          }
+
+        case "designateGroup":
+          try {
+            const decodedToken = verifyAuthorization(req);
+
+            if (
+              !decodedToken ||
+              (!decodedToken.isSS && !decodedToken.isSCards)
+            ) {
+              throw new Error("Você não tem permissão para designar grupo.");
+            }
+
+            const userToDesignate = await existing(id, "user");
+
+            const { group } = updateUserInput;
+            if (!group) {
+              throw new Error("Grupo não fornecido.");
+            }
+
+            userToDesignate.group = group;
+            await userToDesignate.save();
+
+            return {
+              success: true,
+              message: `Usuário ${userToDesignate.name} agora está no grupo ${group}.`,
+              user: sanitizeUser(userToDesignate),
+            };
+          } catch (error) {
+            throw new Error(`Erro ao designar grupo: ${error.message}`);
+          }
+
         default:
           throw new Error("Ação inválida.");
       }
@@ -227,248 +387,3 @@ const userResolver = {
 };
 
 export default userResolver;
-
-// import User from "../../models/user.models.js";
-// import bcrypt from "bcryptjs";
-// import {
-//   createToken,
-//   existing,
-//   sanitizeUser,
-//   setTokenCookie,
-//   validateUserCredentials,
-//   verifyAuthorization,
-// } from "../../utils/utils.js";
-
-// const userResolver = {
-//   Query: {
-//     user: async (_, { action, id, email, password, group }, { req, res }) => {
-//       switch (action) {
-//         case "get":
-//           try {
-//             const user = await existing(id, "user");
-//             console.log(user);
-
-//             return {
-//               success: true,
-//               message: `Usuário: ${user.name}, encontrado.`,
-//               user: sanitizeUser(user),
-//             };
-//           } catch (error) {
-//             throw new Error(`Error get User: ${error.message}`);
-//           }
-
-//         case "getUsers":
-//           try {
-//             if (!group) {
-//               throw new Error("O parâmetro 'group' é obrigatório.");
-//             }
-
-//             // Filtrar usuários pelo grupo
-//             const users = await User.find({ group });
-
-//             if (!users || users.length === 0) {
-//               return {
-//                 success: false,
-//                 message: "Nenhum usuário encontrado para o grupo fornecido.",
-//                 users: [],
-//               };
-//             }
-
-//             // Retornar usuários sanitizados
-//             return {
-//               success: true,
-//               message: `Usuários encontrados no grupo: ${group}.`,
-//               users: users.map(sanitizeUser), // Sanitiza todos os usuários
-//             };
-//           } catch (error) {
-//             throw new Error(`Erro ao buscar usuários: ${error.message}`);
-//           }
-
-//         case "login":
-//           try {
-//             const user = await validateUserCredentials(email, password);
-//             const token = createToken(user);
-//             setTokenCookie(res, token);
-//             console.log(`User connected: ${user.name}, ${user.id}`);
-//             return {
-//               success: true,
-//               message: `Usuário: ${user.name}, encontrado.`,
-//               user: sanitizeUser(user),
-//             };
-//           } catch (error) {
-//             throw new Error(`Error login User: ${error.message}`);
-//           }
-
-//         case "logout":
-//           try {
-//             res.clearCookie("access_token");
-//             console.log("User logged out");
-//             return {
-//               success: true,
-//               message: "User logged out successfully!!!",
-//             };
-//           } catch (error) {
-//             throw new Error(`Error logout User: ${error.message}`);
-//           }
-
-//         default:
-//           throw new Error("Ação inválida.");
-//       }
-//     },
-//   },
-
-//   Mutation: {
-//     userMutation: async (
-//       _,
-//       { action, user, id, updateUserInput },
-//       { res, req }
-//     ) => {
-//       if (action === "create") {
-//       }
-
-//       switch (action) {
-//         case "create":
-//           try {
-//             // Executar validações simultâneas para e-mail e nome
-//             const [existingEmail, existingNameUser] = await Promise.all([
-//               User.findOne({ email: user.email }),
-//               User.findOne({ name: user.name }),
-//             ]);
-
-//             // Verificar se o e-mail já está em uso
-//             if (existingEmail) {
-//               throw new Error("Email already in use");
-//             }
-
-//             // Verificar se o nome de usuário já está em uso
-//             if (existingNameUser) {
-//               throw new Error("Name already in use");
-//             }
-
-//             // Sanitização do campo de e-mail e nome (simples exemplo)
-//             const sanitizedEmail = user.email.trim().toLowerCase();
-//             const sanitizedName = user.name.trim();
-
-//             // Foto padrão
-//             const defaultProfilePicture =
-//               "https://firebasestorage.googleapis.com/v0/b/queimando-panela.appspot.com/o/perfil%2F1722454447282user.webp?alt=media&token=3dd585aa-5ce9-4bb3-9d46-5ecf11d1e60c";
-
-//             // Hash da senha com custo de salt configurável
-//             const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
-//             const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-
-//             // Criar o novo usuário
-//             const newUser = new User({
-//               ...user,
-//               email: sanitizedEmail,
-//               name: sanitizedName,
-//               password: hashedPassword,
-//               profilePicture: defaultProfilePicture,
-//             });
-
-//             // Salvar o novo usuário no banco de dados
-//             await newUser.save();
-
-//             // Sanitizar os dados do usuário antes de retornar
-//             return {
-//               success: true,
-//               message: `Usuário: ${user.name}, criado.`,
-//               user: sanitizeUser(user),
-//             };
-//           } catch (error) {
-//             throw new Error(`Error creating new User: ${error.message}`);
-//           }
-
-//         case "delete":
-//           try {
-//             const decodedToken = verifyAuthorization(req);
-//             if (!decodedToken) {
-//               throw new Error(
-//                 "Você não tem permissão para excluir esse usuário."
-//               );
-//             }
-//             const user = await existing(id, "user");
-//             // Verificar se o usuário tem permissão para excluir o usuário
-//             if (decodedToken.userId !== user.id && !decodedToken.isAdmin) {
-//               throw new Error(
-//                 "Você não tem permissão para excluir este usuário."
-//               );
-//             }
-
-//             // Excluir o usuário diretamente pelo ID
-//             const deleteResult = await User.deleteOne({ _id: user.id });
-//             if (deleteResult.deletedCount === 0) {
-//               throw new Error(
-//                 "Erro ao excluir o usuário. Usuário não encontrado."
-//               );
-//             }
-
-//             // Limpar o cookie de token de acesso
-//             res.clearCookie("access_token");
-
-//             return {
-//               success: true,
-//               message: `Usuário: ${user.name} foi excluído com sucesso.`,
-//             };
-//           } catch (error) {
-//             throw new Error(`Erro ao excluir usuário: ${error.message}`);
-//           }
-
-//         case "update":
-//           try {
-//             // Verificar autorização com o token
-//             const decodedToken = verifyAuthorization(req);
-//             const user = await existing(id, "user");
-
-//             if (!decodedToken || decodedToken.userId !== user.id) {
-//               throw new Error(
-//                 "Você não tem permissão para alterar esse usuário."
-//               );
-//             }
-
-//             const userUpdate = {};
-//             const { name, profilePicture } = updateUserInput;
-
-//             if (name && name.trim()) {
-//               userUpdate.name = name;
-//             }
-
-//             if (profilePicture && profilePicture.trim()) {
-//               userUpdate.profilePicture = profilePicture;
-//             }
-
-//             // Se não houver nada para atualizar, evite a operação
-//             if (Object.keys(userUpdate).length === 0) {
-//               throw new Error("Nenhuma alteração foi detectada.");
-//             }
-
-//             // Atualizar o usuário
-//             const updateResult = await User.updateOne({ _id: id }, userUpdate);
-//             if (updateResult.nModified === 0) {
-//               throw new Error("Falha ao atualizar o usuário.");
-//             }
-
-//             // Retornar o usuário atualizado
-//             const updatedUser = {
-//               ...user._doc, // Copiar dados antigos do usuário
-//               ...userUpdate, // Aplicar atualizações
-//             };
-
-//             return {
-//               success: true,
-//               message: `Usuário: ${user.name}, criado.`,
-//               user: sanitizeUser(user),
-//             };
-//           } catch (error) {
-//             // Melhorar a mensagem de erro
-//             throw new Error(`Erro ao atualizar o usuário: ${error.message}`);
-//           }
-
-//         default:
-//           throw new Error("Ação inválida.");
-//       }
-//     },
-//   },
-// };
-
-// export default userResolver;

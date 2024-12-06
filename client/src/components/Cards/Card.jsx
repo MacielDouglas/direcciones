@@ -6,9 +6,8 @@ function Card() {
 
   console.log(myCards);
   return (
-    <div className="text-start text-lg w-full h-screen">
+    <div className="text-start text-lg w-full h-screen bg-details">
       <div className="space-y-5 px-4 pt-3">
-        <h1 className="text-4xl font-medium">Tarjetas</h1>
         {!myCards && <p>Actualmente no tienes tartejas asignadas.</p>}
       </div>
     </div>

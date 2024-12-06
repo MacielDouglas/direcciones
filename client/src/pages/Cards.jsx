@@ -11,6 +11,7 @@ import UpdateCard from "../components/Cards/UpdateCard";
 import NewCard from "../components/Cards/NewCard";
 import AssignCard from "../components/Cards/AssignCard";
 import Loading from "../context/Loading";
+import ScrollToTop from "../context/ScrollTotop";
 
 function Cards() {
   const cards = useSelector((state) => state.cards);
@@ -60,7 +61,9 @@ function Cards() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-primary">
+    // <div className="min-h-screen flex flex-col md:flex-row bg-primary">
+    <div>
+      <ScrollToTop />
       <div>{<CardsSidebar />}</div>
       {tab === "cards" && <Card />}
       {tab === "crear" && <NewCard />}

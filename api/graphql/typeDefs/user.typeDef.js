@@ -1,7 +1,24 @@
 const userTypeDef = `#graphql
+
 type Comment {
     cardId: ID!  
     text: String!   
+}
+
+type Address {
+    id: ID!
+    street: String!
+    number: String!
+    neighborhood: String
+    city: String!
+    gps: String
+    complement: String
+    userId: String!
+    type: String!
+    photo: String
+    confirmed: Boolean!
+    active: Boolean!
+    visited: String
 }
 
 type User {
@@ -14,25 +31,34 @@ type User {
     group: String!
     isSS: Boolean!
     isSCards: Boolean!
-    myCards: [String]
+    myCards: [CardWithStreet]
     myTotalCards: [String]
     comments: [Comment] 
     idToken: String
 }
 
+type CardWithStreet {
+    id:ID!
+    number: Int
+    startDate:String
+    endDate: String
+    streets: [Address]
+}
+
 type UserSummary {
     id: ID!
     name: String!
+    group: String
 }
 
 type Query {
     user(action: String!, id: ID, email: String, password: String, group: String): UserResponse
-    getUsers(group: String!): UsersResponse
+    getUsers: UsersResponse
     firebaseConfig: EncryptedConfig
 }
 
 type Mutation {
-    userMutation(action: String!, user: NewUserInput, id: ID, updateUserInput: UpdateUserInput, idToken: String): UserMutationResponse!
+    userMutation(action: String!, user: NewUserInput, id: ID , updateUserInput: UpdateUserInput, idToken: String, ): UserMutationResponse!
 }
 
 type UserResponse {
@@ -55,7 +81,7 @@ type UserMutationResponse {
 
 input UpdateUserInput {
     name: String
-    profilePicture: String
+    group: String
 }
 
 input NewUserInput {
@@ -67,6 +93,8 @@ input NewUserInput {
     group: String
     isSS: Boolean
 }
+
+
 
 type EncryptedConfig {
   encryptedData: String

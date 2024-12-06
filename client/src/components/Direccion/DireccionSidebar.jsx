@@ -13,12 +13,12 @@ function DireccionSidebar() {
         <h1 className="text-4xl font-medium">Dirección</h1>
         <p>En esta página, usted puede ver, editar y enviar direcciones.</p>
       </div>
-      <div className="flex text-center">
+      <div className="flex text-center  ">
         {/* Botão Nueva Dirección */}
         <Link
           to="/address?tab=new-address"
-          className={`p-4 w-full ${
-            currentTab === "new-address" ? "bg-primary" : "bg-details"
+          className={`p-4 w-full  ${
+            currentTab === "new-address" ? "bg-details" : "bg-primary"
           }`}
         >
           Nueva Dirección
@@ -28,7 +28,7 @@ function DireccionSidebar() {
         <Link
           to="/address?tab=search-address"
           className={`p-4 w-full ${
-            currentTab === "search-address" ? "bg-primary" : "bg-details"
+            currentTab === "search-address" ? "bg-details" : "bg-primary"
           }`}
         >
           Buscar Dirección

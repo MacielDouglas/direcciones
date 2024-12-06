@@ -6,11 +6,14 @@ import {
   IoPencilOutline,
   IoPersonAddOutline,
 } from "react-icons/io5";
-import { FaRegUser, FaRegRectangleList, FaRegMap } from "react-icons/fa6";
+import { FaRegRectangleList } from "react-icons/fa6";
 
 function CardsSidebar() {
   const user = useSelector((state) => state.user);
   const location = useLocation();
+
+  // Obtém o valor do parâmetro 'tab' na URL
+  const currentTab = new URLSearchParams(location.search).get("tab") || "cards";
 
   const { isAdmin } = user.userData;
 
@@ -36,85 +39,41 @@ function CardsSidebar() {
       ]
     : [
         {
-          to: "/cards?tab=tarjetas",
-          icon: <IoCardOutline />,
+          to: "/cards?tab=cards",
+          icon: <FaRegRectangleList />,
           label: "Tarjetas",
         },
       ];
 
   return (
-    <div className="md:flex md:flex-col md:h-full md:w-[170px] lg:w-[250px] bg-secondary text-primary md:fixed z-20">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex flex-col gap-4 p-4">
-        {menuOptions.map((item) => {
-          // Aba ativa: verifica a URL atual ou define "Tarjetas" como padrão
-          const isActive =
-            location.search.includes(item.to.split("?tab=")[1]) ||
-            (!location.search && item.label === "Tarjetas");
-
-          return (
-            <Link
-              key={item.label}
-              to={item.to}
-              className={`flex items-center gap-3 p-3 rounded-md transition-all ${
-                isActive
-                  ? " text-yellow-400"
-                  : "hover:bg-gray-700 text-gray-300"
-              }`}
-            >
-              <motion.div
-                className={`text-2xl ${
-                  isActive ? "text-yellow-500" : "text-gray-500"
-                }`}
-                animate={{ opacity: isActive ? 1 : 0.8 }}
-                transition={{ duration: 0.3 }}
-              >
-                {item.icon}
-              </motion.div>
-              <span
-                className={`text-lg md:text-sm lg:text-lg font-medium ${
-                  isActive ? "text-yellow-500" : "text-gray-300"
-                }`}
-              >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+    <div className="text-start text-lg w-full text-secondary">
+      <div className="space-y-5 px-4 pt-3">
+        <h1 className="text-4xl font-medium">Tarjetas</h1>
+        {isAdmin ? (
+          <p>
+            En esta página, usted puede ver, las tarjetas asignadas, crear,
+            modificar y asignar tarjetas.
+          </p>
+        ) : (
+          <p>En esta página, usted puede ver, las tarjetas asignadas.</p>
+        )}
       </div>
 
-      {/* Mobile Navbar */}
-      <div className="flex md:hidden bg-secondary w-full h-[50px] justify-around items-center">
-        {menuOptions.map((item) => {
-          const isActive =
-            location.search.includes(item.to.split("?tab=")[1]) ||
-            (!location.search && item.label === "Tarjetas");
-
-          return (
-            <Link
-              key={item.label}
-              to={item.to}
-              className="flex flex-col items-center text-xs relative"
-            >
-              <motion.div
-                className={`text-xl flex items-center gap-2 ${
-                  isActive ? "text-yellow-400" : "text-gray-500"
-                }`}
-                animate={{ opacity: isActive ? 1 : 0.6 }}
-                transition={{ duration: 0.3 }}
-              >
-                {item.icon}
-                <span
-                  className={`mt-1 text-xs font-medium ${
-                    isActive ? "text-yellow-400 text-base" : "text-gray-500"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </motion.div>
-            </Link>
-          );
-        })}
+      <div className="flex text-center">
+        {menuOptions.map((item) => (
+          <Link
+            key={item.label}
+            to={item.to}
+            className={`flex items-center p-4  w-full  transition-colors justify-center ${
+              currentTab === item.to.split("tab=")[1]
+                ? "bg-details"
+                : "bg-primary hover:bg-[#eaeaea]"
+            }`}
+          >
+            {/* {item.icon} */}
+            <span>{item.label}</span>
+          </Link>
+        ))}
       </div>
     </div>
   );

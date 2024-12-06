@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 
 const addressSchema = new Schema(
   {
@@ -14,7 +14,7 @@ const addressSchema = new Schema(
       required: [true, "O campo 'number' é obrigatório."],
       match: [
         /^\d+[a-zA-Z]?$/,
-        "O campo 'number' deve conter um número válido.",
+        "O campo 'number' deve conter um número válido (ex: '123', '123A').",
       ],
     },
     city: {
@@ -22,7 +22,7 @@ const addressSchema = new Schema(
       required: [true, "O campo 'city' é obrigatório."],
       trim: true,
       minlength: [2, "O campo 'city' deve ter no mínimo 2 caracteres."],
-      maxlength: [60, "O campo 'city' deve ter no máximo 100 caracteres."],
+      maxlength: [60, "O campo 'city' deve ter no máximo 60 caracteres."],
     },
     neighborhood: {
       type: String,
@@ -31,7 +31,7 @@ const addressSchema = new Schema(
       minlength: [2, "O campo 'neighborhood' deve ter no mínimo 2 caracteres."],
       maxlength: [
         60,
-        "O campo 'neighborhood' deve ter no máximo 100 caracteres.",
+        "O campo 'neighborhood' deve ter no máximo 60 caracteres.",
       ],
     },
     gps: {
@@ -44,19 +44,17 @@ const addressSchema = new Schema(
         },
         message: (props) => `${props.value} não é uma coordenada GPS válida!`,
       },
-      required: false,
     },
     complement: {
       type: String,
-      required: false,
       maxlength: [
         250,
         "O campo 'complement' deve ter no máximo 250 caracteres.",
       ],
       set: function (v) {
         const regex =
-          /\b(homem(ens)?|hombre(s)?|mulher(es)?|mujer(es)?|criança|jovem|niño|niña|muchacho|muchacha|peru(ano|ana|anos|anas)?|argentin(a|o|as|os)?|chile(no|na|nos|nas)?|urugua(y|i)(o|a|os|as)?|paragua(y|i)(o|a|os|as)?|venezuela(no|na|as|os)?|bolivia(no|na|nos|nas)?|cuba(no|na|nos|nas)?|equator(iano|iana|ianos|ianas)?|colombia(no|na|nos|nas)?ecuator(iano|iana|ianos|ianas)?)\b/gi;
-        return v.replace(regex, "******");
+          /\b(homem(ens)?|hombre(s)?|mulher(es)?|muj(er|eres)?|criança|jovem|niño|niña|muchacho|muchacha|per(u|uano|uana|uanos|uanas)?|argentin(a|o|as|os)?|chil(e|eno|ena|enos|enas)?|urugua(y|i)(o|a|os|as)?|paragua(y|i)(o|a|os|as)?|venezuel(a|ano|ana|anas|anos)?|bolivi(a|ano|ana|anos|anas)?|cub(a|ano|ana|anos|anas)?|equad(or|oriano|oriana|orianos|orianas)?|colombi(a|ano|ana|anos|anas)?|ecuat(or|oriano|oriana|orianos|orianas)?)\b/gi;
+        return v ? v.replace(regex, "*****") : v;
       },
     },
     type: {
@@ -70,31 +68,33 @@ const addressSchema = new Schema(
     },
     photo: {
       type: String,
-      required: false,
       maxlength: [500, "O campo 'photo' deve ter no máximo 500 caracteres."],
     },
     userId: {
-      type: String,
+      type: Types.ObjectId, // Substituir String por ObjectId
+      ref: "User", // Referência ao modelo User
       required: [true, "O campo 'userId' é obrigatório."],
-      trim: true,
     },
     active: {
       type: Boolean,
-      required: [true, "O campo 'active' é obrigatório."],
+      default: true, // Define padrão como ativo
     },
     confirmed: {
       type: Boolean,
-      required: [true, "O campo 'confirmed' é obrigatório."],
+      default: false, // Define padrão como não confirmado
+    },
+    group: {
+      type: String,
+      required: true,
     },
     visited: {
       type: String,
-      enum: {
-        values: ["yes", "no", null],
-        message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
-      },
+      enum: ["yes", "no", null],
+      default: null,
+      message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
     },
   },
-  { timestamps: true } // Adiciona createdAt e updatedAt automaticamente
+  { timestamps: true }
 );
 
 const Address = model("Address", addressSchema);

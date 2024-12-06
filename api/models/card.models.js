@@ -11,8 +11,8 @@ const cardSchema = new Schema(
       },
     ],
     userId: {
-      type: String,
-      // required: true,
+      type: Types.ObjectId, // Referencia o modelo User
+      ref: "User",
     },
     number: {
       type: Number,
@@ -20,18 +20,32 @@ const cardSchema = new Schema(
       unique: true,
     },
     startDate: {
-      type: String, // Usando string para as datas
+      type: String, // Usando string para datas
     },
     endDate: {
-      type: String, // Usando string para a data
-      default: function () {
-        return new Date().toISOString(); // Usando timestamp na criação
-      },
+      type: String, // Usando string para datas
     },
+    group: {
+      type: String,
+      required: true,
+    },
+    usersAssigned: [
+      {
+        userId: {
+          type: Types.ObjectId, // Referencia o modelo User
+          ref: "User",
+        },
+        date: {
+          type: String, // Data da associação
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true } // Adiciona os timestamps automáticos para createdAt e updatedAt
 );
 
+// Middleware para salvar - verificar duplicidade de streets
 cardSchema.pre("save", async function (next) {
   const card = this;
 
@@ -54,56 +68,14 @@ cardSchema.pre("save", async function (next) {
   next();
 });
 
-// Middleware para updateOne
-cardSchema.pre("updateOne", async function (next) {
+// Middleware para findOneAndUpdate e updateOne
+const updateMiddleware = async function (next) {
   const update = this.getUpdate();
   const street = update.$set?.street || update.street;
 
   if (street) {
-    // Verifica se há outro Card com os mesmos street IDs
     const duplicateCard = await Card.findOne({
-      street: { $in: street }, // Verifica se algum Card tem um dos mesmos IDs de Address
-    });
-
-    if (duplicateCard) {
-      // Compara se o card encontrado tem o mesmo id do card que está sendo atualizado
-      if (duplicateCard._id.toString() === this._conditions._id.toString()) {
-        // Se for o mesmo cartão, permitimos adicionar os novos endereços
-        const newStreets = street.filter(
-          (id) => !duplicateCard.street.includes(id)
-        );
-
-        // Adiciona os novos endereços ao cartão
-        update.$set = {
-          ...update.$set,
-          street: [...duplicateCard.street, ...newStreets],
-        };
-      } else {
-        // Caso contrário, retorna erro informando que os endereços já são usados por outro cartão
-        const duplicatedIds = duplicateCard.street.filter((id) =>
-          street.includes(id)
-        );
-        throw new Error(
-          `Os endereços com os seguintes IDs já estão associados a outro cartão: ${duplicatedIds.join(
-            ", "
-          )}`
-        );
-      }
-    }
-  }
-
-  next();
-});
-
-// Middleware para findOneAndUpdate
-cardSchema.pre("findOneAndUpdate", async function (next) {
-  const update = this.getUpdate();
-  const street = update.$set?.street || update.street;
-
-  if (street) {
-    // Verifica se há outro Card com os mesmos street IDs
-    const duplicateCard = await Card.findOne({
-      street: { $in: street }, // Verifica se algum Card tem um dos mesmos IDs de Address
+      street: { $in: street },
     });
 
     if (duplicateCard) {
@@ -119,7 +91,27 @@ cardSchema.pre("findOneAndUpdate", async function (next) {
   }
 
   next();
-});
+};
+
+cardSchema.pre("updateOne", updateMiddleware);
+cardSchema.pre("findOneAndUpdate", updateMiddleware);
+
+// Método estático para limpar registros antigos em usersAssigned
+cardSchema.statics.cleanOldAssignments = async function () {
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+  await this.updateMany(
+    {},
+    {
+      $pull: {
+        usersAssigned: {
+          date: { $lt: oneYearAgo.toISOString() },
+        },
+      },
+    }
+  );
+};
 
 // Modelo do Card
 const Card = model("Card", cardSchema);

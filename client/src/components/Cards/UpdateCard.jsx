@@ -1,7 +1,7 @@
 import React from "react";
 
 function UpdateCard() {
-  return <div>UpdateCard</div>;
+  return <div className="bg-details">UpdateCard</div>;
 }
 
 export default UpdateCard;

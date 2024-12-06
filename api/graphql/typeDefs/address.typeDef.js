@@ -14,19 +14,15 @@ type Address {
     confirmed: Boolean!
     active: Boolean!
     visited: String
+    group: String! # Campo obrigatório para alinhar com User e Card
 }
 
 type Query {
-    address(action: String!, id: ID, input: FilterAddressInput): AddressResponse
+    address(action: String!, id: ID, input: FilterAddressInput!): AddressResponse
 }
 
 input FilterAddressInput {
     street: String
-    neighborhood: String
-    city: String!
-    type: String
-    confirmed: Boolean!
-    active: Boolean!
 }
 
 type AddressResponse {
@@ -57,6 +53,7 @@ input NewAddressInput {
     confirmed: Boolean!
     active: Boolean!
     visited: String
+    group: String! # O grupo é obrigatório para criação de um novo endereço
 }
 
 input UpdateAddressInput {
@@ -72,6 +69,7 @@ input UpdateAddressInput {
     confirmed: Boolean
     active: Boolean
     visited: String
+    group: String # O grupo pode ser atualizado
 }
 
 type AddressMutationResponse {
@@ -79,7 +77,6 @@ type AddressMutationResponse {
     message: String
     address: Address
 }
-
 `;
 
 export default addressTypeDef;
