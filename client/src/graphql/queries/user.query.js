@@ -8,11 +8,18 @@ export const LOGIN_USER = gql`
       user {
         name
         id
-        group
         isAdmin
+        group
         isSS
-        myCards
         profilePicture
+        myCards {
+          cardId
+          date
+        }
+        myTotalCards {
+          cardId
+          date
+        }
         comments {
           cardId
           text
@@ -32,13 +39,14 @@ export const LOGOUT = gql`
 `;
 
 export const GET_USERS = gql`
-  query GET_USERS($group: String!) {
-    getUsers(group: $group) {
+  query GET_USERS {
+    getUsers {
       message
       success
       users {
         id
         name
+        group
       }
     }
   }

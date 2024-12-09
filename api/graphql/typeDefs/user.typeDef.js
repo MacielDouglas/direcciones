@@ -31,16 +31,21 @@ type User {
     group: String!
     isSS: Boolean!
     isSCards: Boolean!
-    myCards: [CardWithStreet]
-    myTotalCards: [String]
+    myCards: [CardAssociation]
+    myTotalCards: [CardAssociation]
     comments: [Comment] 
     idToken: String
 }
 
+type CardAssociation {
+    cardId: ID!
+    date: String!
+}
+
 type CardWithStreet {
-    id:ID!
+    id: ID!
     number: Int
-    startDate:String
+    startDate: String
     endDate: String
     streets: [Address]
 }
@@ -58,7 +63,7 @@ type Query {
 }
 
 type Mutation {
-    userMutation(action: String!, user: NewUserInput, id: ID , updateUserInput: UpdateUserInput, idToken: String, ): UserMutationResponse!
+    userMutation(action: String!, user: NewUserInput, id: ID, updateUserInput: UpdateUserInput, idToken: String): UserMutationResponse!
 }
 
 type UserResponse {
@@ -93,8 +98,6 @@ input NewUserInput {
     group: String
     isSS: Boolean
 }
-
-
 
 type EncryptedConfig {
   encryptedData: String

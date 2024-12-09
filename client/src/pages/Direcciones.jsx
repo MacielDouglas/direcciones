@@ -39,7 +39,11 @@ function Direcciones() {
       {tab === "new-address" && <NewAddress addresses={addresses} />}
       {tab === "search-address" && <SearchAddress addresses={addresses} />}
       {tab === "address/:id" && <Address />}
-      {id && <Address id={id} />}
+      {id && (
+        <div className="bg-details mb-10">
+          <Address id={id} />
+        </div>
+      )}
     </div>
   );
 }

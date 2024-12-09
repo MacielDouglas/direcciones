@@ -18,7 +18,7 @@ function App() {
     <BrowserRouter>
       <ToastContainer position="top-center" theme="dark" />
       <ScrollToTop />
-      {user.userData && <Header />}
+      {user.userData && user.userData.group !== "0" && <Header />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route element={<PrivateRoute />}>

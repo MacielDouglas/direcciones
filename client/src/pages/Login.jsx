@@ -1,12 +1,14 @@
 import { useLazyQuery } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { LOGIN_USER } from "./../graphql/queries/user.query";
 import { toast } from "react-toastify";
 import { FaGoogle, FaUserAlt, FaLock } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { LOGIN_USER } from "../graphql/queries/user.query";
+import { GET_ADDRESS } from "../graphql/queries/address.query";
 import { setUser } from "../store/userSlice";
+import { setAddresses } from "../store/addressesSlice";
 
 function Login() {
   const user = useSelector((state) => state.user);
@@ -16,36 +18,71 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loginUser, { loading }] = useLazyQuery(LOGIN_USER, {
-    onCompleted: (data) => {
-      if (data?.user?.success) {
-        dispatch(setUser({ user: data.user.user }));
-        toast.success("¡Inicio de sesión exitoso!");
-      } else {
-        toast.error(`Error de inicio de sesión: ${data.user.message}`);
-      }
-    },
-    onError: (error) => {
-      toast.error(`Error en la solicitud de ingreso: ${error.message}`);
-    },
+  const [loginUser, { loading: loginLoading }] = useLazyQuery(LOGIN_USER, {
+    onCompleted: (data) => handleLoginSuccess(data),
+    onError: (error) => toast.error(`Erro na solicitação: ${error.message}`),
   });
 
-  useEffect(() => {
-    if (user.isAuthenticated) {
-      navigate("/");
-    }
-  }, [user.isAuthenticated, navigate]);
+  const [fetchAddresses] = useLazyQuery(GET_ADDRESS, {
+    variables: { action: "get", input: { street: "" } },
+    onCompleted: (data) => handleAddressesFetch(data),
+    onError: (error) =>
+      toast.error(`Erro ao buscar endereços: ${error.message}`),
+  });
 
-  const handleLogin = () => {
+  // Sucesso no login
+  const handleLoginSuccess = useCallback(
+    (data) => {
+      if (data?.user?.success) {
+        console.log("Usuário recebido: ", data.user.user);
+        dispatch(setUser({ user: data.user.user }));
+        toast.success("Login bem-sucedido!");
+
+        if (data.user.user.group !== "0") {
+          fetchAddresses(); // Busca endereços se grupo for diferente de "0"
+        } else {
+          navigate("/"); // Redireciona se grupo for "0"
+        }
+      } else {
+        toast.error(
+          `Erro no login: ${data?.user?.message || "Erro desconhecido"}`
+        );
+      }
+    },
+    [dispatch, fetchAddresses, navigate]
+  );
+
+  // Sucesso na busca de endereços
+  const handleAddressesFetch = useCallback(
+    (data) => {
+      if (data?.address?.address && data.address.address.length > 0) {
+        dispatch(setAddresses({ addresses: data.address.address }));
+        navigate("/");
+      } else {
+        toast.warn("Nenhum endereço encontrado.");
+        navigate("/");
+      }
+    },
+    [dispatch, navigate]
+  );
+
+  // Callback para fazer login
+  const handleLogin = useCallback(() => {
+    if (!email || !password) {
+      toast.error("Por favor, preencha todos os campos.");
+      return;
+    }
     loginUser({ variables: { action: "login", email, password } });
-  };
+  }, [email, password, loginUser]);
+
+  // Variáveis e classes dinamicamente geradas
+  const isFormValid = useMemo(() => email && password, [email, password]);
 
   return (
     <div
       className="min-h-screen bg-cover bg-center flex flex-col justify-center items-center"
       style={{ backgroundImage: `url('./ciudad_2.svg')` }}
     >
-      {/* <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 flex flex-col justify-center items-center"> */}
       <motion.div
         className="bg-white shadow-lg rounded-lg p-10 max-w-md w-full"
         initial={{ opacity: 0, y: 50 }}
@@ -58,18 +95,18 @@ function Login() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          Bienvenido a{" "}
+          Bem-vindo a{" "}
           <span className="text-bold text-orange-600 text-4xl">
             Direcciones
           </span>
         </motion.h1>
         <motion.p
-          className="text-gray-600 mb-6 "
+          className="text-gray-600 mb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          Para comenzar, debe iniciar sesión con una cuenta de{" "}
+          Para começar, faça login com sua conta{" "}
           <span className="text-red-500 font-semibold">Google</span>.
         </motion.p>
 
@@ -113,14 +150,18 @@ function Login() {
 
         <motion.button
           onClick={handleLogin}
-          disabled={loading}
-          className="bg-blue-500 text-white font-semibold py-2 rounded-md w-full mb-4 hover:bg-blue-600 transition"
+          disabled={!isFormValid || loginLoading}
+          className={`${
+            !isFormValid || loginLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600"
+          } text-white font-semibold py-2 rounded-md w-full mb-4 transition`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.6 }}
-          whileHover={{ scale: 1.05 }}
+          whileHover={!loginLoading ? { scale: 1.05 } : undefined}
         >
-          {loading ? "Entrando..." : "Entrar"}
+          {loginLoading ? "Entrando..." : "Entrar"}
         </motion.button>
 
         <motion.button

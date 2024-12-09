@@ -14,10 +14,14 @@ import Loading from "../context/Loading";
 import ScrollToTop from "../context/ScrollTotop";
 
 function Cards() {
+  const user = useSelector((state) => state.user);
   const cards = useSelector((state) => state.cards);
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const admin = user.userData.isAdmmin;
+  const isSS = user.userData.isSS;
 
   const [tab, setTab] = useState(
     () => new URLSearchParams(location.search).get("tab") || "new-address"
@@ -64,7 +68,7 @@ function Cards() {
     // <div className="min-h-screen flex flex-col md:flex-row bg-primary">
     <div>
       <ScrollToTop />
-      <div>{<CardsSidebar />}</div>
+      {admin && <div>{<CardsSidebar />}</div>}
       {tab === "cards" && <Card />}
       {tab === "crear" && <NewCard />}
       {tab === "modificar" && <UpdateCard />}

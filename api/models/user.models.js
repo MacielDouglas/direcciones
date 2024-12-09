@@ -36,17 +36,30 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+
     myCards: [
       {
-        // type: Types.ObjectId,
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Card", // Referência ao modelo Cardmodelo Card
+        cardId: {
+          type: Types.ObjectId,
+          ref: "Card",
+          required: true, // Impede que cardId seja null
+        },
+        date: {
+          type: String,
+          required: true, // Impede que date seja null
+        },
       },
     ],
     myTotalCards: [
       {
-        type: Types.ObjectId,
-        ref: "Card", // Referência para o modelo Card
+        cardId: {
+          type: Types.ObjectId, // Referencia o modelo User
+          ref: "Card",
+        },
+        date: {
+          type: String, // Data da associação
+          required: true,
+        },
       },
     ],
     comments: [

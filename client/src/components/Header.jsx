@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { RiMenu3Line, RiCloseLine, RiLogoutBoxRLine } from "react-icons/ri";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,11 +12,12 @@ import { toast } from "react-toastify";
 import { FaClock } from "react-icons/fa6";
 import { clearCards } from "../store/cardsSlice.js";
 import { clearAddresses } from "../store/addressesSlice.js";
+
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
 
-  const [logoutUser] = useLazyQuery(LOGOUT, {
+  const [logoutUser, { loading: isLoggingOut }] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
       if (data.user.success) {
         dispatch(clearUser());
@@ -37,20 +38,40 @@ function Header() {
   }, []);
 
   const handleLogout = useCallback(() => {
-    logoutUser({ variables: { action: "logout" } });
-  }, [logoutUser]);
+    if (!isLoggingOut) {
+      logoutUser({ variables: { action: "logout" } });
+    }
+  }, [logoutUser, isLoggingOut]);
+
+  const menuItems = useMemo(
+    () =>
+      Object.values(menuOptions).map((item) => (
+        <li key={item.label} className="relative group">
+          <Link
+            to={item.path}
+            className="hover:underline"
+            onClick={handleMenuToggle}
+          >
+            {item.label}
+          </Link>
+        </li>
+      )),
+    [handleMenuToggle]
+  );
 
   return (
     <div className="p-6 flex items-center justify-between text-xl relative">
-      <Link to={"/"} className="uppercase font-medium tracking-[0.5rem]">
+      {/* Título */}
+      <Link to="/" className="uppercase font-medium tracking-[0.5rem]">
         direcciones
       </Link>
 
-      {/* <div className="fixed top-5 right-5 border rounded-full bg-slate-300 p-2 z-50 flex flex-col items-center "> */}
-      <div className="fixed top-5 right-5 z-50 flex flex-col items-center w-10 ">
+      {/* Botão do Menu */}
+      <div className="fixed top-5 right-5 z-50 flex flex-col items-center w-10">
         <button
-          className="border rounded-full bg-slate-300 p-2 "
+          className="border rounded-full bg-slate-300 p-2"
           onClick={handleMenuToggle}
+          aria-label="Menu Toggle"
         >
           {isMenuOpen ? <RiCloseLine /> : <RiMenu3Line />}
         </button>
@@ -58,8 +79,8 @@ function Header() {
           <SessionProvider />
         </div>
       </div>
-      {/* <SessionProvider /> */}
 
+      {/* Menu de Navegação */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -72,10 +93,8 @@ function Header() {
             <h1 className="uppercase font-medium tracking-widest text-3xl">
               Direcciones
             </h1>
-            {/* <div> */}
             <ul className="space-y-8 md:text-center">
               <li>
-                {" "}
                 <Link
                   to="/"
                   onClick={handleMenuToggle}
@@ -84,29 +103,22 @@ function Header() {
                   Home
                 </Link>
               </li>
-              {Object.values(menuOptions).map((item) => (
-                <li key={item.label} className="relative group">
-                  <Link
-                    to={item.path}
-                    className="hover:underline"
-                    onClick={handleMenuToggle}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {menuItems}
             </ul>
-            {/* </div> */}
             <button
               onClick={handleLogout}
               className="hover:underline text-orange-500 flex items-center gap-2"
+              disabled={isLoggingOut}
             >
-              <RiLogoutBoxRLine /> Sair
+              <RiLogoutBoxRLine />
+              {isLoggingOut ? "Encerrando..." : "Encerrar"}
             </button>
-            <p className="flex gap-4">
+            <div className="flex gap-4 items-center  text-4xl">
               <FaClock />
-              <SessionProvider />
-            </p>
+              <span>
+                <SessionProvider />
+              </span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

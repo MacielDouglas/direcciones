@@ -21,17 +21,14 @@ export default function Home() {
     Perfil: FaRegUser,
   };
 
+  console.log(addresses);
+
   // Lazy Query para obter endereços
   const [fetchAddresses, { data, loading, error }] = useLazyQuery(GET_ADDRESS, {
     variables: {
       action: "get",
-      addressId: "",
       input: {
         street: "",
-        active: true,
-        city: "",
-        confirmed: true,
-        neighborhood: "",
       },
     },
     onCompleted: (data) => {
@@ -42,13 +39,7 @@ export default function Home() {
     },
   });
 
-  // Realiza a consulta somente uma vez na montagem se não houver dados e o grupo for diferente de 0
-  useEffect(() => {
-    // Verifica apenas uma vez na montagem e quando addresses estiver vazio
-    if (group !== 0 && (!addresses || addresses.length === 0)) {
-      fetchAddresses();
-    }
-  }, [group, addresses]);
+  console.log(data);
 
   return (
     <div className="w-full min-h-screen text-black pb-32 px-6 flex flex-col items-center">

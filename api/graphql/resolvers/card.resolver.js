@@ -142,6 +142,8 @@ const cardResolver = {
 
             const user = await User.findById(userId);
 
+            // console.log(user);
+
             if (decodedToken.group !== user.group) {
               throw new Error(
                 "Você não pode enviar um card para um usuário que não é do seu grupo."
@@ -149,7 +151,7 @@ const cardResolver = {
             }
 
             const card = await Card.findById(cardId); // Certifique-se de que retorna um documento Mongoose
-            console.log(card);
+            // console.log(card);
 
             if (!card) {
               throw new Error("Cartão não encontrado.");
@@ -182,7 +184,19 @@ const cardResolver = {
               { new: true } // Retorna o documento atualizado
             );
 
-            if (!updatedCard) {
+            const updateUser = await User.findByIdAndUpdate(
+              userId,
+              {
+                $push: {
+                  myCards: { cardId, date: currentDate },
+                },
+              },
+              { new: true }
+            );
+
+            console.log(updateUser);
+
+            if (!updatedCard && !updateUser) {
               throw new Error("Falha ao atualizar o cartão.");
             }
 
@@ -250,7 +264,20 @@ const cardResolver = {
               { new: true } // Retorna o documento atualizado
             );
 
-            if (!updatedCard) {
+            const updateUser = await User.findByIdAndUpdate(
+              userId,
+              {
+                $pull: {
+                  myCards: { cardId }, // Remove o card devolvido
+                },
+                $push: {
+                  myTotalCards: { cardId, date: currentDate }, // Adiciona ao histórico
+                },
+              },
+              { new: true } // Retorna o documento atualizado
+            );
+
+            if (!updatedCard && !updateUser) {
               throw new Error("Falha ao atualizar o cartão.");
             }
 

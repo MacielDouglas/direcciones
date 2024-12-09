@@ -62,28 +62,11 @@ const userResolver = {
 
             const cards = await Card.find({ userId: user.id });
 
-            const myCards = await Promise.all(
-              cards.map(async (card) => {
-                const streets = await Address.find({
-                  street: { $in: card.street },
-                });
-
-                return {
-                  id: card.id,
-                  number: card.number,
-                  startDate: card.startDate,
-                  endDate: card.endDate,
-                  streets,
-                };
-              })
-            );
-
             return {
               success: true,
               message: `Usuário: ${user.name}, encontrado.`,
               user: {
                 ...sanitizeUser(user),
-                myCards,
               },
             };
           } catch (error) {

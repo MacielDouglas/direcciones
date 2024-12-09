@@ -107,12 +107,11 @@ function Address({ id }) {
     }
   }, []);
 
-  console.log(complement);
   return (
     <div className="w-full  justify-center flex">
-      <div className=" max-w-lg p-4 border rounded shadow-md mb-52 mt-10">
+      <div className=" max-w-lg p-4 border rounded shadow-md">
         <h2 className="text-xl font-medium text-center mb-4">
-          Informações do Endereço
+          Informaciones de la dirección
         </h2>
         <div className="bg-white p-5 rounded-md drop-shadow-lg mb-4 space-y-3 flex flex-col gap-4">
           <div className="flex  gap-5">
