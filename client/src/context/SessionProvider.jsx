@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { clearUser } from "../store/userSlice";
 import { clearCards } from "../store/cardsSlice";
 import { clearAddresses } from "../store/addressesSlice";
+import PropTypes from "prop-types";
 
 const SessionProvider = ({ text }) => {
   const dispatch = useDispatch();
@@ -62,3 +63,7 @@ const SessionProvider = ({ text }) => {
 };
 
 export default SessionProvider;
+
+SessionProvider.propTypes = {
+  text: PropTypes.string,
+};

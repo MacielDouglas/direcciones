@@ -1,6 +1,6 @@
 import { useLazyQuery } from "@apollo/client";
-import { useCallback, useEffect, useState, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useState, useMemo } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaGoogle, FaUserAlt, FaLock } from "react-icons/fa";
@@ -11,7 +11,7 @@ import { setUser } from "../store/userSlice";
 import { setAddresses } from "../store/addressesSlice";
 
 function Login() {
-  const user = useSelector((state) => state.user);
+  // const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

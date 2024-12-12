@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useLazyQuery } from "@apollo/client";
@@ -11,7 +10,6 @@ import { setAddresses } from "../store/addressesSlice";
 export default function Home() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const addresses = useSelector((state) => state.addresses);
   const { name, group } = user.userData;
 
   // Mapeamento de ícones
@@ -20,8 +18,6 @@ export default function Home() {
     Dirección: FaRegMap,
     Perfil: FaRegUser,
   };
-
-  console.log(addresses);
 
   // Lazy Query para obter endereços
   const [fetchAddresses, { data, loading, error }] = useLazyQuery(GET_ADDRESS, {
@@ -33,13 +29,10 @@ export default function Home() {
     },
     onCompleted: (data) => {
       if (data) {
-        console.log("DATA: ", data.address.address);
         dispatch(setAddresses({ addresses: data.address.address }));
       }
     },
   });
-
-  console.log(data);
 
   return (
     <div className="w-full min-h-screen text-black pb-32 px-6 flex flex-col items-center">

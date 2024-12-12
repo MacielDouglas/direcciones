@@ -5,6 +5,7 @@ import NewAddress from "../components/Direccion/NewAddress";
 import SearchAddress from "../components/Direccion/SearchAddress";
 import { useSelector } from "react-redux";
 import Address from "../components/Address.jsx";
+import UpdateAddress from "../components/Direccion/UpdateAddress.jsx";
 
 function Direcciones() {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -14,16 +15,20 @@ function Direcciones() {
   const [tab, setTab] = useState(
     () => new URLSearchParams(location.search).get("tab") || "new-address"
   );
+  const [direccionId, setDireccionId] = useState(null);
 
-  // Efeito para atualizar a aba com base nos parâmetros da URL
   useEffect(() => {
-    const tabFromUrl = new URLSearchParams(location.search).get("tab");
+    const searchParams = new URLSearchParams(location.search);
+    const tabFromUrl = searchParams.get("tab");
+    const idFromUrl = searchParams.get("id");
 
     if (!tabFromUrl) {
-      // Redireciona para "new-address" se o parâmetro "tab" não estiver presente
       navigate("?tab=new-address", { replace: true });
     } else {
       setTab(tabFromUrl);
+
+      // Armazene o ID em uma variável de estado separada, se necessário
+      setDireccionId(idFromUrl);
     }
   }, [location.search, navigate]);
 
@@ -32,13 +37,17 @@ function Direcciones() {
     return match ? match[1] : null;
   };
   const id = getDireccionIdFromTab();
+  console.log("Id do Direcciones: ", id);
 
   return (
     <div>
       <div>{<DireccionSidebar />}</div>
       {tab === "new-address" && <NewAddress addresses={addresses} />}
       {tab === "search-address" && <SearchAddress addresses={addresses} />}
-      {tab === "address/:id" && <Address />}
+      {tab === "update-address" && (
+        <UpdateAddress addresses={addresses} id={direccionId} />
+      )}
+
       {id && (
         <div className="bg-details mb-10">
           <Address id={id} />

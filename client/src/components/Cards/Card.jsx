@@ -9,10 +9,12 @@ function Card() {
     useSelector((state) => state.addresses?.addressesData) || [];
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = String(date.getUTCDate()).padStart(2, "0");
-    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const year = date.getUTCFullYear();
+    const date = new Date(dateString); // Converte a string para um objeto Date
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Os meses começam do zero
+    const year = date.getFullYear();
+
     return `${day}/${month}/${year}`;
   };
 
@@ -46,11 +48,12 @@ function Card() {
               key={card.id}
               className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl mb-6"
             >
-              <h2 className="text-3xl font-medium text-gray-700 mb-6">
+              <h2 className="text-3xl font-medium text-gray-700 mb-3">
                 Tarjeta número: {card.number}
               </h2>
               <p className="">
-                Usted la recibió en: {formatDate(card.startDate)}
+                Usted la recibió en:{" "}
+                <strong>{formatDate(card.startDate)}</strong>
               </p>
               {/* <div className=""> */}
               {matchedAddresses.length > 0 ? (
