@@ -34,7 +34,6 @@ function Login() {
   const handleLoginSuccess = useCallback(
     (data) => {
       if (data?.user?.success) {
-        console.log("Usuário recebido: ", data.user.user);
         dispatch(setUser({ user: data.user.user }));
         toast.success("Login bem-sucedido!");
 

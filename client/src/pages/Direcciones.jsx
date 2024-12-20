@@ -37,7 +37,6 @@ function Direcciones() {
     return match ? match[1] : null;
   };
   const id = getDireccionIdFromTab();
-  console.log("Id do Direcciones: ", id);
 
   return (
     <div>

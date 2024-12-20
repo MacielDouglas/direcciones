@@ -29,7 +29,7 @@ function App() {
             <Route path="/cards" element={<Cards />} />
             <Route path="/address" element={<Direcciones />} />
             <Route path="/user" element={<Home />} />
-            <Route path="/update-address" element={<UpdateAddress />} />
+            {/* <Route path="/update-address" element={<UpdateAddress />} /> */}
           </Route>
         </Route>
         <Route path="*" element={<Login />} /> {/* Rota 404 */}

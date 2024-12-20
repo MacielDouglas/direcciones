@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +6,7 @@ import InputField from "../../context/InputField";
 import { useMutation } from "@apollo/client";
 import { UPDATE_ADDRESS } from "../../graphql/mutation/address.mutation"; // Supõe que existe uma mutation para atualização
 import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
 
 function UpdateAddress({ addresses, id }) {
   const addressToEdit = addresses.find((address) => address.id === id);
@@ -154,7 +154,7 @@ function UpdateAddress({ addresses, id }) {
   };
 
   return (
-    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col items-center justify-center mb-10">
+    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col itens-center mb-10">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h1 className="text-3xl font-medium text-gray-700 mb-6">
           Atualizar Endereço
@@ -231,8 +231,8 @@ function UpdateAddress({ addresses, id }) {
 }
 
 UpdateAddress.propTypes = {
-  addresses: PropTypes.array.isRequired,
-  id: PropTypes.string.isRequired,
+  addresses: PropTypes.array,
+  id: PropTypes.string,
 };
 
 export default UpdateAddress;

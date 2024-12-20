@@ -127,7 +127,6 @@ function Address({ id }) {
 
   const handleEdit = () => {
     navigate(`/address?tab=update-address&id=${id}`);
-    console.log("Id do Addresses...", id);
   };
 
   return (
@@ -136,6 +135,7 @@ function Address({ id }) {
         <h2 className="text-xl font-medium text-center mb-4">
           Informaciones de la dirección
         </h2>
+
         <div className="bg-white p-5 rounded-md drop-shadow-lg mb-4 space-y-3">
           <div className="flex gap-5 justify-between">
             <span className="text-5xl self-center">{typeIcons[type]}</span>
@@ -174,7 +174,7 @@ function Address({ id }) {
               className="bg-secondary text-primary w-full p-2"
               onClick={handleEdit}
             >
-              editar
+              editar la dirección
             </button>
           </div>
         </div>
