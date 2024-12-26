@@ -10,6 +10,7 @@ export const GET_ADDRESS = gql`
         street
         number
         complement
+        neighborhood
         city
         gps
         id

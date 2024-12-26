@@ -86,6 +86,7 @@ function Address({ id }) {
   }
 
   const { street, number, neighborhood, city, type, gps, complement } = address;
+  console.log(address);
 
   const [latitude, longitude] = useMemo(
     () => gps.split(", ").map((coord) => parseFloat(coord.trim())),

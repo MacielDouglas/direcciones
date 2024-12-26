@@ -155,6 +155,7 @@ const addressResolver = {
 
         case "update":
           try {
+            console.log("Update");
             validateObjectId(id);
             const address = await Address.findById(id);
             if (!address) {
@@ -194,6 +195,8 @@ const addressResolver = {
                 { $set: addressUpdate },
                 { new: true, runValidators: true }
               ).lean();
+
+              console.log("Endereço novo: ", updatedAddress);
 
               return {
                 message: "Endereço atualizado com sucesso.",

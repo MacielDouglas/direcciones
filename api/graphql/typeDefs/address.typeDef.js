@@ -13,7 +13,7 @@ type Address {
     photo: String
     confirmed: Boolean!
     active: Boolean!
-    visited: String
+    visited: Boolean
     group: String! # Campo obrigatório para alinhar com User e Card
 }
 
@@ -52,7 +52,7 @@ input NewAddressInput {
     photo: String
     confirmed: Boolean!
     active: Boolean!
-    visited: String
+    visited: Boolean
     group: String! # O grupo é obrigatório para criação de um novo endereço
 }
 
@@ -68,7 +68,7 @@ input UpdateAddressInput {
     photo: String
     confirmed: Boolean
     active: Boolean
-    visited: String
+    visited: Boolean
     group: String # O grupo pode ser atualizado
 }
 

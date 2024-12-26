@@ -18,7 +18,7 @@ type Address {
     photo: String
     confirmed: Boolean!
     active: Boolean!
-    visited: String
+    visited: Boolean
 }
 
 type User {

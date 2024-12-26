@@ -120,6 +120,7 @@ function UpdateAddress({ addresses, id }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
 
     try {
       const validationErrors = validate();
@@ -130,8 +131,9 @@ function UpdateAddress({ addresses, id }) {
 
       await updateAddress({
         variables: {
-          id, // ID do endereço que será atualizado
-          updatedAddress: {
+          action: "update",
+          addressMutationId: id, // ID do endereço que será atualizado
+          updateAddressInput: {
             street: formData.street,
             number: formData.number,
             neighborhood: formData.neighborhood,
@@ -208,6 +210,72 @@ function UpdateAddress({ addresses, id }) {
           >
             {isFetchingGps ? "Obtendo..." : "GPS Atual"}
           </button>
+          <div className="flex flex-col">
+            <label
+              htmlFor="type"
+              className="text-sm text-gray-600 mb-1 font-semibold"
+            >
+              Tipo *
+            </label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="house">Casa</option>
+              <option value="department">Departamento</option>
+              <option value="store">Comercio</option>
+              <option value="hotel">Posada</option>
+              <option value="restaurant">Restaurante</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label
+              htmlFor="confirmed"
+              className="text-sm text-gray-600 mb-1 font-semibold"
+            >
+              ¿Está confirmado? *
+            </label>
+            <select
+              name="confirmed"
+              value={formData.confirmed}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  confirmed: e.target.value === "true",
+                })
+              }
+              className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="false">No, hay que confirmar</option>
+              <option value="true">Si, Confirmado</option>
+            </select>
+          </div>
+          <div className="flex flex-col">
+            <label
+              htmlFor="visited"
+              className="text-sm text-gray-600 mb-1 font-semibold"
+            >
+              ¿Seguirás visitando? *
+            </label>
+            <select
+              name="visited"
+              value={formData.visited}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  visited: e.target.value === "true",
+                })
+              }
+              className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="false">No, puede visita otro</option>
+              <option value="true">Si, voy a visitar</option>
+            </select>
+          </div>
+
           <InputField
             label="Complemento"
             name="complement"

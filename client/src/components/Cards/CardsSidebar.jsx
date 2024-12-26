@@ -15,10 +15,10 @@ function CardsSidebar() {
   // Obtém o valor do parâmetro 'tab' na URL
   const currentTab = new URLSearchParams(location.search).get("tab") || "cards";
 
-  const { isAdmin } = user.userData;
+  const { isSS } = user.userData;
 
   // Define as opções de menu com base no tipo de usuário
-  const menuOptions = isAdmin
+  const menuOptions = isSS
     ? [
         {
           to: "/cards?tab=cards",
@@ -49,7 +49,7 @@ function CardsSidebar() {
     <div className="text-start text-lg w-full text-secondary">
       <div className="space-y-5 px-4 pt-3">
         <h1 className="text-4xl font-medium">Tarjetas</h1>
-        {isAdmin ? (
+        {isSS ? (
           <p>
             En esta página, usted puede ver, las tarjetas asignadas, crear,
             modificar y asignar tarjetas.

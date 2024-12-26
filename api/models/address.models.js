@@ -88,10 +88,10 @@ const addressSchema = new Schema(
       required: true,
     },
     visited: {
-      type: String,
-      enum: ["yes", "no", null],
-      default: null,
-      message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
+      type: Boolean,
+      // enum: ["yes", "no", null],
+      default: false,
+      // message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
     },
   },
   { timestamps: true }

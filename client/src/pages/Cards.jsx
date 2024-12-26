@@ -22,6 +22,7 @@ function Cards() {
 
   const admin = user.userData.isAdmmin;
   const isSS = user.userData.isSS;
+  console.log("isssss", isSS);
 
   const [tab, setTab] = useState(
     () => new URLSearchParams(location.search).get("tab") || "new-address"
@@ -68,11 +69,11 @@ function Cards() {
     // <div className="min-h-screen flex flex-col md:flex-row bg-primary">
     <div>
       <ScrollToTop />
-      {admin && <div>{<CardsSidebar />}</div>}
+      {isSS && <div>{<CardsSidebar />}</div>}
       {tab === "cards" && <Card />}
       {tab === "crear" && <NewCard />}
       {tab === "modificar" && <UpdateCard />}
-      {tab === "asignar" && <AssignCard />}
+      {isSS && tab === "asignar" && <AssignCard />}
     </div>
   );
 }
