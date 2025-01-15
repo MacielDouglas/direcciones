@@ -118,16 +118,21 @@ function NewCard() {
           Crear Tarjetas
         </h1>
         {addresses && (
-          <p>
-            Actualmente hay{" "}
-            <span className="font-semibold">{addresses.length}</span>{" "}
-            direcciones al total,
-            <span className="font-semibold">
-              {availableAddresses.length}
-            </span>{" "}
-            direcciones disponibles y{" "}
-            <span className="font-semibold">{cards.length}</span> tarjetas.
-          </p>
+          <>
+            <p>
+              Actualmente hay{" "}
+              <span className="font-semibold">{addresses.length}</span>{" "}
+              direcciones al total.
+            </p>
+            <p>
+              <span className="font-semibold">{availableAddresses.length}</span>{" "}
+              direcciones disponibles.{" "}
+            </p>
+            <p>
+              <span className="font-semibold">{cards.length}</span> tarjetas
+              creadas.
+            </p>
+          </>
         )}
 
         <div>

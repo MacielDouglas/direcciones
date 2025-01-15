@@ -85,7 +85,16 @@ function Address({ id }) {
     return <p>Endereço não encontrado.</p>;
   }
 
-  const { street, number, neighborhood, city, type, gps, complement } = address;
+  const {
+    street,
+    number,
+    neighborhood,
+    city,
+    type,
+    gps,
+    complement,
+    confirmed,
+  } = address;
   console.log(address);
 
   const [latitude, longitude] = useMemo(
@@ -131,13 +140,17 @@ function Address({ id }) {
   };
 
   return (
-    <div className="w-full justify-center flex">
-      <div className="max-w-lg p-4 border rounded shadow-md">
+    <div className="w-full justify-center flex rounded-xl">
+      <div className="max-w-lg p-2 border rounded shadow-md">
         <h2 className="text-xl font-medium text-center mb-4">
           Informaciones de la dirección
         </h2>
 
-        <div className="bg-white p-5 rounded-md drop-shadow-lg mb-4 space-y-3">
+        <div
+          className={`${
+            confirmed ? "bg-white" : "bg-tertiary"
+          }  p-5 rounded-md drop-shadow-lg mb-4 space-y-3`}
+        >
           <div className="flex gap-5 justify-between">
             <span className="text-5xl self-center">{typeIcons[type]}</span>
             <div className="text-sm">
@@ -164,6 +177,14 @@ function Address({ id }) {
             {/* <button className="w-full" onClick={handleEditClick(id)}>
               Editar
             </button> */}
+          </div>
+          <div
+            className={`${
+              confirmed ? "bg-white" : "bg-gray-400"
+            } p-2 flex justify-between`}
+          >
+            <p>{confirmed ? "Confirmado" : "Necesita confirmar"}</p>
+            <button>Confirmar</button>
           </div>
           {complement && (
             <div className="border-t border-gray-200 mt-2 pt-2">

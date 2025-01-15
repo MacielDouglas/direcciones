@@ -19,6 +19,8 @@ function SearchAddress() {
   const openSearchModal = () => setIsSearchOpen(true);
   const closeSearchModal = () => setIsSearchOpen(false);
 
+  console.log(addresses);
+
   // Captura a localização do usuário
   useEffect(() => {
     if (navigator.geolocation) {

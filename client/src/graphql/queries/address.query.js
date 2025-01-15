@@ -13,6 +13,7 @@ export const GET_ADDRESS = gql`
         neighborhood
         city
         gps
+        confirmed
         id
         photo
         type
