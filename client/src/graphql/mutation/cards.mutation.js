@@ -51,6 +51,23 @@ export const DELETE_CARD = gql`
   }
 `;
 
+export const DESIGNATED_CARD = gql`
+  mutation DESIGNATED_CARD(
+    $action: String!
+    $designateCardInput: DesignateCardInput!
+  ) {
+    cardMutation(action: $action, designateCardInput: $designateCardInput) {
+      message
+      success
+      card {
+        id
+        number
+        startDate
+      }
+    }
+  }
+`;
+
 export const RETURN_CARD = gql`
   mutation RETURN_CARD(
     $action: String!

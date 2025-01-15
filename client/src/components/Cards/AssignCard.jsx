@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -9,6 +9,8 @@ import { GET_CARDS } from "../../graphql/queries/cards.query";
 import { GET_USERS } from "../../graphql/queries/user.query";
 import { setCards } from "../../store/cardsSlice";
 import Loading from "../../context/Loading";
+import { DESIGNATED_CARD } from "../../graphql/mutation/cards.mutation";
+import { toast } from "react-toastify";
 
 function AssignCard() {
   const cards = useSelector((state) => state.cards.cardsData.card || []);
@@ -16,13 +18,13 @@ function AssignCard() {
   const user = useSelector((state) => state.user.userData);
   const dispatch = useDispatch();
 
+  console.log(cards);
+
   const [selectedCard, setSelectedCard] = useState(null);
   const [cardColors, setCardColors] = useState({});
   const [mapCenter, setMapCenter] = useState([0, 0]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-
-  console.log(selectedCard);
 
   const { loading: cardsLoading, error: cardsError } = useQuery(GET_CARDS, {
     variables: { action: "get" },
@@ -40,7 +42,18 @@ function AssignCard() {
 
   const users = usersData?.getUsers.users;
 
-  console.log(users);
+  const [designateCardInput, { data }] = useMutation(DESIGNATED_CARD, {
+    onCompleted: (data) => {
+      toast.success(data.designatedCardMutation.message);
+      // setLoading(false);
+      setModalOpen(false);
+      setSelectedCard(null);
+    },
+    onError: (error) => {
+      toast.error(`Error al designar la tarjeta: ${error.message}`);
+      // setLoading(false);
+    },
+  });
 
   const addressMap = useMemo(
     () => new Map(addresses.map((address) => [address.id, address])),
@@ -95,10 +108,22 @@ function AssignCard() {
     setSelectedCard((prev) => (prev === cardId ? null : selecionado));
     setModalOpen(true);
   };
-  console.log(selectedCard);
 
-  const handleSendCard = () => {
+  const handleSendCard = async () => {
     if (!selectedUser) return alert("Selecione um usuário!");
+    try {
+      await designateCardInput({
+        variables: {
+          action: "designateCard",
+          designateCardInput: {
+            cardId: selectedCard.id,
+            userId: selectedUser.id,
+          },
+        },
+      });
+    } catch (error) {
+      toast.error(`Error ao designar a tarjeta: ${error.message}`);
+    }
     console.log(
       `Card ${selectedCard.number} enviado para o usuário ${selectedUser.name}`
     );
@@ -146,8 +171,6 @@ function AssignCard() {
 
   if (cardsLoading) return <Loading text="Carregando dados dos cartões..." />;
   if (cardsError) return <p>Erro ao carregar cartões: {cardsError.message}</p>;
-
-  console.log(selectedCard);
 
   return (
     <div className="min-h-screen bg-details p-3 md:p-10 flex flex-col justify-center  mb-[40px]">
@@ -224,7 +247,7 @@ function AssignCard() {
                 <p>Direcciones: {card.street.length}</p>
                 {card.street.map((addressId, index) => {
                   const matchedAddress = addressMap.get(addressId);
-                  console.log(matchedAddress);
+
                   return matchedAddress ? (
                     <p key={addressId}>
                       {index + 1} - {matchedAddress.street},{" "}

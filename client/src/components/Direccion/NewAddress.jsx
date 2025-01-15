@@ -1,3 +1,291 @@
+// import { useState, useEffect } from "react";
+// import PropTypes from "prop-types";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+// import { useNavigate } from "react-router-dom";
+// import InputField from "../../context/InputField";
+// import { useMutation } from "@apollo/client";
+// import { NEW_ADDRESS } from "../../graphql/mutation/address.mutation";
+// import { useSelector } from "react-redux";
+
+// function NewAddress() {
+//   const user = useSelector((state) => state.user);
+//   const addresses = useSelector((state) => state.addresses.addressesData);
+//   const navigate = useNavigate();
+
+//   const [formData, setFormData] = useState({
+//     street: "",
+//     number: "",
+//     neighborhood: "",
+//     city: "",
+//     gps: "",
+//     complement: "",
+//     photo: null,
+//     type: "house",
+//     active: false,
+//     confirmed: false,
+//     visited: false,
+//     group: "",
+//   });
+
+//   const [errors, setErrors] = useState({});
+//   const [isFetchingGps, setIsFetchingGps] = useState(false);
+//   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+//   const [existingAddress, setExistingAddress] = useState(null);
+
+//   const [newAddress] = useMutation(NEW_ADDRESS, {
+//     onCompleted: () => {
+//       toast.success("Endereço cadastrado com sucesso!");
+//       resetForm();
+//     },
+//     onError: (error) => {
+//       console.error("Erro ao cadastrar endereço:", error.message);
+//       toast.error("Erro ao cadastrar endereço: " + error.message);
+//     },
+//   });
+
+//   const gpsRegex =
+//     /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d+)?|180(\.0+)?)$/;
+
+//   // useEffect(() => {
+//   //   validateFields();
+//   // }, [formData, errors]);
+
+//   const validateFields = () => {
+//     const validationErrors = {};
+
+//     if (!formData.street.trim())
+//       validationErrors.street = "A rua é obrigatória.";
+//     if (!formData.number.trim())
+//       validationErrors.number = "O número é obrigatório.";
+//     if (!formData.neighborhood.trim())
+//       validationErrors.neighborhood = "O bairro é obrigatório.";
+//     if (!formData.city.trim())
+//       validationErrors.city = "A cidade é obrigatória.";
+//     if (formData.gps && !gpsRegex.test(formData.gps))
+//       validationErrors.gps = "Coordenadas GPS inválidas.";
+
+//     setErrors(validationErrors);
+//     setIsButtonDisabled(Object.keys(validationErrors).length > 0);
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handlePhotoChange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//       setFormData((prev) => ({ ...prev, photo: file }));
+//     }
+//   };
+
+//   const handleGetCurrentGps = () => {
+//     setIsFetchingGps(true);
+//     navigator.geolocation.getCurrentPosition(
+//       (position) => {
+//         const { latitude, longitude } = position.coords;
+//         setFormData((prev) => ({ ...prev, gps: `${latitude}, ${longitude}` }));
+//         setIsFetchingGps(false);
+//       },
+//       (error) => {
+//         console.error("Erro ao obter localização:", error);
+//         toast.error("Não foi possível obter o GPS atual.");
+//         setIsFetchingGps(false);
+//       }
+//     );
+//   };
+
+//   const checkIfAddressExists = () => {
+//     return addresses.find(
+//       (address) =>
+//         address.street === formData.street.trim() &&
+//         address.number === formData.number.trim() &&
+//         address.neighborhood === formData.neighborhood.trim()
+//     );
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (isButtonDisabled) {
+//       toast.error("Por favor, corrija os erros no formulário.");
+//       return;
+//     }
+
+//     const existing = checkIfAddressExists();
+//     if (existing) {
+//       setExistingAddress(existing);
+//       toast.info("Endereço já existente! Selecione uma ação.");
+//       return;
+//     }
+
+//     try {
+//       await newAddress({
+//         variables: {
+//           action: "create",
+//           newAddress: {
+//             street: formData.street.trim(),
+//             number: formData.number.trim(),
+//             neighborhood: formData.neighborhood.trim(),
+//             city: formData.city.trim(),
+//             complement: formData.complement.trim(),
+//             gps: formData.gps.trim(),
+//             userId: user.userData.id,
+//             active: formData.active,
+//             confirmed: formData.confirmed,
+//             visited: formData.visited,
+//             type: formData.type,
+//             group: user.userData.group,
+//             photo: formData.photo,
+//           },
+//         },
+//       });
+//     } catch (error) {
+//       console.error("Erro ao cadastrar endereço:", error.message);
+//     }
+//   };
+
+//   const resetForm = () => {
+//     setFormData({
+//       street: "",
+//       number: "",
+//       neighborhood: "",
+//       city: "",
+//       gps: "",
+//       complement: "",
+//       photo: null,
+//       type: "house",
+//       active: false,
+//       confirmed: false,
+//       visited: false,
+//       group: "",
+//     });
+//     setErrors({});
+//     setExistingAddress(null);
+//   };
+
+//   const handleCancel = () => {
+//     resetForm();
+//   };
+
+//   const handleEdit = () => {
+//     toast.info("Você pode revisar as informações.");
+//     setExistingAddress(null);
+//   };
+
+//   const handleModify = () => {
+//     navigate(`/update-address/${existingAddress.id}`);
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col items-center justify-center mb-10">
+//       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
+//         <h1 className="text-3xl font-medium text-gray-700 mb-6">
+//           Nueva Dirección
+//         </h1>
+//         <form onSubmit={handleSubmit} className="space-y-5">
+//           <InputField
+//             label="Calle *"
+//             placeholder="Ex: Rua Direita"
+//             name="street"
+//             value={formData.street}
+//             onChange={handleChange}
+//             error={errors.street}
+//           />
+//           <InputField
+//             label="Número *"
+//             name="number"
+//             placeholder="Ex: 123 ou 123a"
+//             value={formData.number}
+//             onChange={handleChange}
+//             error={errors.number}
+//           />
+//           <InputField
+//             label="Bairro *"
+//             name="neighborhood"
+//             placeholder="Ex: Vila Porto de Galinhas"
+//             value={formData.neighborhood}
+//             onChange={handleChange}
+//             error={errors.neighborhood}
+//           />
+//           <InputField
+//             label="Cidade *"
+//             name="city"
+//             placeholder="Ex: Ipojuca"
+//             value={formData.city}
+//             onChange={handleChange}
+//             error={errors.city}
+//           />
+//           <InputField
+//             label="GPS (Latitude, Longitude)"
+//             name="gps"
+//             value={formData.gps}
+//             onChange={handleChange}
+//             error={errors.gps}
+//             placeholder="Ex.: -23.5505, -46.6333"
+//           />
+//           <button
+//             type="button"
+//             onClick={handleGetCurrentGps}
+//             disabled={isFetchingGps}
+//             className="px-4 py-2 bg-blue-500 text-white"
+//           >
+//             {isFetchingGps ? "Obtendo..." : "GPS Atual"}
+//           </button>
+
+//           {/* Additional Fields */}
+
+//           <button
+//             type="submit"
+//             disabled={isButtonDisabled}
+//             className={`w-full py-3 rounded-lg text-white font-semibold ${
+//               isButtonDisabled
+//                 ? "bg-gray-300"
+//                 : "bg-blue-500 hover:bg-blue-600 transition-colors"
+//             }`}
+//           >
+//             Enviar
+//           </button>
+//         </form>
+
+//         {existingAddress && (
+//           <div className="p-6 w-full h-full flex items-center justify-center fixed inset-0 bg-black bg-opacity-50">
+//             <div className="bg-details h-72 max-h-96 p-5 flex items-center justify-center flex-col">
+//               <p className="text-xl mb-3">
+//                 La dirección ya existe. Elige una acción:
+//               </p>
+//               <div className="flex gap-5 flex-col w-full">
+//                 <button
+//                   onClick={handleCancel}
+//                   className="px-4 py-2 border border-red-600 text-red-800"
+//                 >
+//                   Cancelar
+//                 </button>
+//                 <button
+//                   onClick={handleEdit}
+//                   className="px-4 py-2 border border-blue-600 text-blue-800"
+//                 >
+//                   Reedición
+//                 </button>
+//                 <button
+//                   onClick={handleModify}
+//                   className="px-4 py-2 border border-green-600 text-green-800"
+//                 >
+//                   Modificar
+//                 </button>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default NewAddress;
+
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { toast } from "react-toastify";
@@ -11,6 +299,7 @@ import { useSelector } from "react-redux";
 function NewAddress() {
   const user = useSelector((state) => state.user);
   const addresses = useSelector((state) => state.addresses.addressesData);
+  console.log();
 
   const [formData, setFormData] = useState({
     street: "",
@@ -24,6 +313,7 @@ function NewAddress() {
     active: false,
     confirmed: false,
     visited: false,
+    group: "",
   });
 
   const [error, setError] = useState({});
@@ -34,10 +324,11 @@ function NewAddress() {
 
   const [newAddress, { data }] = useMutation(NEW_ADDRESS, {
     onCompleted: async (data) => {
-      console.log(data);
+      console.log("Nueva Direccion: ", data);
       toast.success(data.street);
     },
     onError: (error) => {
+      console.error(`Error ao cadastrar endereço: ${error.message}`);
       toast.error(`Error ao cadastrar endereço: ${error.message}`);
     },
   });
@@ -51,8 +342,10 @@ function NewAddress() {
       formData.number &&
       formData.neighborhood &&
       formData.city &&
-      (!formData.gps || gpsRegex.test(formData.gps)) &&
+      formData.gps &&
+      gpsRegex.test(formData.gps) &&
       Object.keys(error).length === 0;
+    console.log(isValid);
     setIsButtonDisabled(!isValid);
   }, [formData, error]);
 
@@ -140,6 +433,7 @@ function NewAddress() {
             confirmed: false,
             visited: null,
             type: formData.type,
+            group: user.userData.group,
             photo:
               "https://minexco.com.br/wp-content/uploads/2017/12/casa-de-praia-foto-em-destaque-1024x683.png",
           },
