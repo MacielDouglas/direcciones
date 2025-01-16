@@ -117,7 +117,7 @@ function SearchAddress() {
                 <li
                   key={index}
                   className={`border-b p-5 border-gray-200 flex justify-center flex-col ${
-                    !address.confirmed ? "bg-primary" : ""
+                    !address.confirmed ? "bg-red-100" : "bg-primary"
                   }`}
                 >
                   <Link
@@ -136,7 +136,7 @@ function SearchAddress() {
                     <div className="col-span-5 w-full  flex flex-col gap-5">
                       <div>
                         <p className="text-gray-800 font-semibold text-lg ">
-                          {address.street}, {address.number},
+                          {address.street}, {address.number}.
                         </p>
                         <p className="text-gray-500 text-sm">
                           {address.city}, {address.neighborhood},

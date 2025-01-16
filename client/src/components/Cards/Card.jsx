@@ -96,15 +96,12 @@ function Card() {
         )}
       </div>
 
-      <div className="h-full bg-details p-4 md:p-10 flex flex-col items-center justify-center mb-10">
+      <div className="h-full bg-details md:p-10 flex flex-col items-center justify-center mb-10">
         {cardDetails.map((card) => {
           const matchedAddresses = getMatchedAddresses(card.street);
 
           return (
-            <div
-              key={card.id}
-              className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl mb-6"
-            >
+            <div key={card.id} className="bg-white  p-8 w-full max-w-3xl mb-6">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-3xl font-medium text-gray-700">
                   Tarjeta número: {card.number}
@@ -119,7 +116,7 @@ function Card() {
                 <strong>{formatDate(card.startDate)}</strong>
               </p>
               <button
-                className="bg-secondary text-white px-4 py-2 rounded shadow-md hover:bg-primary-dark w-full"
+                className="bg-gradient-to-b from-stone-800  to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary w-full"
                 onClick={() => handleOpenModal(card.id)}
               >
                 Concluir esta tarjeta
@@ -127,7 +124,7 @@ function Card() {
 
               {matchedAddresses.length > 0 ? (
                 matchedAddresses.map((address) => (
-                  <div key={address.id} className="bg-details -mx-6 m-3">
+                  <div key={address.id} className="-mx-8 m-3">
                     <Address id={address.id} />
                   </div>
                 ))
@@ -139,7 +136,7 @@ function Card() {
         })}
         {cardDetails.length === 0 && (
           <div className="h-full">
-            <Loading text="No hay tarjetas para mostrar." />
+            <Loading text="No hay tarjetas asignadas." />
           </div>
         )}
       </div>

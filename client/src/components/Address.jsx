@@ -140,66 +140,67 @@ function Address({ id }) {
   };
 
   return (
-    <div className="w-full justify-center flex rounded-xl">
-      <div className="max-w-lg p-2 border rounded shadow-md">
+    // <div className="w-full   rounded-xl">
+    <div className="w-full p-4 border rounded shadow-md ">
+      <div
+        className={`${
+          confirmed ? "bg-primary" : "bg-red-100"
+        }  p-5 rounded-md drop-shadow-lg mb-4 space-y-3`}
+      >
         <h2 className="text-xl font-medium text-center mb-4">
           Informaciones de la dirección
         </h2>
-
-        <div
-          className={`${
-            confirmed ? "bg-white" : "bg-tertiary"
-          }  p-5 rounded-md drop-shadow-lg mb-4 space-y-3`}
-        >
-          <div className="flex gap-5 justify-between">
-            <span className="text-5xl self-center">{typeIcons[type]}</span>
-            <div className="text-sm">
-              <p className="text-xl mb-2">
-                Rua: <strong>{`${street}, ${number}`}</strong>
-              </p>
-              <p>
-                Bairro: <strong>{neighborhood}</strong>
-              </p>
-              <p>
-                Cidade: <strong>{city}</strong>
-              </p>
-            </div>
-            <Link
-              to={`https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=walking`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-4xl font-semibold self-center"
-            >
-              IR
-            </Link>
+        <hr />
+        <p className={`font-bold ${confirmed ? "" : "text-red-600"}`}>
+          {confirmed ? "Dirección confirmada" : "Necesita confirmar"}
+        </p>
+        <div className="flex gap-5 justify-between">
+          <span className="text-5xl self-center">{typeIcons[type]}</span>
+          <div className="text-sm ">
+            <p className="text-xl mb-2">
+              Rua: <strong>{`${street}, ${number}`}</strong>
+            </p>
+            <p>
+              Bairro: <strong>{neighborhood}</strong>
+            </p>
+            <p>
+              Cidade: <strong>{city}</strong>
+            </p>
           </div>
-          <div className="flex justify-center bg-secondary text-primary">
-            {/* <button className="w-full" onClick={handleEditClick(id)}>
+          <Link
+            to={`https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=walking`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-4xl font-semibold self-center"
+          >
+            IR
+          </Link>
+        </div>
+        <div className="flex justify-center bg-secondary text-primary">
+          {/* <button className="w-full" onClick={handleEditClick(id)}>
               Editar
             </button> */}
-          </div>
-          <div
-            className={`${
-              confirmed ? "bg-white" : "bg-gray-400"
-            } p-2 flex justify-between`}
-          >
-            <p>{confirmed ? "Confirmado" : "Necesita confirmar"}</p>
-            <button>Confirmar</button>
-          </div>
-          {complement && (
-            <div className="border-t border-gray-200 mt-2 pt-2">
-              <p>{complement}</p>
-            </div>
-          )}
-          <div className="flex justify-center">
-            <button
-              className="bg-secondary text-primary w-full p-2"
-              onClick={handleEdit}
-            >
-              editar la dirección
-            </button>
-          </div>
         </div>
+
+        {/* <div
+          className={`${
+            confirmed ? "bg-white" : "bg-gray-400"
+          } p-2 flex justify-between`}
+        ></div> */}
+        {complement && (
+          <div className="border-t border-gray-200 mt-2 pt-2">
+            <p>{complement}</p>
+          </div>
+        )}
+        <div className="flex justify-center">
+          <button
+            className="bg-gradient-to-b from-stone-800  to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary w-full"
+            onClick={handleEdit}
+          >
+            editar la dirección
+          </button>
+        </div>
+        {/* </div> */}
 
         <div>
           <MapContainer
@@ -233,6 +234,7 @@ function Address({ id }) {
         </div>
       </div>
     </div>
+    // </div>
   );
 }
 
