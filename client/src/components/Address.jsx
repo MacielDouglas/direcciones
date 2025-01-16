@@ -94,8 +94,8 @@ function Address({ id }) {
     gps,
     complement,
     confirmed,
+    photo,
   } = address;
-  console.log(address);
 
   const [latitude, longitude] = useMemo(
     () => gps.split(", ").map((coord) => parseFloat(coord.trim())),
@@ -151,6 +151,15 @@ function Address({ id }) {
           Informaciones de la dirección
         </h2>
         <hr />
+        {photo !== undefined && (
+          <div className="w-full ">
+            <img
+              src={photo}
+              className="object-cover rounded-t-md w-full"
+              alt={`imagem de ${street}, ${number}`}
+            />
+          </div>
+        )}
         <p className={`font-bold ${confirmed ? "" : "text-red-600"}`}>
           {confirmed ? "Dirección confirmada" : "Necesita confirmar"}
         </p>
@@ -176,17 +185,7 @@ function Address({ id }) {
             IR
           </Link>
         </div>
-        <div className="flex justify-center bg-secondary text-primary">
-          {/* <button className="w-full" onClick={handleEditClick(id)}>
-              Editar
-            </button> */}
-        </div>
 
-        {/* <div
-          className={`${
-            confirmed ? "bg-white" : "bg-gray-400"
-          } p-2 flex justify-between`}
-        ></div> */}
         {complement && (
           <div className="border-t border-gray-200 mt-2 pt-2">
             <p>{complement}</p>

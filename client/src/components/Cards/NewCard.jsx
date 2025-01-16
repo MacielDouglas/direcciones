@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -9,6 +9,13 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { NEW_CARD } from "../../graphql/mutation/cards.mutation";
 import Loading from "../../context/Loading";
+import {
+  MdHouse,
+  MdRestaurant,
+  MdHotel,
+  MdOutlineStorefront,
+  MdOutlineApartment,
+} from "react-icons/md";
 
 // Ícones personalizados para os marcadores
 const redIcon = new L.Icon({
@@ -105,6 +112,17 @@ function NewCard() {
     return <Loading text={"Creando una nueva tarjeta..."} />;
   }
 
+  const typeIcons = useMemo(
+    () => ({
+      house: <MdHouse />,
+      department: <MdOutlineApartment />,
+      store: <MdOutlineStorefront />,
+      restaurant: <MdRestaurant />,
+      hotel: <MdHotel />,
+    }),
+    []
+  );
+
   return (
     <div className="min-h-screen bg-details p-3 md:p-10  flex justify-center">
       <motion.div
@@ -152,13 +170,23 @@ function NewCard() {
                       key={address.id}
                       className="flex items-center text-sm lg:text-lg justify-between border-b py-2"
                     >
-                      <div>
-                        <p>
-                          <strong>{address.street}</strong>, {address.number}
-                        </p>
-                        <p>
-                          {address.neighborhood}, {address.city}
-                        </p>
+                      <div className="w-full flex items-center gap-3">
+                        <img
+                          src={address.photo}
+                          className="object-cover w-24"
+                          alt={`Foto de la calle: ${address.street}, ${address.number}`}
+                        />
+                        <div>
+                          <span className="text-lg">
+                            {typeIcons[address.type]}
+                          </span>
+                          <p>
+                            <strong>{address.street}</strong>, {address.number}
+                          </p>
+                          <p>
+                            {address.neighborhood}, {address.city}
+                          </p>
+                        </div>
                       </div>
                       <input
                         type="checkbox"
@@ -212,7 +240,15 @@ function NewCard() {
                     >
                       <Popup>
                         <div className="text-sm">
+                          <img
+                            src={address.photo}
+                            className="object-cover w-36"
+                            alt={`Foto de la calle: ${address.street}, ${address.number}`}
+                          />
                           <p>
+                            <span className="text-3xl">
+                              {typeIcons[address.type]}
+                            </span>
                             <strong>{address.street}</strong>, {address.number}
                           </p>
                           <p>

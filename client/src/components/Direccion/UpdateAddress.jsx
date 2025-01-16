@@ -54,7 +54,7 @@ function UpdateAddress({ addresses, id }) {
         city: addressToEdit.city || "",
         gps: addressToEdit.gps || "",
         complement: addressToEdit.complement || "",
-        photo: null, // A foto é opcional
+        photo: addressToEdit.photo,
         type: addressToEdit.type || "house",
         active: addressToEdit.active || false,
         confirmed: addressToEdit.confirmed || false,
@@ -159,7 +159,7 @@ function UpdateAddress({ addresses, id }) {
     <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col itens-center mb-10">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h1 className="text-3xl font-medium text-gray-700 mb-6">
-          Atualizar Endereço
+          Actualizar la dirección
         </h1>
         <form onSubmit={handleSubmit} className="space-y-5">
           <InputField
