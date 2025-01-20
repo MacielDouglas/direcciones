@@ -124,7 +124,7 @@ function NewCard() {
   );
 
   return (
-    <div className="min-h-screen bg-details p-3 md:p-10  flex justify-center">
+    <div className="min-h-screen bg-details  md:p-10  flex justify-center">
       <motion.div
         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl"
         initial={{ opacity: 0, x: -50 }}
@@ -163,7 +163,7 @@ function NewCard() {
                 Puedes seleccionar direcciones desde esta lista o directamente
                 en el mapa.
               </p>
-              <div className="overflow-y-auto border p-4 rounded max-h-[30vh] bg-primary">
+              <div className="overflow-y-auto border p-4  rounded max-h-[30vh]  bg-primary">
                 {availableAddresses.length ? (
                   availableAddresses.map((address) => (
                     <div
