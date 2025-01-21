@@ -25,6 +25,14 @@ function Login() {
               Direcciones
             </span>
           </motion.h1>
+          <div className="flex justify-center mb-6">
+            <img
+              src="./direccioes_map.svg"
+              className="w-40"
+              alt="imagen de direcciones"
+            />
+          </div>
+
           <motion.p
             className="text-gray-600 mb-6 text-lg"
             initial={{ opacity: 0 }}
