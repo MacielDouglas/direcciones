@@ -29,3 +29,33 @@ export const UPDATE_USER = gql`
     }
   }
 `;
+
+export const LOGIN_GOOGLE = gql`
+  mutation LOGIN_GOOGLE($user: UserGoogle!) {
+    loginGoogle(user: $user) {
+      message
+      success
+      user {
+        name
+        id
+        isAdmin
+        group
+        isSS
+        codUser
+        profilePicture
+        myCards {
+          cardId
+          date
+        }
+        myTotalCards {
+          cardId
+          date
+        }
+        comments {
+          cardId
+          text
+        }
+      }
+    }
+  }
+`;

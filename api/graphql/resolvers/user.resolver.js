@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import {
   createToken,
   existing,
+  hashToNumbers,
   sanitizeUser,
   setTokenCookie,
   validateUserCredentials,
@@ -366,6 +367,112 @@ const userResolver = {
           throw new Error("Ação inválida.");
       }
     },
+
+    loginGoogle: async (_, { user }, { res }) => {
+      const { email, displayName, photoUrl, uid } = user;
+
+      try {
+        // Validação básica do e-mail
+        if (!email || typeof email !== "string") {
+          throw new Error("E-mail inválido.");
+        }
+
+        // Verifica se o usuário já existe
+        const existUser = await User.findOne({ email: email });
+
+        if (!existUser) {
+          const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
+          const hashedPassword = await bcrypt.hash(uid, saltRounds);
+
+          // Gera o número único
+          const numberUnique = await hashToNumbers(uid);
+
+          // Cria um novo usuário
+          const newUser = new User({
+            name: displayName,
+            email: email,
+            password: hashedPassword,
+            profilePicture: photoUrl,
+            uid: uid,
+            codUser: numberUnique,
+          });
+
+          // Tenta salvar o novo usuário no banco
+          try {
+            await newUser.save();
+          } catch (saveError) {
+            throw new Error(
+              `Erro ao salvar novo usuário: ${saveError.message}`
+            );
+          }
+        }
+
+        const user = await validateUserCredentials(email, uid);
+
+        // Gera um token para o usuário
+        const token = createToken(user);
+
+        // Define o token no cookie
+        setTokenCookie(res, token);
+
+        // Retorna sucesso
+        return {
+          success: true,
+          message: `Usuário: ${user.name}, encontrado.`,
+          user: {
+            ...sanitizeUser(user),
+          },
+        };
+      } catch (error) {
+        throw new Error(`Erro ao fazer login: ${error.message}`);
+      }
+    },
+    // loginGoogle: async (_, { user }, { res }) => {
+    //   const { email, displayName, photoUrl, uid } = user;
+
+    //   try {
+    //     const existUser = await User.findOne({ email: email });
+
+    //     if (!existUser) {
+    //       const generatePassWord =
+    //         Math.random().toString(36).slice(-8) +
+    //         Math.random().toString(36).slice(-8);
+
+    //       const hashedPassword = await bcrypt.hash(generatePassWord, 10);
+    //       const numberUnique = await hashToNumbers(uid);
+
+    //       const newUser = new User({
+    //         name: displayName,
+    //         email: email,
+    //         password: hashedPassword,
+    //         profilePicture: photoUrl,
+    //         uid: uid,
+    //         codUser: numberUnique,
+    //       });
+
+    //       await newUser.save();
+    //     }
+
+    //     const user = await User.findOne({ email: email });
+    //     if (user.uid === uid) {
+    //       throw new Error("Informaciones equivocadas.");
+    //     }
+
+    //     const token = createToken(user);
+
+    //     setTokenCookie(res, token);
+
+    //     return {
+    //       success: true,
+    //       message: `Usuário: ${user.name}, encontrado.`,
+    //       user: {
+    //         ...sanitizeUser(user),
+    //       },
+    //     };
+    //   } catch (error) {
+    //     throw new Error(`Error login User: ${error.message}`);
+    //   }
+    // },
   },
 };
 

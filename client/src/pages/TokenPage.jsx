@@ -9,8 +9,8 @@ import { clearUser } from "../store/userSlice";
 
 function TokenPage() {
   const user = useSelector((state) => state.user);
-  const { name } = user.userData;
-  const token = name.slice(-5); // substitua por lógica real
+  const { name, codUser } = user.userData;
+
   const dispatch = useDispatch();
 
   const [logoutUser] = useLazyQuery(LOGOUT, {
@@ -19,17 +19,19 @@ function TokenPage() {
         dispatch(clearUser());
         toast.success("¡Cierre de sesión exitoso!");
       } else {
-        toast.error(`Erro ao fazer logout: ${data.user.message}`);
+        toast.error(`Error al cerrar sesión: ${data.user.message}`);
       }
     },
     onError: (error) => {
-      toast.error(`Erro na solicitação de logout: ${error.message}`);
+      toast.error(
+        `Error en la solicitud de cierre de sesión: ${error.message}`
+      );
     },
   });
 
   const copyToken = () => {
-    navigator.clipboard.writeText(token);
-    toast.success("Token copiado!");
+    navigator.clipboard.writeText(codUser);
+    toast.success("¡Token copiado!");
   };
 
   const handleLogout = useCallback(() => {
@@ -46,18 +48,21 @@ function TokenPage() {
           <h2 className="text-3xl font-semibold mb-4">
             {" "}
             Muchas gracias{" "}
-            <span className="text-orange-600 font-bold">
-              {name.slice(0, -5)}
-            </span>
-            , por registrarte.
+            <span className="text-orange-600 font-bold">{name}</span>, por
+            registrarte.
           </h2>
 
           <p className="mb-4">
-            Envie este número ao administrador para obter acesso.
+            Envíe este número al administrador para obtener acceso.
           </p>
           <div className="flex items-center justify-center mb-6">
-            <span className="text-4xl font-mono text-orange-600">{token}</span>
-            <button onClick={copyToken} className="ml-2 text-orange-500">
+            <span className="text-4xl font-mono text-orange-600">
+              {codUser}
+            </span>
+            <button
+              onClick={copyToken}
+              className="ml-2 text-2xl text-orange-500"
+            >
               <FaCopy />
             </button>
           </div>
@@ -71,7 +76,7 @@ function TokenPage() {
             onClick={handleLogout}
             className="hover:underline text-orange-500 flex items-center gap-2"
           >
-            Encerrar
+            Encerrar sesión
           </button>
         </div>
       </div>

@@ -56,6 +56,7 @@ export const sanitizeUser = (user) => {
     myCards,
     myTotalCards,
     comments,
+    codUser,
   } = user;
   return {
     id: _id,
@@ -67,6 +68,7 @@ export const sanitizeUser = (user) => {
     myCards,
     myTotalCards,
     comments,
+    codUser,
   };
 };
 
@@ -136,3 +138,44 @@ export const findNextNumber = async () => {
 // ======= Funções Auxiliares =======
 
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+export const hashToNumbers = async (
+  input,
+  min = 10000,
+  max = 99999,
+  algorithm = "SHA-256"
+) => {
+  if (typeof input !== "string" || input.trim() === "") {
+    throw new Error("Input must be a non-empty string.");
+  }
+
+  if (min >= max || max - min < 10000) {
+    throw new Error(
+      "Invalid range: Ensure that max > min and the range is at least 10,000."
+    );
+  }
+
+  // Converte a string para um ArrayBuffer
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+
+  // Cria o hash
+  const hashBuffer = await crypto.subtle.digest(algorithm, data);
+
+  // Converte o ArrayBuffer para um array de bytes
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  // Reduz o hash para um número no intervalo definido
+  const range = max - min;
+  const uniqueNumber =
+    hashArray.reduce((acc, byte) => {
+      return (acc * 256 + byte) % range;
+    }, 0) + min;
+
+  return uniqueNumber;
+};
+
+// // Exemplo de uso
+// hashToNumbers("zZmvRZPtjrg2x9FSDBUq3S8hltj2").then((numbers) => {
+//   console.log(numbers); // Exibe os cinco números
+// });

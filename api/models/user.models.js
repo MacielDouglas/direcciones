@@ -36,7 +36,13 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-
+    uid: {
+      type: String,
+    },
+    codUser: {
+      type: Number,
+      required: true,
+    },
     myCards: [
       {
         cardId: {

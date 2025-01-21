@@ -35,6 +35,7 @@ type User {
     myTotalCards: [CardAssociation]
     comments: [Comment] 
     idToken: String
+    codUser: Int!
 }
 
 type CardAssociation {
@@ -62,8 +63,10 @@ type Query {
     firebaseConfig: EncryptedConfig
 }
 
+
 type Mutation {
     userMutation(action: String!, user: NewUserInput, id: ID, updateUserInput: UpdateUserInput, idToken: String): UserMutationResponse!
+    loginGoogle(user: UserGoogle!): UserResponse
 }
 
 type UserResponse {
@@ -82,6 +85,22 @@ type UserMutationResponse {
     success: Boolean!
     message: String
     user: User
+}
+
+input UserGoogle {
+    displayName: String!
+    email: String!
+    photoUrl: String!
+    # name: String!
+    uid: String!
+}
+
+type LoginGoogleResponse {
+    success: Boolean!
+    message: String!
+    name: String!
+    photoUrl: String
+    
 }
 
 input UpdateUserInput {
