@@ -84,7 +84,11 @@ function Card() {
   };
 
   return (
-    <div className="text-start text-lg w-full text-secondary h-full bg-details">
+    <div
+      className={`text-start text-lg w-full text-secondary h-full ${
+        myCards.length === 0 ? "p-5" : ""
+      }`}
+    >
       <div className="space-y-5 px-4 pt-3">
         <h1 className="text-4xl font-medium ">Tarjetas</h1>
         {myCards.length === 0 ? (

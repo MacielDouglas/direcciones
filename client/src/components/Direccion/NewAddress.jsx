@@ -60,7 +60,7 @@ function NewAddress() {
       formData.gps &&
       gpsRegex.test(formData.gps) &&
       Object.keys(error).length === 0;
-    console.log(isValid);
+
     setIsButtonDisabled(!isValid);
   }, [formData, error]);
 
@@ -190,7 +190,7 @@ function NewAddress() {
   };
 
   return (
-    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col items-center justify-center mb-10">
+    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col items-center justify-center">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h1 className="text-3xl font-medium text-gray-700 mb-6">
           Nueva Dirección

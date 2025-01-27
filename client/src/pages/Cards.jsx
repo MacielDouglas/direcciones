@@ -41,7 +41,7 @@ function Cards() {
     if (!cards?.cards || cards.cards.length === 0) {
       fetchCards();
     }
-  }, [fetchCards]);
+  }, [fetchCards, cards.cards]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");

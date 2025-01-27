@@ -9,7 +9,7 @@ function Login() {
     >
       <div className="w-full h-full flex items-center justify-center bg-stone-950 bg-opacity-[40%]  ">
         <motion.div
-          className="bg-white shadow-lg rounded-lg p-10 max-w-md w-full "
+          className="bg-white shadow-lg rounded-lg p-10 max-w-md h-[600px]  w-full m-4 sm:m-0 flex flex-col justify-evenly "
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}

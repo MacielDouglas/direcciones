@@ -48,7 +48,7 @@ function Direcciones() {
       )}
 
       {id && (
-        <div className="bg-details mb-10">
+        <div className="bg-details">
           <Address id={id} />
         </div>
       )}

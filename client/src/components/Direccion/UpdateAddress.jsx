@@ -156,7 +156,7 @@ function UpdateAddress({ addresses, id }) {
   };
 
   return (
-    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col itens-center mb-10">
+    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col itens-center">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
         <h1 className="text-3xl font-medium text-gray-700 mb-6">
           Actualizar la dirección
