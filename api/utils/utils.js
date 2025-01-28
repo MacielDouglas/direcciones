@@ -174,8 +174,3 @@ export const hashToNumbers = async (
 
   return uniqueNumber;
 };
-
-// // Exemplo de uso
-// hashToNumbers("zZmvRZPtjrg2x9FSDBUq3S8hltj2").then((numbers) => {
-//   console.log(numbers); // Exibe os cinco números
-// });

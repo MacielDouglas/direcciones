@@ -112,7 +112,7 @@ const userResolver = {
         }
 
         // Buscar usuários conforme o filtro
-        const users = await User.find(filter, "id name group");
+        const users = await User.find(filter, "id name group codUser");
 
         if (!users || users.length === 0) {
           return {
@@ -144,16 +144,16 @@ const userResolver = {
           try {
             const [existingEmail, existingNameUser] = await Promise.all([
               User.findOne({ email: user.email }),
-              User.findOne({ name: user.name }),
+              // User.findOne({ name: user.name }),
             ]);
 
             if (existingEmail) {
               throw new Error("Email already in use");
             }
 
-            if (existingNameUser) {
-              throw new Error("Name already in use");
-            }
+            // if (existingNameUser) {
+            //   throw new Error("Name already in use");
+            // }
 
             const sanitizedEmail = user.email.trim().toLowerCase();
             const sanitizedName = user.name.trim();
@@ -225,7 +225,8 @@ const userResolver = {
 
         case "addGroup":
           try {
-            const userToUpdate = await existing(id, "user"); // Inicializa primeiro
+            const { newName, userMutationId } = updateUserInput; // Obtém o novo nome do corpo da requisição
+            const userToUpdate = await existing(userMutationId, "user"); // Inicializa primeiro
             const decodedToken = verifyAuthorization(req);
 
             if (!decodedToken || !decodedToken.isSS) {
@@ -234,17 +235,63 @@ const userResolver = {
               );
             }
 
-            if (
-              decodedToken.group === userToUpdate.group ||
-              userToUpdate.group !== "0"
-            ) {
+            const userUpdate = {};
+            const group = decodedToken.group;
+
+            // Verifica se o usuário já pertence ao grupo
+            if (decodedToken.group === userToUpdate.group) {
+              // Usuário já pertence ao grupo, resetar informações e removê-lo do grupo
+              userUpdate.group = "0";
+              userUpdate.myCards = [];
+              userUpdate.myTotalCards = [];
+              userUpdate.comments = [];
+              userUpdate.isAdmin = false;
+              userUpdate.isSS = false;
+              userUpdate.isSCards = false;
+
+              const updatedUser = await User.findByIdAndUpdate(
+                userMutationId,
+                userUpdate,
+                {
+                  new: true,
+                }
+              );
+
+              return {
+                success: true,
+                message: `Usuário foi removido do grupo e suas informações foram resetadas.`,
+                user: sanitizeUser(updatedUser),
+              };
+            }
+
+            if (userToUpdate.group !== "0") {
               throw new Error(
-                "Esse usuário já pertence ao seu grupo ou esta em um outro grupo."
+                "Esse usuário já pertence a outro grupo. Primeiro, remova-o do grupo atual."
               );
             }
 
-            const userUpdate = {};
-            const group = decodedToken.group;
+            // Valida e atualiza o nome, se fornecido
+            if (newName) {
+              if (!newName.trim()) {
+                throw new Error(
+                  "O nome fornecido é inválido. Por favor, insira um nome válido."
+                );
+              }
+
+              // Valida duplicação de nome dentro do mesmo grupo
+              const isDuplicateName = await User.exists({
+                name: newName.trim(),
+                group: decodedToken.group,
+              });
+
+              if (isDuplicateName) {
+                throw new Error(
+                  `Já existe um usuário com o nome '${newName.trim()}' no grupo. Escolha outro nome.`
+                );
+              }
+
+              userUpdate.name = newName.trim();
+            }
 
             // Valida e atualiza o grupo apenas se o usuário tiver permissão
             if (group && group.trim()) {
@@ -255,20 +302,15 @@ const userResolver = {
               }
 
               userUpdate.group = group;
-            } else if (!group) {
-              // Removendo o grupo implica em resetar as informações associadas
-              userUpdate.group = null;
-              userUpdate.myCards = [];
-              userUpdate.myTotalCards = [];
-              userUpdate.comments = [];
-              userUpdate.isAdmin = false;
-              userUpdate.isSS = false;
-              userUpdate.isSCards = false;
             }
 
-            const updatedUser = await User.findByIdAndUpdate(id, userUpdate, {
-              new: true,
-            });
+            const updatedUser = await User.findByIdAndUpdate(
+              userMutationId,
+              userUpdate,
+              {
+                new: true,
+              }
+            );
 
             return {
               success: true,
@@ -427,52 +469,6 @@ const userResolver = {
         throw new Error(`Erro ao fazer login: ${error.message}`);
       }
     },
-    // loginGoogle: async (_, { user }, { res }) => {
-    //   const { email, displayName, photoUrl, uid } = user;
-
-    //   try {
-    //     const existUser = await User.findOne({ email: email });
-
-    //     if (!existUser) {
-    //       const generatePassWord =
-    //         Math.random().toString(36).slice(-8) +
-    //         Math.random().toString(36).slice(-8);
-
-    //       const hashedPassword = await bcrypt.hash(generatePassWord, 10);
-    //       const numberUnique = await hashToNumbers(uid);
-
-    //       const newUser = new User({
-    //         name: displayName,
-    //         email: email,
-    //         password: hashedPassword,
-    //         profilePicture: photoUrl,
-    //         uid: uid,
-    //         codUser: numberUnique,
-    //       });
-
-    //       await newUser.save();
-    //     }
-
-    //     const user = await User.findOne({ email: email });
-    //     if (user.uid === uid) {
-    //       throw new Error("Informaciones equivocadas.");
-    //     }
-
-    //     const token = createToken(user);
-
-    //     setTokenCookie(res, token);
-
-    //     return {
-    //       success: true,
-    //       message: `Usuário: ${user.name}, encontrado.`,
-    //       user: {
-    //         ...sanitizeUser(user),
-    //       },
-    //     };
-    //   } catch (error) {
-    //     throw new Error(`Error login User: ${error.message}`);
-    //   }
-    // },
   },
 };
 

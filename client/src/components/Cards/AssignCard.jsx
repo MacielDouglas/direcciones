@@ -18,8 +18,6 @@ function AssignCard() {
   const user = useSelector((state) => state.user.userData);
   const dispatch = useDispatch();
 
-  console.log(cards);
-
   const [selectedCard, setSelectedCard] = useState(null);
   const [cardColors, setCardColors] = useState({});
   const [mapCenter, setMapCenter] = useState([0, 0]);

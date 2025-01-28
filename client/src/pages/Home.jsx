@@ -2,7 +2,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useLazyQuery } from "@apollo/client";
 import { motion } from "framer-motion";
-import { FaRegUser, FaRegRectangleList, FaRegMap } from "react-icons/fa6";
+import {
+  FaRegUser,
+  FaRegRectangleList,
+  FaRegMap,
+  FaUsers,
+} from "react-icons/fa6";
 import menuOptions from "../constants/menu";
 import { GET_ADDRESS } from "../graphql/queries/address.query";
 import { setAddresses } from "../store/addressesSlice";
@@ -10,12 +15,15 @@ import { setAddresses } from "../store/addressesSlice";
 export default function Home() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { name, group } = user.userData;
-
+  const { name, isSS, group } = user.userData;
+  {
+    /* <FaUsers /> */
+  }
   // Mapeamento de ícones
   const iconsMap = {
     Tarjetas: FaRegRectangleList,
     Dirección: FaRegMap,
+    Admin: FaUsers,
     Perfil: FaRegUser,
   };
 
@@ -52,14 +60,14 @@ export default function Home() {
       </motion.div>
 
       {/* Botão para atualizar os dados manualmente */}
-      {group !== 0 && (
+      {/* {group !== 0 && (
         <button
           onClick={fetchAddresses}
           className="mt-4 py-2 px-6 bg-blue-500 text-white font-medium rounded hover:bg-blue-600"
         >
           {loading ? "Atualizando..." : "Atualizar Endereços"}
         </button>
-      )}
+      )} */}
 
       {/* Opções de Menu */}
       <div className="flex flex-col w-full max-w-2xl mt-4">
@@ -97,6 +105,15 @@ export default function Home() {
             </motion.div>
           );
         })}
+        {isSS && (
+          <Link
+            to="/adminUsers"
+            className="flex gap-7 pt-10  h-full border-t border-details p-6"
+          >
+            <FaUsers size={38} color="black" className="flex-shrink-0" />
+            <p className="font-medium text-4xl tracking-widest ">Admin</p>
+          </Link>
+        )}
       </div>
 
       {/* Exibe erros se houver */}

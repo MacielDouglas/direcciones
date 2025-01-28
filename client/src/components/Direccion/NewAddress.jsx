@@ -14,7 +14,6 @@ function NewAddress() {
   const addresses = useSelector((state) => state.addresses.addressesData);
 
   const [isUploading, setIsUploading] = useState(false);
-  console.log();
 
   const [formData, setFormData] = useState({
     street: "",

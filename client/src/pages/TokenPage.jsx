@@ -61,9 +61,10 @@ function TokenPage() {
             </span>
             <button
               onClick={copyToken}
-              className="ml-2 text-2xl text-orange-500"
+              className="ml-2 text-2xl text-orange-500 flex gap-1"
             >
               <FaCopy />
+              <p className="text-sm">Copiar</p>
             </button>
           </div>
           <p>Saludos.</p>

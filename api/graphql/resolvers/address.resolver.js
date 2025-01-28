@@ -71,8 +71,6 @@ const addressResolver = {
           .skip(skip)
           .lean();
 
-        console.log(addresses);
-
         return {
           message: addresses.length
             ? "Endereços encontrados."
@@ -138,8 +136,6 @@ const addressResolver = {
               throw new Error("Endereço já existente.");
             }
 
-            console.log(formattedAddress);
-
             const address = new Address(formattedAddress);
 
             await address.save();
@@ -155,7 +151,6 @@ const addressResolver = {
 
         case "update":
           try {
-            console.log("Update");
             validateObjectId(id);
             const address = await Address.findById(id);
             if (!address) {
@@ -195,8 +190,6 @@ const addressResolver = {
                 { $set: addressUpdate },
                 { new: true, runValidators: true }
               ).lean();
-
-              console.log("Endereço novo: ", updatedAddress);
 
               return {
                 message: "Endereço atualizado com sucesso.",

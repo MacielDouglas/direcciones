@@ -10,20 +10,24 @@ export const DELETE_USER = gql`
 `;
 
 export const UPDATE_USER = gql`
-  mutation UPDATE_USER($action: String!, $userMutationId: ID!) {
-    userMutation(action: $action, id: $userMutationId) {
+  mutation UPDATE_USER($action: String!, $updateUserInput: UpdateUserInput!) {
+    userMutation(action: $action, updateUserInput: $updateUserInput) {
       message
       success
       user {
+        id
         name
+        codUser
         group
+        isAdmin
+        isSS
         myCards {
-          id
-          number
-          streets {
-            number
-            active
-          }
+          date
+          cardId
+        }
+        myTotalCards {
+          cardId
+          date
         }
       }
     }
