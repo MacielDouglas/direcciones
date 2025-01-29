@@ -9,6 +9,7 @@ import {
 import SearchModal from "./SearchModal";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import Loading from "../../context/Loading";
 
 function SearchAddress() {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -18,8 +19,6 @@ function SearchAddress() {
 
   const openSearchModal = () => setIsSearchOpen(true);
   const closeSearchModal = () => setIsSearchOpen(false);
-
-  console.log(addresses);
 
   // Captura a localização do usuário
   useEffect(() => {
@@ -56,6 +55,12 @@ function SearchAddress() {
     return R * c; // Distância em metros
   };
 
+  if (addresses === null)
+    return (
+      <div className="p-8">
+        <Loading text="No tenemos direcciones para buscar..." />;
+      </div>
+    );
   // Ordena os endereços em ordem decrescente (por id ou outra propriedade relevante)
   const sortedAddresses = [...addresses].sort((a, b) => b - a);
 

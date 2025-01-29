@@ -79,6 +79,12 @@ function NewCard() {
       setTimeout(() => setLoading(false), 2000);
     }
   };
+  if (addresses === null)
+    return (
+      <div className="p-8">
+        <Loading text="No tenemos direcciones para crear una tarjetar..." />;
+      </div>
+    );
 
   const availableAddresses = Object.values(addresses).filter(
     (address) => !cards.some((card) => card.street.includes(address.id))

@@ -230,9 +230,11 @@ const userResolver = {
             const decodedToken = verifyAuthorization(req);
 
             if (!decodedToken || !decodedToken.isSS) {
-              throw new Error(
-                "Você não tem permissão para alterar esse usuário."
-              );
+              throw new Error("No tienes permiso para cambiar este usuario.");
+            }
+
+            if (userToUpdate.isAdmin) {
+              throw new Error("No tienes permiso para cambiar este usuario.");
             }
 
             const userUpdate = {};
@@ -259,14 +261,14 @@ const userResolver = {
 
               return {
                 success: true,
-                message: `Usuário foi removido do grupo e suas informações foram resetadas.`,
+                message: `El usuario ${updatedUser.name}, ha sido eliminado del grupo y sus informaciónes fue borrada.`,
                 user: sanitizeUser(updatedUser),
               };
             }
 
             if (userToUpdate.group !== "0") {
               throw new Error(
-                "Esse usuário já pertence a outro grupo. Primeiro, remova-o do grupo atual."
+                "Este usuario ya pertenece a otro grupo. Primero, elimínelo del grupo actual.."
               );
             }
 
@@ -274,7 +276,7 @@ const userResolver = {
             if (newName) {
               if (!newName.trim()) {
                 throw new Error(
-                  "O nome fornecido é inválido. Por favor, insira um nome válido."
+                  "El nombre proporcionado no es válido. Por favor, introduzca un nombre válido"
                 );
               }
 
@@ -286,7 +288,7 @@ const userResolver = {
 
               if (isDuplicateName) {
                 throw new Error(
-                  `Já existe um usuário com o nome '${newName.trim()}' no grupo. Escolha outro nome.`
+                  `Ya hay un usuario con el nombre '${newName.trim()}' en el grupo. Por favor elija otro nombre.`
                 );
               }
 
@@ -297,7 +299,7 @@ const userResolver = {
             if (group && group.trim()) {
               if (!decodedToken.isSS && !decodedToken.isSCards) {
                 throw new Error(
-                  "Você não tem permissão para alterar o campo 'group'."
+                  "No tienes permiso para cambiar el campo 'grupo'."
                 );
               }
 
@@ -314,11 +316,11 @@ const userResolver = {
 
             return {
               success: true,
-              message: `Usuário foi adicionado ao grupo com sucesso.`,
+              message: `El usuario ${updatedUser.name} se agregó correctamente al grupo.`,
               user: sanitizeUser(updatedUser),
             };
           } catch (error) {
-            throw new Error(`Erro ao atualizar o usuário: ${error.message}`);
+            throw new Error(`Error al actualizar el usuario: ${error.message}`);
           }
 
         case "update":

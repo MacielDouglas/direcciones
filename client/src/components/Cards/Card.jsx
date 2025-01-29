@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Address from "../Address";
 import Modal from "react-modal";
@@ -8,7 +8,7 @@ import { useMutation } from "@apollo/client";
 import { setUser } from "../../store/userSlice";
 import Loading from "../../context/Loading";
 
-Modal.setAppElement("#root"); // Garante acessibilidade para leitores de tela
+Modal.setAppElement("#root");
 
 function Card() {
   const dispatch = useDispatch();
@@ -16,10 +16,24 @@ function Card() {
   const [selectedCardId, setSelectedCardId] = useState(null);
 
   const user = useSelector((state) => state.user);
-  const myCards = user?.userData?.myCards || [];
+  const myCards = useMemo(() => user?.userData?.myCards || [], [user]);
   const cardsData = useSelector((state) => state.cards?.cardsData?.card || []);
   const addressesData =
     useSelector((state) => state.addresses?.addressesData) || [];
+
+  const cardDetails = useMemo(
+    () =>
+      cardsData.filter((card) =>
+        myCards.some((myCard) => myCard.cardId === card.id)
+      ),
+    [cardsData, myCards]
+  );
+
+  const getMatchedAddresses = useMemo(
+    () => (cardStreetIds) =>
+      addressesData.filter((address) => cardStreetIds.includes(address.id)),
+    [addressesData]
+  );
 
   const [returnedCard] = useMutation(RETURN_CARD, {
     onCompleted: () => {
@@ -29,20 +43,9 @@ function Card() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  const cardDetails = cardsData.filter((card) =>
-    myCards.some((myCard) => myCard.cardId === card.id)
-  );
-
-  const getMatchedAddresses = (cardStreetIds) => {
-    return addressesData.filter((address) =>
-      cardStreetIds.includes(address.id)
-    );
+    return `${String(date.getDate()).padStart(2, "0")}/${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}/${date.getFullYear()}`;
   };
 
   const handleOpenModal = (cardId) => {
@@ -67,19 +70,15 @@ function Card() {
         },
       });
 
-      // Atualizar os cartões do usuário removendo o cartão concluído
       const updatedMyCards = myCards.filter(
         (myCard) => myCard.cardId !== selectedCardId
       );
-
       dispatch(
         setUser({ user: { ...user.userData, myCards: updatedMyCards } })
       );
-      console.log(`Tarjeta ${selectedCardId} concluida`);
       setIsModalOpen(false);
     } catch (error) {
       toast.error(error.message);
-      throw new Error(`No fue posible concluir esta tarteja: ${error.message}`);
     }
   };
 
@@ -90,7 +89,7 @@ function Card() {
       }`}
     >
       <div className="space-y-5 px-4 pt-3">
-        <h1 className="text-4xl font-medium ">Tarjetas</h1>
+        <h1 className="text-4xl font-medium">Tarjetas</h1>
         {myCards.length === 0 ? (
           <p>Actualmente no tienes tartejas asignadas.</p>
         ) : (
@@ -103,15 +102,12 @@ function Card() {
       <div className="h-full bg-details md:p-10 flex flex-col items-center justify-center mb-10">
         {cardDetails.map((card) => {
           const matchedAddresses = getMatchedAddresses(card.street);
-
           return (
-            <div key={card.id} className="bg-white  p-8 w-full max-w-3xl mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="text-3xl font-medium text-gray-700">
-                  Tarjeta número: {card.number}
-                </h2>
-              </div>
-              <p className="text-">
+            <div key={card.id} className="bg-white p-8 w-full max-w-3xl mb-6">
+              <h2 className="text-3xl font-medium text-gray-700">
+                Tarjeta número: {card.number}
+              </h2>
+              <p>
                 Esta tarjeta tiene <strong>{matchedAddresses.length}</strong>{" "}
                 {matchedAddresses.length > 1 ? "direcciones" : "dirección"}
               </p>
@@ -120,17 +116,14 @@ function Card() {
                 <strong>{formatDate(card.startDate)}</strong>
               </p>
               <button
-                className="bg-gradient-to-b from-stone-800  to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary w-full"
+                className="bg-gradient-to-b from-stone-800 to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary w-full"
                 onClick={() => handleOpenModal(card.id)}
               >
                 Concluir esta tarjeta
               </button>
-
               {matchedAddresses.length > 0 ? (
                 matchedAddresses.map((address) => (
-                  <div key={address.id} className="-mx-8 m-3">
-                    <Address id={address.id} />
-                  </div>
+                  <Address key={address.id} id={address.id} />
                 ))
               ) : (
                 <p>No hay direcciones asociadas a esta tarjeta.</p>
@@ -139,23 +132,19 @@ function Card() {
           );
         })}
         {cardDetails.length === 0 && (
-          <div className="h-full">
-            <Loading text="No hay tarjetas asignadas." />
-          </div>
+          <Loading text="No hay tarjetas asignadas." />
         )}
       </div>
 
-      {/* Modal */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={handleCloseModal}
-        contentLabel="Concluir Tarjeta"
         className="bg-white rounded-lg shadow-lg max-w-md mx-auto p-6 text-center"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
       >
         <h2 className="text-xl font-medium mb-4">Confirmar acción</h2>
         <p>¿Está seguro de que desea concluir esta tarjeta?</p>
-        <div className="mt-6 flex justify-between gap-4 ">
+        <div className="mt-6 flex justify-between gap-4">
           <button
             className="bg-gray-300 px-4 py-2 rounded shadow hover:bg-gray-400 w-full"
             onClick={handleCloseModal}

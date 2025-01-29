@@ -3,12 +3,21 @@ import { useSelector } from "react-redux";
 import { GET_USERS } from "../graphql/queries/user.query";
 import { useState } from "react";
 import { UPDATE_USER } from "../graphql/mutation/user.mutation";
+import { toast } from "react-toastify";
 
 function AdminUsers() {
   const user = useSelector((state) => state.user.userData); // Usuário logado
   const { group } = user;
   const { data: usersData, loading, error, refetch } = useQuery(GET_USERS);
-  const [updateUserInput] = useMutation(UPDATE_USER);
+  const [updateUserInput] = useMutation(UPDATE_USER, {
+    onCompleted: (data) => {
+      refetch();
+      toast.success(data.userMutation.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const [selectedUser, setSelectedUser] = useState(null); // Usuário selecionado
   const [newName, setNewName] = useState(""); // Novo nome para o usuário em caso de duplicação
@@ -31,14 +40,11 @@ function AdminUsers() {
     try {
       const user = users.find((u) => u.id === userId);
 
-      const newGroup = action === "add" ? group : 0;
-
       // Verifica duplicação de nome ao adicionar
       if (action === "add" && checkDuplicateName(user.name)) {
         if (newName == !user.name) {
           setIsNameDuplicate(true);
           setSeeNewName(user.name); // Define o nome atual no campo de edição
-
           return;
         }
       }
@@ -52,7 +58,6 @@ function AdminUsers() {
           },
         },
       });
-      refetch();
 
       setSelectedUser(null);
     } catch (error) {
