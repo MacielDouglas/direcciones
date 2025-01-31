@@ -12,6 +12,7 @@ import {
   initialFormState,
 } from "../../constants/direccion.js";
 import { setAddresses } from "../../store/addressesSlice";
+import { GET_ADDRESS } from "./../../graphql/queries/address.query";
 
 function NewAddress() {
   const dispatch = useDispatch();
