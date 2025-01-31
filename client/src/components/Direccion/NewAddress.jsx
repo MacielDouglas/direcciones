@@ -1,54 +1,62 @@
 import { useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import InputField from "../../context/InputField";
-import { useMutation } from "@apollo/client";
-import { NEW_ADDRESS } from "../../graphql/mutation/address.mutation";
-import { useSelector } from "react-redux";
 import FormUploadImage from "../../forms/FormUploadImage";
+import { NEW_ADDRESS } from "../../graphql/mutation/address.mutation";
+import {
+  gpsRegex,
+  imagesAddresses,
+  initialFormState,
+} from "../../constants/direccion.js";
+import { setAddresses } from "../../store/addressesSlice";
 
 function NewAddress() {
-  const user = useSelector((state) => state.user);
-  const addresses = useSelector((state) => state.addresses.addressesData);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.user.userData);
+  const addresses = useSelector((state) => state.addresses.addressesData || []);
 
-  const [isUploading, setIsUploading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    street: "",
-    number: "",
-    neighborhood: "",
-    city: "",
-    gps: "",
-    complement: "",
-    photo: null,
-    type: "house",
-    active: false,
-    confirmed: false,
-    visited: false,
-    group: "",
-  });
+  const [formData, setFormData] = useState(initialFormState);
 
   const [error, setError] = useState({});
   const [isFetchingGps, setIsFetchingGps] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [charCount, setCharCount] = useState(250);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const [existingAddress, setExistingAddress] = useState(null);
-  const navigate = useNavigate();
 
-  const [newAddress, { data }] = useMutation(NEW_ADDRESS, {
+  const [fetchAddresses, { refetch }] = useLazyQuery(GET_ADDRESS, {
+    variables: { action: "get", input: { street: "" } },
+    fetchPolicy: "network-only",
+    onCompleted: (data) => {
+      if (data?.address?.address.length) {
+        dispatch(setAddresses({ addresses: data.address.address }));
+      } else {
+        toast.warn("Nenhum endereço encontrado.");
+      }
+    },
+    onError: (error) =>
+      toast.error(`Erro ao buscar endereços: ${error.message}`),
+  });
+
+  const [newAddress] = useMutation(NEW_ADDRESS, {
     onCompleted: async (data) => {
-      console.log("Nueva Direccion: ", data);
-      toast.success(data.street);
+      toast.success("Endereço cadastrado com sucesso!");
+      await refetch();
+      navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
     },
     onError: (error) => {
-      console.error(`Error ao cadastrar endereço: ${error.message}`);
-      toast.error(`Error ao cadastrar endereço: ${error.message}`);
+      toast.error(`Erro ao cadastrar endereço: ${error.message}`),
+        console.error(error);
+      console.log("Error: ", error.message);
     },
   });
 
-  const gpsRegex =
-    /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d+)?|180(\.0+)?)$/;
+  useEffect(() => {
+    setCharCount(250 - formData.complement.length);
+  }, [formData.complement]);
 
   useEffect(() => {
     const isValid =
@@ -65,26 +73,41 @@ function NewAddress() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "complement" && value.length > 250) return;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleGetCurrentGps = () => {
     setIsFetchingGps(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
+      ({ coords }) => {
         setFormData((prev) => ({
           ...prev,
-          gps: `${latitude}, ${longitude}`,
+          gps: `${coords.latitude}, ${coords.longitude}`,
         }));
         setIsFetchingGps(false);
       },
-      (error) => {
-        console.error("Erro ao obter localização:", error);
+      () => {
         toast.error("Não foi possível obter o GPS atual.");
         setIsFetchingGps(false);
       }
     );
+  };
+
+  const checkIfAddressExists = () => {
+    if (!Array.isArray(addresses)) return false; // Verifica se é um array válido
+
+    return addresses.find(
+      (addr) =>
+        addr.street === formData.street &&
+        addr.number === formData.number &&
+        addr.neighborhood === formData.neighborhood
+    );
+  };
+
+  const handleUploadComplete = (url) => {
+    setFormData((prev) => ({ ...prev, photo: url }));
+    setIsUploading(false);
   };
 
   const validate = () => {
@@ -99,15 +122,6 @@ function NewAddress() {
     return newErrors;
   };
 
-  const checkIfAddressExists = () => {
-    return addresses.find(
-      (address) =>
-        address.street === formData.street &&
-        address.number === formData.number &&
-        address.neighborhood === formData.neighborhood
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -118,122 +132,78 @@ function NewAddress() {
         return;
       }
 
-      const existing = checkIfAddressExists();
-      if (existing) {
-        setExistingAddress(existing);
-        toast.info("Endereço já existente! Selecione uma ação.");
+      if (checkIfAddressExists()) {
+        toast.info("Endereço já cadastrado!");
         return;
       }
+
+      // if (!formData.photo) {
+      //   setFormData((prev) => ({
+      //     ...prev,
+      //     photo: imagesAddresses[formData.type],
+      //   }));
+      // }
+
+      // console.log(formData);
 
       await newAddress({
         variables: {
           action: "create",
           newAddress: {
-            street: formData.street,
-            number: formData.number,
-            neighborhood: formData.neighborhood,
-            city: formData.city,
-            complement: formData.complement,
-            gps: formData.gps,
-            userId: user.userData.id,
-            active: false,
-            confirmed: false,
-            visited: null,
-            type: formData.type,
-            group: user.userData.group,
-            photo: isUploading
-              ? isUploading
-              : "https://minexco.com.br/wp-content/uploads/2017/12/casa-de-praia-foto-em-destaque-1024x683.png",
+            ...formData,
+            userId: user.id,
+            group: user.group,
+            photo: formData.photo
+              ? formData.photo
+              : imagesAddresses[formData.type],
           },
         },
       });
-
-      console.log("Dados enviados:", formData);
-      toast.success("Endereço cadastrado com sucesso!");
-      setFormData({
-        street: "",
-        number: "",
-        neighborhood: "",
-        city: "",
-        gps: "",
-        complement: "",
-        photo: null,
-        type: "house",
-      });
     } catch (error) {
-      console.error("Erro ao cadastrar endereço: ", error.message);
+      console.log(error);
+      toast.error(`Erro ao cadastrar endereço: ${error.message}`);
     }
   };
 
-  const handleCancel = () => {
-    setFormData({
-      street: "",
-      number: "",
-      neighborhood: "",
-      city: "",
-      gps: "",
-      complement: "",
-      photo: null,
-      type: "casa",
-    });
-    setExistingAddress(null);
-  };
-
-  const handleEdit = () => {
-    toast.info("Você pode revisar as informações.");
-    setExistingAddress(null);
-  };
-
-  const handleModify = () => {
-    navigate(`/update-address/${existingAddress.id}`);
-  };
-
   return (
-    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col items-center justify-center">
+    <div className="min-h-screen p-10 flex items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
-        <h1 className="text-3xl font-medium text-gray-700 mb-6">
-          Nueva Dirección
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <h1 className="text-2xl font-semibold mb-6">Novo Endereço</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
-            label="Calle *"
-            placeholder="Ex: Rua Direita"
+            label="Rua *"
             name="street"
             value={formData.street}
             onChange={handleChange}
             error={error.street}
           />
           <InputField
-            label="Numero *"
+            label="Número *"
             name="number"
-            placeholder="Ex: 123 u 123a"
             value={formData.number}
             onChange={handleChange}
             error={error.number}
           />
           <InputField
-            label="Barrio *"
+            label="Bairro *"
             name="neighborhood"
-            placeholder="Ex: Vila Porto de Galinhas"
             value={formData.neighborhood}
             onChange={handleChange}
             error={error.neighborhood}
           />
           <InputField
-            label="Ciudad *"
+            label="Cidade *"
             name="city"
-            placeholder="Ex: Ipojuca"
             value={formData.city}
             onChange={handleChange}
             error={error.city}
           />
           <InputField
-            label="GPS (Latitude, Longitude)"
+            label="GPS (Lat, Long) *"
             name="gps"
             value={formData.gps}
             onChange={handleChange}
             error={error.gps}
-            placeholder="Ex.: -23.5505, -46.6333"
           />
           <button
             type="button"
@@ -318,18 +288,23 @@ function NewAddress() {
             isTextarea
             maxLength="250"
           />
+          <p className="text-right text-sm text-gray-500">
+            {charCount} caracteres restantes
+          </p>
 
-          {isUploading && (
-            <div className="w-full flex justify-center">
-              <img
-                src={isUploading}
-                className="w-full max-w-xs rounded-lg border border-gray-300"
-                alt="Imagem Enviada"
-              />
-            </div>
-          )}
-          <FormUploadImage setIsUploading={setIsUploading} />
+          <div className="w-full flex justify-center">
+            <img
+              src={
+                formData.photo
+                  ? formData.photo
+                  : `${imagesAddresses[formData.type]}`
+              }
+              className="w-full max-w-xs rounded-lg border border-gray-300"
+              alt="Imagem Enviada"
+            />
+          </div>
 
+          <FormUploadImage onUploadComplete={handleUploadComplete} />
           <button
             type="submit"
             disabled={isButtonDisabled}
@@ -339,38 +314,9 @@ function NewAddress() {
                 : "bg-blue-500 hover:bg-blue-600 transition-colors"
             }`}
           >
-            Enviar
+            {isUploading ? "Aguardando imagem..." : "Enviar"}
           </button>
         </form>
-        {existingAddress && (
-          <div className="p-6  w-full h-full flex  items-center justify-center  fixed inset-0 bg-black bg-opacity-50 ">
-            <div className="bg-details h-72 max-h-96 p-5 flex  items-center justify-center  flex-col">
-              <p className="text-xl mb-3">
-                La dirección ya existe. Elige una acción:
-              </p>
-              <div className="flex gap-5 flex-col w-full">
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 border border-red-600 text-red-800 "
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleEdit}
-                  className="px-4 py-2 border border-blue-600 text-blue-800 "
-                >
-                  Reedición
-                </button>
-                <button
-                  onClick={handleModify}
-                  className="px-4 py-2 border border-green-600 text-green-800 "
-                >
-                  Modificar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

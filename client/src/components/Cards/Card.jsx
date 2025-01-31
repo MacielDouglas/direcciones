@@ -18,8 +18,13 @@ function Card() {
   const user = useSelector((state) => state.user);
   const myCards = useMemo(() => user?.userData?.myCards || [], [user]);
   const cardsData = useSelector((state) => state.cards?.cardsData?.card || []);
-  const addressesData =
-    useSelector((state) => state.addresses?.addressesData) || [];
+  const addressesSelector = useSelector(
+    (state) => state.addresses?.addressesData
+  );
+  const addressesData = useMemo(
+    () => addressesSelector || [],
+    [addressesSelector]
+  );
 
   const cardDetails = useMemo(
     () =>

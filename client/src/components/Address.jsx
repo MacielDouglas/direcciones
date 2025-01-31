@@ -151,12 +151,17 @@ function Address({ id }) {
           Informaciones de la dirección
         </h2>
         <hr />
-        {photo !== undefined && (
+        {photo && (
           <div className="w-full ">
             <img
               src={photo}
               className="object-cover rounded-t-md w-full"
               alt={`imagem de ${street}, ${number}`}
+              onError={(e) => {
+                if (e.target.src !== "/direccioes_map.svg") {
+                  e.target.src = "/direccioes_map.svg";
+                }
+              }}
             />
           </div>
         )}
