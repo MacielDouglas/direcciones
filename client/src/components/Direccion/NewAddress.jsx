@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLazyQuery, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import InputField from "../../context/InputField";
@@ -12,7 +12,6 @@ import {
   initialFormState,
 } from "../../constants/direccion.js";
 import { setAddresses } from "../../store/addressesSlice";
-import { GET_ADDRESS } from "./../../graphql/queries/address.query";
 
 function NewAddress() {
   const dispatch = useDispatch();
@@ -21,38 +20,23 @@ function NewAddress() {
   const addresses = useSelector((state) => state.addresses.addressesData || []);
 
   const [formData, setFormData] = useState(initialFormState);
-
-  const [error, setError] = useState({});
+  const [charCount, setCharCount] = useState(250);
   const [isFetchingGps, setIsFetchingGps] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [charCount, setCharCount] = useState(250);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
-  const [fetchAddresses, { refetch }] = useLazyQuery(GET_ADDRESS, {
-    variables: { action: "get", input: { street: "" } },
-    fetchPolicy: "network-only",
-    onCompleted: (data) => {
-      if (data?.address?.address.length) {
-        dispatch(setAddresses({ addresses: data.address.address }));
-      } else {
-        toast.warn("Nenhum endereço encontrado.");
-      }
-    },
-    onError: (error) =>
-      toast.error(`Erro ao buscar endereços: ${error.message}`),
-  });
 
   const [newAddress] = useMutation(NEW_ADDRESS, {
     onCompleted: async (data) => {
       toast.success("Endereço cadastrado com sucesso!");
-      await refetch();
+      dispatch(
+        setAddresses({
+          addresses: [...addresses, data.addressMutation.address],
+        })
+      );
       navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
     },
-    onError: (error) => {
+    onError: (error) =>
       toast.error(`Erro ao cadastrar endereço: ${error.message}`),
-        console.error(error);
-      console.log("Error: ", error.message);
-    },
   });
 
   useEffect(() => {
@@ -61,16 +45,14 @@ function NewAddress() {
 
   useEffect(() => {
     const isValid =
-      formData.street &&
-      formData.number &&
-      formData.neighborhood &&
-      formData.city &&
-      formData.gps &&
-      gpsRegex.test(formData.gps) &&
-      Object.keys(error).length === 0;
+      formData.street.trim() &&
+      formData.number.trim() &&
+      formData.neighborhood.trim() &&
+      formData.city.trim() &&
+      gpsRegex.test(formData.gps.trim());
 
     setIsButtonDisabled(!isValid);
-  }, [formData, error]);
+  }, [formData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,20 +71,21 @@ function NewAddress() {
         setIsFetchingGps(false);
       },
       () => {
-        toast.error("Não foi possível obter o GPS atual.");
+        toast.error("No se puede obtener el GPS actual.");
         setIsFetchingGps(false);
       }
     );
   };
 
   const checkIfAddressExists = () => {
-    if (!Array.isArray(addresses)) return false; // Verifica se é um array válido
-
-    return addresses.find(
+    return addresses.some(
       (addr) =>
-        addr.street === formData.street &&
-        addr.number === formData.number &&
-        addr.neighborhood === formData.neighborhood
+        addr.street.trim().toLowerCase() ===
+          formData.street.trim().toLowerCase() &&
+        addr.number.trim().toLowerCase() ===
+          formData.number.trim().toLowerCase() &&
+        addr.neighborhood.trim().toLowerCase() ===
+          formData.neighborhood.trim().toLowerCase()
     );
   };
 
@@ -111,42 +94,35 @@ function NewAddress() {
     setIsUploading(false);
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.street) newErrors.street = "A rua é obrigatória.";
-    if (!formData.number) newErrors.number = "O número é obrigatório.";
-    if (!formData.neighborhood)
-      newErrors.neighborhood = "O bairro é obrigatório.";
-    if (!formData.city) newErrors.city = "A cidade é obrigatória.";
-    if (formData.gps && !gpsRegex.test(formData.gps))
-      newErrors.gps = "Coordenadas inválidas.";
-    return newErrors;
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.street.trim()) errors.street = "La calle es obligatoria...";
+    if (!formData.number.trim()) errors.number = "El número es obligatorio...";
+    if (!formData.neighborhood.trim())
+      errors.neighborhood = "El barrio es obligatorio...";
+    if (!formData.city.trim()) errors.city = "La ciudad es obligatoria...";
+    if (!gpsRegex.test(formData.gps.trim()))
+      errors.gps = "Coordenadas no válidas";
+    return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      Object.values(validationErrors).forEach((err) => toast.error(err));
+      return;
+    }
+
+    if (checkIfAddressExists()) {
+      toast.info("¡Dirección ya registrada!");
+      return;
+    }
+
+    const photoUrl = formData.photo || imagesAddresses[formData.type];
+
     try {
-      const validationErrors = validate();
-      if (Object.keys(validationErrors).length > 0) {
-        setError(validationErrors);
-        return;
-      }
-
-      if (checkIfAddressExists()) {
-        toast.info("Endereço já cadastrado!");
-        return;
-      }
-
-      // if (!formData.photo) {
-      //   setFormData((prev) => ({
-      //     ...prev,
-      //     photo: imagesAddresses[formData.type],
-      //   }));
-      // }
-
-      // console.log(formData);
-
       await newAddress({
         variables: {
           action: "create",
@@ -154,57 +130,54 @@ function NewAddress() {
             ...formData,
             userId: user.id,
             group: user.group,
-            photo: formData.photo
-              ? formData.photo
-              : imagesAddresses[formData.type],
+            photo: photoUrl,
           },
         },
       });
     } catch (error) {
-      console.log(error);
-      toast.error(`Erro ao cadastrar endereço: ${error.message}`);
+      toast.error(`Error al registrar la dirección: ${error.message}`);
     }
   };
 
   return (
-    <div className="min-h-screen p-10 flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen py-5 px-6 flex items-center justify-center bg-details">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl">
-        <h1 className="text-2xl font-semibold mb-6">Novo Endereço</h1>
+        <h1 className="text-2xl font-semibold mb-6">Nueva dirección</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
-            label="Rua *"
+            label="Calle *"
             name="street"
             value={formData.street}
             onChange={handleChange}
-            error={error.street}
+            placeholder={`Ej: Rua Principal`}
           />
           <InputField
-            label="Número *"
+            label="Numero *"
             name="number"
             value={formData.number}
             onChange={handleChange}
-            error={error.number}
+            placeholder={`Ej: 123 u 123a`}
           />
           <InputField
-            label="Bairro *"
+            label="Vecindario o barrio *"
             name="neighborhood"
             value={formData.neighborhood}
             onChange={handleChange}
-            error={error.neighborhood}
+            placeholder={`Ej: Porto de Galinhas`}
           />
           <InputField
-            label="Cidade *"
+            label="Ciudad *"
             name="city"
             value={formData.city}
             onChange={handleChange}
-            error={error.city}
+            placeholder={`Ej: Ipojuca`}
           />
           <InputField
             label="GPS (Lat, Long) *"
             name="gps"
             value={formData.gps}
             onChange={handleChange}
-            error={error.gps}
+            placeholder={`Ej: -8.508111, -35.008334`}
           />
           <button
             type="button"
@@ -212,7 +185,7 @@ function NewAddress() {
             disabled={isFetchingGps}
             className="px-4 py-2 bg-blue-500 text-white"
           >
-            {isFetchingGps ? "Obtendo..." : "GPS Atual"}
+            {isFetchingGps ? "Obteniendo..." : "GPS actual"}
           </button>
 
           <div className="flex flex-col">
@@ -230,60 +203,62 @@ function NewAddress() {
             >
               <option value="house">Casa</option>
               <option value="department">Departamento</option>
-              <option value="store">Comercio</option>
-              <option value="hotel">Posada</option>
+              <option value="store">Negocio</option>
+              <option value="hotel">Posada u Hotelaria</option>
               <option value="restaurant">Restaurante</option>
             </select>
           </div>
+
           <div className="flex flex-col">
             <label
               htmlFor="confirmed"
               className="text-sm text-gray-600 mb-1 font-semibold"
             >
-              ¿Está confirmado? *
+              ¿Confirmado? *
             </label>
             <select
               name="confirmed"
-              value={formData.confirmed}
+              value={formData.confirmed ? true : false}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   confirmed: e.target.value === "true",
-                })
+                }))
               }
               className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="false">No, hay que confirmar</option>
-              <option value="true">Si, Confirmado</option>
+              <option value="false">No, tienes que confirmar.</option>
+              <option value="true">Sí, dirección confirmada.</option>
             </select>
           </div>
+
           <div className="flex flex-col">
             <label
               htmlFor="visited"
               className="text-sm text-gray-600 mb-1 font-semibold"
             >
-              ¿Seguirás visitando? *
+              ¿Seguirá visitando? *
             </label>
             <select
               name="visited"
-              value={formData.visited}
+              value={formData.visited ? true : false}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   visited: e.target.value === "true",
-                })
+                }))
               }
               className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="false">No, puede visita otro</option>
-              <option value="true">Si, voy a visitar</option>
+              <option value="false">No, alguien más puede visitar</option>
+              <option value="true">Sí, seguiré visitando.</option>
             </select>
           </div>
 
           <InputField
             label="Complemento (opcional)"
             name="complement"
-            placeholder="Ex: Apartamento 103"
+            placeholder="Ej: Casa 1  Departamento 1001"
             value={formData.complement}
             onChange={handleChange}
             isTextarea
@@ -295,17 +270,14 @@ function NewAddress() {
 
           <div className="w-full flex justify-center">
             <img
-              src={
-                formData.photo
-                  ? formData.photo
-                  : `${imagesAddresses[formData.type]}`
-              }
-              className="w-full max-w-xs rounded-lg border border-gray-300"
-              alt="Imagem Enviada"
+              src={formData.photo || imagesAddresses[formData.type]}
+              className="object-cover rounded-t-md w-full h-64 border border-gray-300"
+              alt="Pré-visualização da imagem"
             />
           </div>
 
           <FormUploadImage onUploadComplete={handleUploadComplete} />
+
           <button
             type="submit"
             disabled={isButtonDisabled}
@@ -315,7 +287,7 @@ function NewAddress() {
                 : "bg-blue-500 hover:bg-blue-600 transition-colors"
             }`}
           >
-            {isUploading ? "Aguardando imagem..." : "Enviar"}
+            {isUploading ? "Esperando imagen..." : "Enviar"}
           </button>
         </form>
       </div>

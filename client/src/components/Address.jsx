@@ -155,7 +155,7 @@ function Address({ id }) {
           <div className="w-full ">
             <img
               src={photo}
-              className="object-cover rounded-t-md w-full"
+              className="object-cover rounded-t-md w-full h-64"
               alt={`imagem de ${street}, ${number}`}
               onError={(e) => {
                 if (e.target.src !== "/direccioes_map.svg") {

@@ -120,7 +120,6 @@ function UpdateAddress({ addresses, id }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
 
     try {
       const validationErrors = validate();

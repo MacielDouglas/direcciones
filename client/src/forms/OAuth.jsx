@@ -25,6 +25,7 @@ function OAuth() {
   // Query para buscar endereços
   const [fetchAddresses] = useLazyQuery(GET_ADDRESS, {
     variables: { action: "get", input: { street: "" } },
+    fetchPolicy: "network-only",
     onCompleted: (data) => handleAddressResponse(data),
     onError: (error) =>
       toast.error(`Erro ao buscar endereços: ${error.message}`),

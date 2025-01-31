@@ -86,8 +86,8 @@ function SearchAddress() {
   };
 
   return (
-    <div className="min-h-screen bg-details p-4 md:p-10 flex flex-col items-center justify-center">
-      <div className="flex items-center justify-center my-6 bg-details">
+    <div className="min-h-screen bg-details py-5 px-6  flex flex-col items-center justify-center">
+      <div className="flex items-center justify-center my-6 bg-details ">
         <button
           onClick={openSearchModal}
           className="w-full max-w-xs bg-secondary text-white font-semibold py-3 px-6 shadow-md hover:bg-sky-700 transition-colors"
@@ -96,7 +96,7 @@ function SearchAddress() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-4 space-y-6">
+      <div className="bg-white rounded-lg shadow-md p-4 space-y-6 w-full">
         <h2 className="text-center">
           Encontrado, {sortedAddresses.length}{" "}
           {sortedAddresses.length <= 1 ? "dirección" : "direcciones"}

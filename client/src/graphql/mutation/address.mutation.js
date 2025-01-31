@@ -8,9 +8,11 @@ export const NEW_ADDRESS = gql`
       address {
         street
         number
+        city
         neighborhood
         complement
         confirmed
+        photo
         gps
         group
         visited

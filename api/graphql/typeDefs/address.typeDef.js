@@ -13,7 +13,7 @@ type Address {
     photo: String
     confirmed: Boolean!
     active: Boolean!
-    visited: Boolean
+    visited: Boolean!
     group: String! # Campo obrigatório para alinhar com User e Card
 }
 

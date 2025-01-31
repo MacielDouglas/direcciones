@@ -81,7 +81,8 @@ const addressSchema = new Schema(
     },
     confirmed: {
       type: Boolean,
-      default: false, // Define padrão como não confirmado
+      required: true,
+      // default: false, // Define padrão como não confirmado
     },
     group: {
       type: String,
@@ -89,8 +90,9 @@ const addressSchema = new Schema(
     },
     visited: {
       type: Boolean,
+      required: true,
       // enum: ["yes", "no", null],
-      default: false,
+      // default: false,
       // message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
     },
   },

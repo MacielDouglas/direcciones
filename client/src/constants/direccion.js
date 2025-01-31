@@ -7,7 +7,7 @@ const initialFormState = {
   complement: "",
   photo: "",
   type: "house",
-  active: false,
+  active: true,
   confirmed: false,
   visited: false,
 };
@@ -17,14 +17,14 @@ const gpsRegex =
 
 const imagesAddresses = {
   house:
-    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/direcciones%2FHouse.webp?alt=media&token=2bf24765-d729-4868-9955-a4e485371377",
+    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FHouse.webp?alt=media&token=3681c42d-021a-4384-9708-dadd6b41f23f",
   department:
-    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/direcciones%2FApartament.webp?alt=media&token=e66b1ad1-d1ac-4af5-b13d-36610c09c720",
+    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FApartament.webp?alt=media&token=ee26536a-975d-4ce9-a119-8e8629c409b5",
   store:
-    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/direcciones%2FStore.webp?alt=media&token=7b410ea6-577d-455f-b0b8-4f8b9785a86e",
+    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FStore.webp?alt=media&token=7daaaa73-645f-4473-ad77-2a9085b7c3f1",
   restaurant:
-    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/direcciones%2Frestaurant.webp?alt=media&token=a06a0e1d-2e30-49e1-8fbc-bc992d9c15c0",
+    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2Frestaurant.webp?alt=media&token=2736100b-bef6-4a33-9952-413a547c42a8",
   hotel:
-    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/direcciones%2FHotel.webp?alt=media&token=e44bb402-a1d0-434b-a73e-a95fed36618e",
+    "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FHotel.webp?alt=media&token=ed3d7e91-1a81-41d4-b2d2-e8dbc7519b3e",
 };
 export { initialFormState, gpsRegex, imagesAddresses };

@@ -113,6 +113,9 @@ const addressResolver = {
               gps: newAddress.gps?.trim(),
               group: decodedToken.group,
               userId: decodedToken.userId, // Relacionar com o usuário autenticado
+              visited: newAddress.visited,
+              confirmed: newAddress.confirmed,
+              active: newAddress.active,
             };
 
             if (
