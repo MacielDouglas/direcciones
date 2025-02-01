@@ -1,4 +1,5 @@
 import { useState } from "react";
+import heic2any from "heic2any";
 import PropTypes from "prop-types";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from "../firebase";
