@@ -89,7 +89,11 @@ const FormUploadImage = ({ onUploadComplete }) => {
     try {
       const storage = getStorage(app);
       const storageRef = ref(storage, `uploads/${image.name}`);
-      await uploadBytes(storageRef, image);
+      const metadata = {
+        contentType: "image/webp", // Forçar o tipo da imagem
+      };
+      await uploadBytes(storageRef, image, metadata);
+      // await uploadBytes(storageRef, image);
       const downloadURL = await getDownloadURL(storageRef);
 
       onUploadComplete(downloadURL);
