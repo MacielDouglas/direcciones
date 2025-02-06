@@ -3,11 +3,17 @@ const cardTypeDef = `#graphql
 type Card {
     id: ID!
     street: [String]!
-    userId: String
+    usersAssigned: [Assigned]!
     number: Int
     startDate: String
     endDate: String
     group: String! # O grupo está alinhado ao grupo do usuário
+}
+
+type Assigned {
+    userId: String!
+    date: String!
+    id: ID!
 }
 
 type Query {
@@ -20,7 +26,7 @@ type Mutation {
         newCard: NewCardInput,
         id: ID,
         updateCardInput: UpdateCardInput
-        designateCardInput: DesignateCardInput
+        designateCardInput: DesignateCardInput!
     ): CardMutationResponse!
 }
 
@@ -41,11 +47,16 @@ input NewCardInput {
 
 input UpdateCardInput {
     street: [String]
-    userId: String
+    usersAssigned: [AssignedInput]
     number: Int
     startDate: String
     endDate: String
     group: String # O grupo pode ser atualizado
+}
+
+input AssignedInput {
+    userId: String!
+    date: String!
 }
 
 input DesignateCardInput {

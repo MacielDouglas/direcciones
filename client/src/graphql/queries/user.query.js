@@ -41,13 +41,16 @@ export const LOGOUT = gql`
 export const GET_USERS = gql`
   query GET_USERS {
     getUsers {
-      message
+      success
       success
       users {
-        id
         name
-        group
         codUser
+        id
+        myCards {
+          cardId
+          date
+        }
       }
     }
   }

@@ -56,6 +56,7 @@ type UserSummary {
     name: String!
     group: String
     codUser: Int
+    myCards: [CardAssociation]
 }
 
 type Query {

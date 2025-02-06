@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.9",
+    "@headlessui/react": "^2.2.0",
     "@lottiefiles/react-lottie-player": "^3.5.4",
     "@reduxjs/toolkit": "^2.3.0",
     "firebase": "^11.0.1",

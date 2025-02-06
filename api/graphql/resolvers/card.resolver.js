@@ -158,11 +158,11 @@ const cardResolver = {
               throw new Error("Usuário não encontrado.");
             }
 
-            if (card.startDate || card.startDate !== null) {
-              throw new Error(
-                `Este cartão já esta em uso e não pode ser designado.`
-              );
-            }
+            // if (card.startDate || card.startDate !== null) {
+            //   throw new Error(
+            //     `Este cartão já esta em uso e não pode ser designado.`
+            //   );
+            // }
 
             const currentDate = new Date().toISOString();
 
