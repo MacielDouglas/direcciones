@@ -60,7 +60,7 @@ input AssignedInput {
 }
 
 input DesignateCardInput {
-    cardId: ID!
+    cardId: [ID]!
     userId: ID!
 }
 

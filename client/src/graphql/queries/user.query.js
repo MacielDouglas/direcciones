@@ -46,6 +46,7 @@ export const GET_USERS = gql`
       users {
         name
         codUser
+        group
         id
         myCards {
           cardId

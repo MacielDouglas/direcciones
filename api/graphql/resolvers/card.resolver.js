@@ -136,11 +136,16 @@ const cardResolver = {
 
             const { userId, cardId } = designateCardInput;
 
-            if (!userId || !cardId) {
-              throw new Error("ID do usuário ou ID do card são necessários.");
+            if (!userId || !Array.isArray(cardId) || cardId.length === 0) {
+              throw new Error(
+                "ID do usuário e pelo menos um ID de card são necessários."
+              );
             }
 
             const user = await User.findById(userId);
+            if (!user) {
+              throw new Error("Usuário não encontrado.");
+            }
 
             if (decodedToken.group !== user.group) {
               throw new Error(
@@ -148,61 +153,61 @@ const cardResolver = {
               );
             }
 
-            const card = await Card.findById(cardId); // Certifique-se de que retorna um documento Mongoose
-
-            if (!card) {
-              throw new Error("Cartão não encontrado.");
-            }
-
-            if (!user) {
-              throw new Error("Usuário não encontrado.");
-            }
-
-            // if (card.startDate || card.startDate !== null) {
-            //   throw new Error(
-            //     `Este cartão já esta em uso e não pode ser designado.`
-            //   );
-            // }
-
             const currentDate = new Date().toISOString();
 
-            // Atualizar o documento diretamente
-            const updatedCard = await Card.findByIdAndUpdate(
-              cardId,
-              {
-                $set: {
-                  startDate: currentDate,
-                  endDate: null,
-                },
-                $push: {
-                  usersAssigned: { userId, date: currentDate },
-                },
-              },
-              { new: true } // Retorna o documento atualizado
+            // Atualizar múltiplos cartões
+            const updatedCards = await Promise.all(
+              cardId.map(async (id) => {
+                const card = await Card.findById(id);
+                if (!card) {
+                  throw new Error(`Cartão com ID ${id} não encontrado.`);
+                }
+
+                return Card.findByIdAndUpdate(
+                  id,
+                  {
+                    $set: {
+                      startDate: currentDate,
+                      endDate: null,
+                    },
+                    $push: {
+                      usersAssigned: { userId, date: currentDate },
+                    },
+                  },
+                  { new: true }
+                );
+              })
             );
 
-            const updateUser = await User.findByIdAndUpdate(
+            // Atualizar usuário
+            const updatedUser = await User.findByIdAndUpdate(
               userId,
               {
                 $push: {
-                  myCards: { cardId, date: currentDate },
+                  myCards: cardId.map((id) => ({
+                    cardId: id,
+                    date: currentDate,
+                  })),
                 },
               },
               { new: true }
             );
 
-            if (!updatedCard && !updateUser) {
-              throw new Error("Falha ao atualizar o cartão.");
+            if (!updatedUser) {
+              throw new Error("Falha ao atualizar o usuário.");
             }
 
+            console.log(updatedCards);
+
             return {
-              message: `Cartão designado para o usuário ${user.name}.`,
+              message: `Cartões designados para o usuário ${user.name}.`,
               success: true,
-              card: updatedCard,
+              // card: updatedCards,
             };
           } catch (error) {
-            throw new Error(`Erro ao designar cartão: ${error.message}`);
+            throw new Error(`Erro ao designar cartões: ${error.message}`);
           }
+
         case "returnCard":
           try {
             const decodedToken = verifyAuthorization(req);
