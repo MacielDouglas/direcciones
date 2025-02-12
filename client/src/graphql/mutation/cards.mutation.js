@@ -59,11 +59,11 @@ export const DESIGNATED_CARD = gql`
     cardMutation(action: $action, designateCardInput: $designateCardInput) {
       message
       success
-      card {
-        id
-        number
-        startDate
-      }
+      # card {
+      #   id
+      #   number
+      #   startDate
+      # }
     }
   }
 `;

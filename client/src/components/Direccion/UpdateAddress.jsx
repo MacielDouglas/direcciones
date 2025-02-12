@@ -1,156 +1,193 @@
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
-import InputField from "../../context/InputField";
 import { useMutation } from "@apollo/client";
-import { UPDATE_ADDRESS } from "../../graphql/mutation/address.mutation"; // Supõe que existe uma mutation para atualização
-import { useSelector } from "react-redux";
-import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { UPDATE_ADDRESS } from "../../graphql/mutation/address.mutation";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { gpsRegex, imagesAddresses } from "../../constants/direccion";
+import FormUploadImage from "../../forms/FormUploadImage";
+import InputField from "../../context/InputField";
+import { setAddresses } from "../../store/addressesSlice";
 
-function UpdateAddress({ addresses, id }) {
-  const addressToEdit = addresses.find((address) => address.id === id);
-  const user = useSelector((state) => state.user);
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    street: "",
-    number: "",
-    neighborhood: "",
-    city: "",
-    gps: "",
-    complement: "",
-    photo: null,
-    type: "house",
-    active: false,
-    confirmed: false,
-    visited: false,
-  });
-
-  const [error, setError] = useState({});
+function UpdateAddress({ id }) {
+  const [formData, setFormData] = useState({});
+  const [changedFields, setChangedFields] = useState({});
   const [isFetchingGps, setIsFetchingGps] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [charCount, setCharCount] = useState(250);
+  const [newUrlPhoto, setNewUrlPhoto] = useState("");
 
-  const [updateAddress] = useMutation(UPDATE_ADDRESS, {
-    onCompleted: () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const addresses = useSelector((state) => state.addresses);
+  const address = addresses.addressesData.find((address) => address.id === id);
+
+  useEffect(() => {
+    if (address) {
+      setFormData(address);
+    }
+  }, [address]);
+
+  useEffect(() => {
+    setCharCount(250 - (formData.complement ? formData.complement.length : 0));
+  }, [formData.complement]);
+
+  useEffect(() => {
+    if (!changedFields) {
+      setIsButtonDisabled(true);
+      return;
+    }
+
+    const fieldValidators = {
+      street: (value) => !!value?.trim(),
+      number: (value) => !!value?.trim(),
+      neighborhood: (value) => !!value?.trim(),
+      city: (value) => !!value?.trim(),
+      gps: (value) => gpsRegex.test(value?.trim()),
+      type: (value) => !!value?.trim(),
+      complement: (value) => !!value?.trim(),
+      photo: (value) => !!value?.trim(),
+      confirmed: (value) => typeof value === "boolean",
+      visited: (value) => typeof value === "boolean",
+    };
+
+    // Verifica se pelo menos um campo presente é válido
+    const isValid = Object.entries(changedFields).some(([key, value]) =>
+      fieldValidators[key]?.(value)
+    );
+
+    setIsButtonDisabled(!isValid);
+  }, [changedFields]);
+
+  const [updateAddress, { loading }] = useMutation(UPDATE_ADDRESS, {
+    onCompleted: (data) => {
+      setIsButtonDisabled(true);
       toast.success("Endereço atualizado com sucesso!");
-      navigate("/address?tab=search-address"); // Redireciona após a atualização
+
+      const updatedAddress = data.addressMutation.address;
+
+      dispatch(
+        setAddresses({
+          addresses: addresses.addressesData.map((addr) =>
+            addr.id === updatedAddress.id ? updatedAddress : addr
+          ),
+        })
+      );
+
+      navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
+      // navigate("/address?tab=search-address");
     },
     onError: (error) => {
+      setIsButtonDisabled(false);
       toast.error(`Erro ao atualizar endereço: ${error.message}`);
     },
   });
 
-  const gpsRegex =
-    /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d+)?|180(\.0+)?)$/;
-
-  // Preenche os valores iniciais do formulário com os dados de `addressToEdit`
-  useEffect(() => {
-    if (addressToEdit) {
-      setFormData({
-        street: addressToEdit.street || "",
-        number: addressToEdit.number || "",
-        neighborhood: addressToEdit.neighborhood || "",
-        city: addressToEdit.city || "",
-        gps: addressToEdit.gps || "",
-        complement: addressToEdit.complement || "",
-        photo: addressToEdit.photo,
-        type: addressToEdit.type || "house",
-        active: addressToEdit.active || false,
-        confirmed: addressToEdit.confirmed || false,
-        visited: addressToEdit.visited || false,
-      });
-    }
-  }, [addressToEdit]);
-
-  // Validações do formulário
-  useEffect(() => {
-    const isValid =
-      formData.street &&
-      formData.number &&
-      formData.neighborhood &&
-      formData.city &&
-      (!formData.gps || gpsRegex.test(formData.gps)) &&
-      Object.keys(error).length === 0;
-    setIsButtonDisabled(!isValid);
-  }, [formData, error]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, photo: file }));
-    }
-  };
-
   const handleGetCurrentGps = () => {
     setIsFetchingGps(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
+      ({ coords }) => {
         setFormData((prev) => ({
           ...prev,
-          gps: `${latitude}, ${longitude}`,
+          gps: `${coords.latitude}, ${coords.longitude}`,
         }));
         setIsFetchingGps(false);
       },
-      (error) => {
-        console.error("Erro ao obter localização:", error);
-        toast.error("Não foi possível obter o GPS atual.");
+      () => {
+        toast.error("No se puede obtener el GPS actual.");
         setIsFetchingGps(false);
       }
     );
   };
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.street) newErrors.street = "A rua é obrigatória.";
-    if (!formData.number) newErrors.number = "O número é obrigatório.";
-    if (!formData.neighborhood)
-      newErrors.neighborhood = "O bairro é obrigatório.";
-    if (!formData.city) newErrors.city = "A cidade é obrigatória.";
-    if (formData.gps && !gpsRegex.test(formData.gps))
-      newErrors.gps = "Coordenadas inválidas.";
-    return newErrors;
+  const handleUploadComplete = (url) => {
+    setIsUploading(true);
+    setIsButtonDisabled(true);
+    setNewUrlPhoto({ photo: url });
+    setChangedFields((prev) => ({ ...prev, photo: url }));
+    setIsUploading(false);
+    setIsButtonDisabled(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    const parsedValue = ["confirmed", "visited"].includes(name)
+      ? value === "true"
+      : value;
+
+    setFormData((prev) => ({ ...prev, [name]: parsedValue }));
+    setChangedFields((prev) => {
+      const updatedFields = {
+        ...prev,
+        [name]: parsedValue !== address[name] ? parsedValue : undefined,
+      };
+
+      if (name === "type" && imagesAddresses[value] && !newUrlPhoto) {
+        updatedFields.photo = imagesAddresses[value];
+      }
+
+      return updatedFields;
+    });
+  };
+
+  const checkIfAddressExists = () => {
+    if (!addresses?.addressesData || !Array.isArray(addresses.addressesData)) {
+      return false;
+    }
+
+    return addresses.addressesData.some((addr) => {
+      const street = addr?.street?.trim().toLowerCase() || "";
+      const number = addr?.number?.trim().toLowerCase() || "";
+      const neighborhood = addr?.neighborhood?.trim().toLowerCase() || "";
+
+      const changedStreet = changedFields?.street?.trim().toLowerCase() || "";
+      const changedNumber = changedFields?.number?.trim().toLowerCase() || "";
+      const changedNeighborhood =
+        changedFields?.neighborhood?.trim().toLowerCase() || "";
+
+      return (
+        street === changedStreet &&
+        number === changedNumber &&
+        neighborhood === changedNeighborhood
+      );
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const validationErrors = validate();
-      if (Object.keys(validationErrors).length > 0) {
-        setError(validationErrors);
-        return;
-      }
+    if (newUrlPhoto || formData.type) {
+      const photoUrl = newUrlPhoto || imagesAddresses[formData.type];
+      setChangedFields((prev) => ({
+        ...prev,
+        photo: photoUrl,
+      }));
+    }
 
+    const updatedData = Object.fromEntries(
+      Object.entries(changedFields).filter(([_, value]) => value !== undefined)
+    );
+
+    if (addresses && checkIfAddressExists()) {
+      toast.info("¡Dirección ya registrada!");
+      return;
+    }
+
+    if (!address) {
+      toast.error("Erro: endereço não encontrado.");
+      return;
+    }
+
+    if (Object.keys(updatedData).length > 0) {
       await updateAddress({
         variables: {
           action: "update",
-          addressMutationId: id, // ID do endereço que será atualizado
-          updateAddressInput: {
-            street: formData.street,
-            number: formData.number,
-            neighborhood: formData.neighborhood,
-            city: formData.city,
-            gps: formData.gps,
-            complement: formData.complement,
-            userId: user.userData.id,
-            active: formData.active,
-            confirmed: formData.confirmed,
-            visited: formData.visited,
-            type: formData.type,
-            photo: formData.photo ? "https://url-da-imagem-selecionada" : null, // Exemplo de uso de uma URL estática
-          },
+          id: address.id,
+          updateAddressInput: updatedData,
         },
       });
-    } catch (error) {
-      console.error("Erro ao atualizar endereço: ", error.message);
-      toast.error("Erro ao atualizar o endereço.");
+      // onClose();
     }
   };
 
@@ -163,43 +200,38 @@ function UpdateAddress({ addresses, id }) {
         <form onSubmit={handleSubmit} className="space-y-5">
           <InputField
             label="Calle *"
-            placeholder="Ex: Rua Direita"
             name="street"
-            value={formData.street}
+            value={formData.street || ""}
             onChange={handleChange}
-            error={error.street}
+            placeholder={`Ej: Rua Principal`}
           />
           <InputField
-            label="Número *"
+            label="Numero *"
             name="number"
-            placeholder="Ex: 123 ou 123A"
-            value={formData.number}
+            value={formData.number || ""}
             onChange={handleChange}
-            error={error.number}
+            placeholder={`Ej: 123 u 123a`}
           />
           <InputField
-            label="Bairro *"
+            label="Vecindario o barrio *"
             name="neighborhood"
-            placeholder="Ex: Vila Porto de Galinhas"
-            value={formData.neighborhood}
+            value={formData.neighborhood || ""}
             onChange={handleChange}
-            error={error.neighborhood}
+            placeholder={`Ej: Porto de Galinhas`}
           />
           <InputField
-            label="Cidade *"
+            label="Ciudad *"
             name="city"
-            placeholder="Ex: Ipojuca"
-            value={formData.city}
+            value={formData.city || ""}
             onChange={handleChange}
-            error={error.city}
+            placeholder={`Ej: Ipojuca`}
           />
           <InputField
-            label="GPS (Latitude, Longitude)"
+            label="GPS (Lat, Long) *"
             name="gps"
-            placeholder="Ex.: -23.5505, -46.6333"
-            value={formData.gps}
+            value={formData.gps || ""}
             onChange={handleChange}
-            error={error.gps}
+            placeholder={`Ej: -8.508111, -35.008334`}
           />
           <button
             type="button"
@@ -207,8 +239,9 @@ function UpdateAddress({ addresses, id }) {
             disabled={isFetchingGps}
             className="px-4 py-2 bg-blue-500 text-white"
           >
-            {isFetchingGps ? "Obtendo..." : "GPS Atual"}
+            {isFetchingGps ? "Obteniendo..." : "GPS actual"}
           </button>
+
           <div className="flex flex-col">
             <label
               htmlFor="type"
@@ -218,14 +251,14 @@ function UpdateAddress({ addresses, id }) {
             </label>
             <select
               name="type"
-              value={formData.type}
+              value={formData.type || ""}
               onChange={handleChange}
               className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="house">Casa</option>
               <option value="department">Departamento</option>
-              <option value="store">Comercio</option>
-              <option value="hotel">Posada</option>
+              <option value="store">Negocio</option>
+              <option value="hotel">Posada u Hotelaria</option>
               <option value="restaurant">Restaurante</option>
             </select>
           </div>
@@ -235,71 +268,86 @@ function UpdateAddress({ addresses, id }) {
               htmlFor="confirmed"
               className="text-sm text-gray-600 mb-1 font-semibold"
             >
-              ¿Está confirmado? *
+              ¿Confirmado? *
             </label>
+
             <select
               name="confirmed"
               value={formData.confirmed}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  confirmed: e.target.value === "true",
-                })
-              }
+              onChange={handleChange}
               className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="false">No, hay que confirmar</option>
-              <option value="true">Si, Confirmado</option>
+              <option value={false}>No, tienes que confirmar.</option>
+              <option value={true}>Sí, dirección confirmada.</option>
             </select>
           </div>
+
           <div className="flex flex-col">
             <label
               htmlFor="visited"
               className="text-sm text-gray-600 mb-1 font-semibold"
             >
-              ¿Seguirás visitando? *
+              ¿Seguirá visitando? *
             </label>
             <select
               name="visited"
               value={formData.visited}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  visited: e.target.value === "true",
-                })
-              }
+              onChange={handleChange}
               className="w-full border p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="false">No, puede visita otro</option>
-              <option value="true">Si, voy a visitar</option>
+              <option value={false}>No, alguien más puede visitar</option>
+              <option value={true}>Sí, seguiré visitando.</option>
             </select>
           </div>
 
           <InputField
-            label="Complemento"
+            label="Complemento (opcional)"
             name="complement"
-            placeholder="Ex.: Apartamento 103"
-            value={formData.complement}
+            placeholder="Ej: Casa 1  Departamento 1001"
+            value={formData.complement || ""}
             onChange={handleChange}
+            isTextarea
+            maxLength="250"
           />
+          <p className="text-right text-sm text-gray-500">
+            {charCount} caracteres restantes
+          </p>
+
+          <div className="w-full flex justify-center">
+            <img
+              src={
+                newUrlPhoto
+                  ? newUrlPhoto.photo
+                  : changedFields.type
+                  ? imagesAddresses[changedFields.type]
+                  : formData.photo || newUrlPhoto
+              }
+              className="object-cover rounded-t-md w-full h-64 border border-gray-300"
+              alt="Pré-visualização da imagem"
+            />
+          </div>
+
+          <FormUploadImage onUploadComplete={handleUploadComplete} />
           <button
             type="submit"
             disabled={isButtonDisabled}
             className={`w-full py-3 rounded-lg text-white font-semibold ${
-              isButtonDisabled ? "bg-gray-300" : "bg-blue-500 hover:bg-blue-600"
+              isButtonDisabled
+                ? "bg-gray-300"
+                : "bg-blue-500 hover:bg-blue-600 transition-colors"
             }`}
           >
-            Atualizar Endereço
+            {isUploading
+              ? "Esperando imagen..."
+              : loading
+              ? "Enviando alteraciones..."
+              : "Enviar"}
+            {/* {isUploading ? "Esperando imagen..." : "Enviar alterações"} */}
           </button>
         </form>
       </div>
     </div>
   );
 }
-
-UpdateAddress.propTypes = {
-  addresses: PropTypes.array,
-  id: PropTypes.string,
-};
 
 export default UpdateAddress;

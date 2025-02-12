@@ -27,7 +27,7 @@ type Mutation {
         id: ID,
         updateCardInput: UpdateCardInput
         designateCardInput: DesignateCardInput!
-    ): CardMutationResponse!
+    ): CardMutationResponse
 }
 
 type CardResponse {

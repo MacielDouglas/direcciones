@@ -3,21 +3,22 @@ import { gql } from "@apollo/client";
 export const NEW_ADDRESS = gql`
   mutation NEW_ADDRESS($action: String!, $newAddress: NewAddressInput!) {
     addressMutation(action: $action, newAddress: $newAddress) {
-      message
       success
+      message
       address {
+        id
         street
         number
-        city
         neighborhood
-        complement
-        confirmed
-        photo
+        city
         gps
-        group
-        visited
-        id
         type
+        group
+        confirmed
+        active
+        complement
+        visited
+        photo
         userId
       }
     }
@@ -25,18 +26,18 @@ export const NEW_ADDRESS = gql`
 `;
 
 export const UPDATE_ADDRESS = gql`
-  mutation UpdateAddress(
+  mutation UPDATE_ADDRESS(
     $action: String!
     $updateAddressInput: UpdateAddressInput!
-    $addressMutationId: ID!
+    $id: ID!
   ) {
     addressMutation(
       action: $action
-      id: $addressMutationId
       updateAddressInput: $updateAddressInput
+      id: $id
     ) {
-      message
       success
+      message
       address {
         id
         street
@@ -44,12 +45,14 @@ export const UPDATE_ADDRESS = gql`
         neighborhood
         city
         gps
-        userId
-        complement
+        type
+        group
         confirmed
         active
+        complement
         visited
-        type
+        photo
+        userId
       }
     }
   }

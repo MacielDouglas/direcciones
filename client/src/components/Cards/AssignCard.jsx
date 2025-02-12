@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from "@apollo/client";
-import { useEffect, useMemo, useState } from "react";
+import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -20,10 +20,10 @@ import {
 import SelectCardComponent from "../hooks/SelectCardComponent";
 
 function AssignCard() {
+  const dispatch = useDispatch();
   const cards = useSelector((state) => state.cards.cardsData.card || []);
   const addresses = useSelector((state) => state.addresses.addressesData || []);
   const user = useSelector((state) => state.user.userData);
-  const dispatch = useDispatch();
 
   const [selectedCard, setSelectedCard] = useState([]);
   const [cardColors, setCardColors] = useState({});
@@ -35,21 +35,32 @@ function AssignCard() {
   const [cardAssigned, setCardAssigned] = useState([]);
   const [cardNotAssigned, setCardNotAssigned] = useState([]);
 
-  const { loading: cardsLoading, error: cardsError } = useQuery(GET_CARDS, {
-    variables: { action: "get" },
+  const [fetchCards, { loading: cardsLoading, error: cardsError }] =
+    useLazyQuery(GET_CARDS, {
+      variables: { action: "get" },
+      fetchPolicy: "network-only",
+      onCompleted: (data) => {
+        if (data?.card) {
+          dispatch(setCards({ cards: data.card }));
+        }
+      },
+    });
+
+  const [fetchUsers, { data: usersData }] = useLazyQuery(GET_USERS, {
+    variables: { group: user.group },
     fetchPolicy: "network-only",
-    onCompleted: (data) => {
-      if (data?.card) {
-        dispatch(setCards({ cards: data.card }));
-      }
-    },
   });
 
-  const { data: usersData } = useQuery(GET_USERS, {
-    variables: { group: user.group },
-  });
+  useEffect(() => {
+    fetchCards(); // Chama a query apenas na montagem do componente
+    fetchUsers();
+  }, [fetchCards, fetchUsers]);
 
   const users = useMemo(() => usersData?.getUsers?.users || [], [usersData]);
+  const addressMap = useMemo(
+    () => new Map(addresses.map((a) => [a.id, a])),
+    [addresses]
+  );
 
   useEffect(() => {
     setUsersNotAssigned(users.filter((user) => user.myCards.length === 0));
@@ -58,22 +69,15 @@ function AssignCard() {
     setCardNotAssigned(cards.filter((card) => card.startDate === null));
   }, [users, cards]);
 
-  const [designateCardInput, { data }] = useMutation(DESIGNATED_CARD, {
-    onCompleted: (data) => {
-      toast.success(data.designatedCardMutation.message);
-
+  const [designateCardInput] = useMutation(DESIGNATED_CARD, {
+    onCompleted: async (data) => {
+      toast.success(data.cardMutation.message);
       setModalOpen(false);
       setSelectedCard([]);
+      await fetchCards();
     },
-    onError: (error) => {
-      toast.error(`Error al designar la tarjeta: ${error.message}`);
-    },
+    onError: (error) => toast.error(`Erro: ${error.message}`),
   });
-
-  const addressMap = useMemo(
-    () => new Map(addresses.map((address) => [address.id, address])),
-    [addresses]
-  );
 
   const getCustomIcon = (cardId, number) => {
     return new L.DivIcon({
@@ -99,37 +103,24 @@ function AssignCard() {
     });
   };
 
+  const handleSelectCard = useCallback((cardId, number) => {
+    setSelectedCard((prev) =>
+      prev.some((card) => card.id === cardId)
+        ? prev.filter((card) => card.id !== cardId)
+        : [...prev, { id: cardId, number }]
+    );
+  }, []);
+
   const handleSendCard = async () => {
     if (!selectedUser) return alert("Selecione um usuário!");
-    try {
-      console.log(
-        "CARDS: ",
-        selectedCard.map((card) => card.id)
-      );
-      await designateCardInput({
-        variables: {
-          action: "designateCard",
-          designateCardInput: {
-            cardId: selectedCard.map((card) => card.id), // Agora aceita múltiplos IDs
-            userId: selectedUser.id,
-          },
+    await designateCardInput({
+      variables: {
+        action: "designateCard",
+        designateCardInput: {
+          cardId: selectedCard.map((card) => card.id),
+          userId: selectedUser.id,
         },
-      });
-    } catch (error) {
-      toast.error(`Erro ao designar cartões: ${error.message}`);
-    }
-    setModalOpen(false);
-  };
-
-  const handleSelectCard = (cardId, number) => {
-    setSelectedCard((prev) => {
-      const isSelected = prev.some((card) => card.id === cardId);
-
-      if (isSelected) {
-        return prev.filter((card) => card.id !== cardId);
-      } else {
-        return [...prev, { id: cardId, number }];
-      }
+      },
     });
   };
 
@@ -251,16 +242,15 @@ function AssignCard() {
           <div className="flex flex-col md:flex-row my-3 w-full">
             <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
               <h3 className="text-xl font-semibold">Tarjetas disponibles</h3>
-              <div className="w-full flex justify-between items-center">
-                <p>Tarjetas selecionadas: {selectedCard?.length}</p>
-                <button
-                  onClick={() => setModalOpen(true)}
-                  disabled={selectedCard.length === 0}
-                  className="bg-gradient-to-b from-stone-800 to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary  disabled:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  asignar tarjetas
-                </button>
-              </div>
+              <div className="w-full flex justify-between items-center"></div>
+              <p>Tarjetas selecionadas: {selectedCard?.length}</p>
+              <button
+                onClick={() => setModalOpen(true)}
+                disabled={selectedCard.length === 0}
+                className="bg-gradient-to-b from-stone-800 to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary  disabled:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                asignar tarjetas
+              </button>
               <SelectCardComponent
                 cardItem={cardNotAssigned}
                 handleSelectCard={handleSelectCard}

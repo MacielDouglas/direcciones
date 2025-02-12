@@ -197,8 +197,6 @@ const cardResolver = {
               throw new Error("Falha ao atualizar o usuário.");
             }
 
-            console.log(updatedCards);
-
             return {
               message: `Cartões designados para o usuário ${user.name}.`,
               success: true,

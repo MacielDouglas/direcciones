@@ -20,7 +20,7 @@ function Cards() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const admin = user.userData.isAdmmin;
+  // const admin = user.userData.isAdmmin;
   const isSS = user.userData.isSS;
 
   const [tab, setTab] = useState(
@@ -46,7 +46,6 @@ function Cards() {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");
 
     if (!tabFromUrl) {
-      // Redireciona somente se necessário
       if (tab !== "cards") {
         navigate("?tab=cards", { replace: true });
       }
@@ -65,7 +64,6 @@ function Cards() {
   }
 
   return (
-    // <div className="min-h-screen flex flex-col md:flex-row bg-primary">
     <div>
       <ScrollToTop />
       {isSS && <div>{<CardsSidebar />}</div>}

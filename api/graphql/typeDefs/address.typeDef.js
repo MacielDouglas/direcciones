@@ -18,7 +18,7 @@ type Address {
 }
 
 type Query {
-    address(action: String!, id: ID, input: FilterAddressInput!): AddressResponse
+    address(action: String!, id: ID, input: FilterAddressInput): AddressResponse
 }
 
 input FilterAddressInput {
@@ -35,8 +35,8 @@ type Mutation {
     addressMutation(
         action: String!, 
         newAddress: NewAddressInput, 
-        id: ID, 
-        updateAddressInput: UpdateAddressInput
+        id: ID!, 
+        updateAddressInput: UpdateAddressInput!
     ): AddressMutationResponse!
 }
 

@@ -12,10 +12,10 @@ const addressSchema = new Schema(
     number: {
       type: String,
       required: [true, "O campo 'number' é obrigatório."],
-      match: [
-        /^\d+[a-zA-Z]?$/,
-        "O campo 'number' deve conter um número válido (ex: '123', '123A').",
-      ],
+      // match: [
+      //   /^\d+[a-zA-Z]?$/,
+      //   "O campo 'number' deve conter um número válido (ex: '123', '123A').",
+      // ],
     },
     city: {
       type: String,

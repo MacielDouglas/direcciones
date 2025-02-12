@@ -17,7 +17,9 @@ function NewAddress() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userData);
-  const addresses = useSelector((state) => state.addresses.addressesData || []);
+  const direccion = useSelector((state) => state.addresses);
+
+  const addresses = direccion.addressesData || [];
 
   const [formData, setFormData] = useState(initialFormState);
   const [charCount, setCharCount] = useState(250);
@@ -115,12 +117,14 @@ function NewAddress() {
       return;
     }
 
-    if (checkIfAddressExists()) {
+    if (addresses && checkIfAddressExists()) {
       toast.info("¡Dirección ya registrada!");
       return;
     }
 
     const photoUrl = formData.photo || imagesAddresses[formData.type];
+
+    console.log("Dados a serem enviados", formData);
 
     try {
       await newAddress({
