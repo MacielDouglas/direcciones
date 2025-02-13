@@ -124,8 +124,6 @@ function NewAddress() {
 
     const photoUrl = formData.photo || imagesAddresses[formData.type];
 
-    console.log("Dados a serem enviados", formData);
-
     try {
       await newAddress({
         variables: {

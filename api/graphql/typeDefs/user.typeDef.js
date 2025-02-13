@@ -67,7 +67,7 @@ type Query {
 
 
 type Mutation {
-    userMutation(action: String!, user: NewUserInput, id: ID, updateUserInput: UpdateUserInput!, idToken: String): UserMutationResponse!
+    userMutation(action: String!, user: NewUserInput, id: ID, updateUserInput: UpdateUserInput, idToken: String): UserMutationResponse!
     loginGoogle(user: UserGoogle!): UserResponse
 }
 

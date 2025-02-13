@@ -12,11 +12,6 @@ function Card() {
   const cardsData = useSelector((state) => state.cards);
   const addressesData = useSelector((state) => state.addresses);
 
-  console.log("usuario: ", user);
-  console.log("cardsData: ", cardsData);
-  console.log("Meus CArtões: ", myCards);
-  console.log("addressesData: ", addressesData);
-
   if (!cardsData.length) return <Loading text="No hay tarjetas disponible." />;
   if (!myCards.length) return <Loading text="No hay tarjetas asignadas." />;
 

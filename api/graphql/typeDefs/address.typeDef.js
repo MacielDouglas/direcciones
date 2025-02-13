@@ -35,8 +35,8 @@ type Mutation {
     addressMutation(
         action: String!, 
         newAddress: NewAddressInput, 
-        id: ID!, 
-        updateAddressInput: UpdateAddressInput!
+        id: ID, 
+        updateAddressInput: UpdateAddressInput
     ): AddressMutationResponse!
 }
 
