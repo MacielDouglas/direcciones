@@ -12,9 +12,10 @@ import {
   MdOutlineStorefront,
   MdOutlineApartment,
 } from "react-icons/md";
+import { FaRoute } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
+import { calculateDistance } from "../constants/direccion";
 
-// Ícones personalizados para os marcadores
 const createCustomIcon = (iconUrl) =>
   new L.Icon({
     iconUrl,
@@ -25,7 +26,6 @@ const createCustomIcon = (iconUrl) =>
 const personIcon = createCustomIcon("person.svg");
 const pinMapIcon = createCustomIcon("pinMap.svg");
 
-// Componente de Roteamento
 function Routing({ userLocation, destination }) {
   const map = useMap();
   const [route, setRoute] = useState(null);
@@ -33,17 +33,14 @@ function Routing({ userLocation, destination }) {
 
   const fetchRoute = useCallback(async () => {
     if (!map || !userLocation || !destination) return;
-
     const url = `https://router.project-osrm.org/route/v1/walking/${userLocation.lng},${userLocation.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
 
     try {
       const response = await fetch(url);
       const data = await response.json();
-
       if (data?.routes?.length && isMounted) {
         const coordinates = data.routes[0].geometry.coordinates;
         const latlngs = coordinates.map(([lng, lat]) => [lat, lng]);
-
         const polyline = L.polyline(latlngs, {
           color: "#6c63ff",
           weight: 4,
@@ -53,6 +50,8 @@ function Routing({ userLocation, destination }) {
           polyline.addTo(map);
           setRoute(polyline);
         }
+        // }).addTo(map);
+        // setRoute(polyline);
       }
     } catch (error) {
       console.error("Erro ao obter a rota:", error);
@@ -70,20 +69,21 @@ function Routing({ userLocation, destination }) {
     };
   }, [fetchRoute, route]);
 
+  // useEffect(() => {
+  //   fetchRoute();
+  //   return () => route && route.remove();
+  // }, [fetchRoute, route]);
+
   return null;
 }
 
-// Componente principal
 function Address({ id }) {
   const addresses = useSelector((state) => state.addresses.addressesData);
   const address = addresses.find((address) => address.id === id);
   const navigate = useNavigate();
-
   const [userLocation, setUserLocation] = useState(null);
 
-  if (!address) {
-    return <p>Endereço não encontrado.</p>;
-  }
+  if (!address) return <p className="text-center">Endereço não encontrado.</p>;
 
   const {
     street,
@@ -96,33 +96,33 @@ function Address({ id }) {
     confirmed,
     photo,
   } = address;
-
   const [latitude, longitude] = useMemo(
-    () => gps.split(", ").map((coord) => parseFloat(coord.trim())),
+    () => gps.split(", ").map(parseFloat),
     [gps]
   );
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation((prevLocation) => {
-            const newLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            return prevLocation?.lat === newLocation.lat &&
-              prevLocation?.lng === newLocation.lng
-              ? prevLocation
-              : newLocation;
-          });
-        },
-        (error) => {
-          console.error("Erro ao obter localização do usuário:", error);
-        }
-      );
-    }
+    navigator.geolocation?.getCurrentPosition(
+      (position) =>
+        setUserLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        }),
+      (error) => console.error("Erro ao obter localização do usuário:", error)
+    );
   }, []);
+
+  console.log(userLocation);
+
+  const distance =
+    userLocation && latitude && longitude
+      ? calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          latitude,
+          longitude
+        ).toFixed(0)
+      : "N/A";
 
   const typeIcons = useMemo(
     () => ({
@@ -135,110 +135,121 @@ function Address({ id }) {
     []
   );
 
-  const handleEdit = () => {
-    navigate(`/address?tab=update-address&id=${id}`);
+  const openMap = () => {
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=walking`;
+    const wazeUrl = `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`;
+    const appleMapsUrl = `maps://maps.apple.com/?saddr=${userLocation?.lat},${userLocation?.lng}&daddr=${latitude},${longitude}&dirflg=w`;
+
+    if (navigator.userAgent.match(/iPhone|iPad|Mac/i)) {
+      window.location.href = appleMapsUrl;
+    } else if (navigator.userAgent.match(/Android/i)) {
+      window.location.href = googleMapsUrl;
+    } else {
+      window.open(googleMapsUrl, "_blank");
+    }
   };
 
+  const handleEdit = () => navigate(`/address?tab=update-address&id=${id}`);
+
   return (
-    // <div className="w-full   rounded-xl">
-    <div className="w-screen p-4 border rounded shadow-md ">
+    <div className="w-full max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
       <div
-        className={`${
+        className={`p-5 rounded-md mb-4 ${
           confirmed ? "bg-primary" : "bg-red-100"
-        }  p-5 rounded-md drop-shadow-lg mb-4 space-y-3`}
+        }`}
       >
         <h2 className="text-xl font-medium text-center mb-4">
-          Informaciones de la dirección
+          Informações da Direção
         </h2>
-        <hr />
         {photo && (
-          <div className="w-full ">
-            <img
-              src={photo}
-              className="object-cover rounded-t-md w-full h-64"
-              alt={`imagem de ${street}, ${number}`}
-              onError={(e) => {
-                if (e.target.src !== "/direccioes_map.svg") {
-                  e.target.src = "/direccioes_map.svg";
-                }
-              }}
-            />
-          </div>
+          <img
+            src={photo}
+            className="w-full h-48 object-cover rounded-md mb-3"
+            alt={street}
+          />
         )}
-        <p className={`font-bold ${confirmed ? "" : "text-red-600"}`}>
-          {confirmed ? "Dirección confirmada" : "Necesita confirmar"}
+        <p
+          className={`text-center font-bold ${
+            confirmed ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {confirmed ? "Direção confirmada" : "Necessita confirmar"}
         </p>
-        <div className="flex gap-5 justify-between">
-          <span className="text-5xl self-center">{typeIcons[type]}</span>
-          <div className="text-sm ">
-            <p className="text-xl mb-2">
-              Rua: <strong>{`${street}, ${number}`}</strong>
+        <div className="flex flex-col items-center space-y-3 text-sm">
+          <div className="flex justify-between items-center w-full">
+            <span className="text-5xl">{typeIcons[type]}</span>
+            <div className="flex items-center gap-3 text-4xl ">
+              <FaRoute />
+              <p className="col-span-1 justify-self-end w-full text-2xl">
+                {distance >= 1000
+                  ? `${(distance / 1000).toFixed(2)}km`
+                  : `${distance}m`}
+              </p>
+            </div>
+          </div>
+          <p className="text-lg font-semibold text-start w-full">
+            Calle: {`${street}, ${number}`}
+          </p>
+          <div className="flex justify-between w-full">
+            <p>
+              Barrio: <strong>{neighborhood}</strong>
             </p>
             <p>
-              Bairro: <strong>{neighborhood}</strong>
-            </p>
-            <p>
-              Cidade: <strong>{city}</strong>
+              Ciudad: <strong>{city}</strong>
             </p>
           </div>
-          <Link
+
+          <button
+            onClick={openMap}
+            className="bg-blue-500 text-white px-3 py-1 rounded-md mt-2"
+          >
+            Ver no Mapa
+          </button>
+
+          {/* <Link
             to={`https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=walking`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-4xl font-semibold self-center"
+            className="bg-blue-500 text-white px-3 py-1 rounded-md mt-2"
           >
-            IR
-          </Link>
+            Ver no Mapa
+          </Link> */}
         </div>
-
-        {complement && (
-          <div className="border-t border-gray-200 mt-2 pt-2">
-            <p>{complement}</p>
-          </div>
-        )}
-        <div className="flex justify-center">
-          <button
-            className="bg-gradient-to-b from-stone-800  to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary w-full"
-            onClick={handleEdit}
-          >
-            editar la dirección
-          </button>
-        </div>
-        {/* </div> */}
-
-        <div>
-          <MapContainer
-            center={[latitude, longitude]}
-            zoom={15}
-            style={{ height: "300px", width: "100%" }}
-            className="rounded border z-0"
-          >
-            <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://carto.com/">Carto</a> contributors & <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-            <Marker position={[latitude, longitude]} icon={pinMapIcon}>
-              <Popup>{`${street}, ${number}, ${neighborhood}, ${city}`}</Popup>
+        {complement && <p className="mt-2 text-center">{complement}</p>}
+        <button
+          className="w-full bg-black text-white py-2 rounded-md mt-3"
+          onClick={handleEdit}
+        >
+          Editar Direção
+        </button>
+      </div>
+      <div className="w-full h-72 rounded-md overflow-hidden">
+        <MapContainer
+          center={[latitude, longitude]}
+          zoom={15}
+          className="h-full w-full"
+        >
+          <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+          <Marker position={[latitude, longitude]} icon={pinMapIcon}>
+            <Popup>{`${street}, ${number}, ${neighborhood}, ${city}`}</Popup>
+          </Marker>
+          {userLocation && (
+            <Marker
+              position={[userLocation.lat, userLocation.lng]}
+              icon={personIcon}
+            >
+              <Popup>Você está aqui!</Popup>
             </Marker>
-            {userLocation && (
-              <Marker
-                position={[userLocation.lat, userLocation.lng]}
-                icon={personIcon}
-              >
-                <Popup>Você está aqui!</Popup>
-              </Marker>
-            )}
-            {userLocation && (
-              <Routing
-                userLocation={userLocation}
-                destination={{ lat: latitude, lng: longitude }}
-              />
-            )}
-          </MapContainer>
-        </div>
+          )}
+          {userLocation && (
+            <Routing
+              userLocation={userLocation}
+              destination={{ lat: latitude, lng: longitude }}
+            />
+          )}
+        </MapContainer>
       </div>
     </div>
-    // </div>
   );
 }
 
@@ -252,3 +263,258 @@ Routing.propTypes = {
 Address.propTypes = {
   id: PropTypes.string.isRequired,
 };
+
+// import { useMemo, useState, useEffect, useCallback } from "react";
+// import { useSelector } from "react-redux";
+// import PropTypes from "prop-types";
+// import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+// import "leaflet/dist/leaflet.css";
+// import "leaflet-routing-machine";
+// import L from "leaflet";
+// import {
+//   MdHouse,
+//   MdRestaurant,
+//   MdHotel,
+//   MdOutlineStorefront,
+//   MdOutlineApartment,
+// } from "react-icons/md";
+// import { Link, useNavigate } from "react-router-dom";
+
+// // Ícones personalizados para os marcadores
+// const createCustomIcon = (iconUrl) =>
+//   new L.Icon({
+//     iconUrl,
+//     iconSize: [25, 41],
+//     iconAnchor: [12, 41],
+//   });
+
+// const personIcon = createCustomIcon("person.svg");
+// const pinMapIcon = createCustomIcon("pinMap.svg");
+
+// // Componente de Roteamento
+// function Routing({ userLocation, destination }) {
+//   const map = useMap();
+//   const [route, setRoute] = useState(null);
+//   let isMounted = true; // Verifica se o componente está montado
+
+//   const fetchRoute = useCallback(async () => {
+//     if (!map || !userLocation || !destination) return;
+
+//     const url = `https://router.project-osrm.org/route/v1/walking/${userLocation.lng},${userLocation.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
+
+//     try {
+//       const response = await fetch(url);
+//       const data = await response.json();
+
+//       if (data?.routes?.length && isMounted) {
+//         const coordinates = data.routes[0].geometry.coordinates;
+//         const latlngs = coordinates.map(([lng, lat]) => [lat, lng]);
+
+//         const polyline = L.polyline(latlngs, {
+//           color: "#6c63ff",
+//           weight: 4,
+//         });
+
+//         if (isMounted) {
+//           polyline.addTo(map);
+//           setRoute(polyline);
+//         }
+//       }
+//     } catch (error) {
+//       console.error("Erro ao obter a rota:", error);
+//     }
+//   }, [map, userLocation, destination]);
+
+//   useEffect(() => {
+//     fetchRoute();
+
+//     return () => {
+//       isMounted = false;
+//       if (route) {
+//         route.remove();
+//       }
+//     };
+//   }, [fetchRoute, route]);
+
+//   return null;
+// }
+
+// // Componente principal
+// function Address({ id }) {
+//   const addresses = useSelector((state) => state.addresses.addressesData);
+//   const address = addresses.find((address) => address.id === id);
+//   const navigate = useNavigate();
+
+//   const [userLocation, setUserLocation] = useState(null);
+
+//   if (!address) {
+//     return <p>Endereço não encontrado.</p>;
+//   }
+
+//   const {
+//     street,
+//     number,
+//     neighborhood,
+//     city,
+//     type,
+//     gps,
+//     complement,
+//     confirmed,
+//     photo,
+//   } = address;
+
+//   const [latitude, longitude] = useMemo(
+//     () => gps.split(", ").map((coord) => parseFloat(coord.trim())),
+//     [gps]
+//   );
+
+//   useEffect(() => {
+//     if (navigator.geolocation) {
+//       navigator.geolocation.getCurrentPosition(
+//         (position) => {
+//           setUserLocation((prevLocation) => {
+//             const newLocation = {
+//               lat: position.coords.latitude,
+//               lng: position.coords.longitude,
+//             };
+//             return prevLocation?.lat === newLocation.lat &&
+//               prevLocation?.lng === newLocation.lng
+//               ? prevLocation
+//               : newLocation;
+//           });
+//         },
+//         (error) => {
+//           console.error("Erro ao obter localização do usuário:", error);
+//         }
+//       );
+//     }
+//   }, []);
+
+//   const typeIcons = useMemo(
+//     () => ({
+//       house: <MdHouse />,
+//       department: <MdOutlineApartment />,
+//       store: <MdOutlineStorefront />,
+//       restaurant: <MdRestaurant />,
+//       hotel: <MdHotel />,
+//     }),
+//     []
+//   );
+
+//   const handleEdit = () => {
+//     navigate(`/address?tab=update-address&id=${id}`);
+//   };
+
+//   return (
+//     // <div className="w-full   rounded-xl">
+//     <div className="w-screen p-4 border rounded shadow-md ">
+//       <div
+//         className={`${
+//           confirmed ? "bg-primary" : "bg-red-100"
+//         }  p-5 rounded-md drop-shadow-lg mb-4 space-y-3`}
+//       >
+//         <h2 className="text-xl font-medium text-center mb-4">
+//           Informaciones de la dirección
+//         </h2>
+//         <hr />
+//         {photo && (
+//           <div className="w-full ">
+//             <img
+//               src={photo}
+//               className="object-cover rounded-t-md w-full h-64"
+//               alt={`imagem de ${street}, ${number}`}
+//               onError={(e) => {
+//                 if (e.target.src !== "/direccioes_map.svg") {
+//                   e.target.src = "/direccioes_map.svg";
+//                 }
+//               }}
+//             />
+//           </div>
+//         )}
+//         <p className={`font-bold ${confirmed ? "" : "text-red-600"}`}>
+//           {confirmed ? "Dirección confirmada" : "Necesita confirmar"}
+//         </p>
+//         <div className="flex gap-5 justify-between">
+//           <span className="text-5xl self-center">{typeIcons[type]}</span>
+//           <div className="text-sm ">
+//             <p className="text-xl mb-2">
+//               Rua: <strong>{`${street}, ${number}`}</strong>
+//             </p>
+//             <p>
+//               Bairro: <strong>{neighborhood}</strong>
+//             </p>
+//             <p>
+//               Cidade: <strong>{city}</strong>
+//             </p>
+//           </div>
+//           <Link
+//             to={`https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=walking`}
+//             target="_blank"
+//             rel="noopener noreferrer"
+//             className="text-4xl font-semibold self-center"
+//           >
+//             IR
+//           </Link>
+//         </div>
+
+//         {complement && (
+//           <div className="border-t border-gray-200 mt-2 pt-2">
+//             <p>{complement}</p>
+//           </div>
+//         )}
+//         <div className="flex justify-center">
+//           <button
+//             className="bg-gradient-to-b from-stone-800  to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary w-full"
+//             onClick={handleEdit}
+//           >
+//             editar la dirección
+//           </button>
+//         </div>
+//         {/* </div> */}
+
+//         <div>
+//           <MapContainer
+//             center={[latitude, longitude]}
+//             zoom={15}
+//             style={{ height: "300px", width: "100%" }}
+//             className="rounded border z-0"
+//           >
+//             <TileLayer
+//               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+//               attribution='&copy; <a href="https://carto.com/">Carto</a> contributors & <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+//             />
+//             <Marker position={[latitude, longitude]} icon={pinMapIcon}>
+//               <Popup>{`${street}, ${number}, ${neighborhood}, ${city}`}</Popup>
+//             </Marker>
+//             {userLocation && (
+//               <Marker
+//                 position={[userLocation.lat, userLocation.lng]}
+//                 icon={personIcon}
+//               >
+//                 <Popup>Você está aqui!</Popup>
+//               </Marker>
+//             )}
+//             {userLocation && (
+//               <Routing
+//                 userLocation={userLocation}
+//                 destination={{ lat: latitude, lng: longitude }}
+//               />
+//             )}
+//           </MapContainer>
+//         </div>
+//       </div>
+//     </div>
+//     // </div>
+//   );
+// }
+
+// export default Address;
+
+// Routing.propTypes = {
+//   userLocation: PropTypes.object,
+//   destination: PropTypes.object,
+// };
+
+// Address.propTypes = {
+//   id: PropTypes.string.isRequired,
+// };

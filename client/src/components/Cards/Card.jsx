@@ -122,7 +122,7 @@ function Card() {
                       onClick={() => setSelectedAddress(address.id)}
                       className="flex flex-col w-full text-left"
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between w-full">
                         <p className="text-4xl">
                           {(address.type === "house" && <MdHouse />) ||
                             (address.type === "department" && (
@@ -140,7 +140,7 @@ function Card() {
                           <FaLocationDot /> direccion: {index + 1}
                         </p>
                       </div>
-                      <div className="mt-5">
+                      <div className="mt-5 w-full">
                         <div className="w-full justify-between flex gap-5">
                           <div>
                             <p className="text-gray-800 font-semibold text-lg ">
@@ -182,7 +182,24 @@ function Card() {
       ))}
 
       {selectedAddress && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-screen h-screen">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-full h-full p-4 sm:p-6">
+          <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-2 sm:p-8">
+            <button
+              onClick={() => setSelectedAddress(null)}
+              className="absolute top-4 right-4 text-red-500 text-3xl  bg-primary p-2 rounded-full border border-red-800"
+            >
+              <RiCloseLargeFill />
+            </button>
+            <div className="max-h-[80vh] overflow-auto">
+              <Address id={selectedAddress} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 
+      {selectedAddress && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-full h-full">
           <div className="bg-secondary">
             <button
               onClick={() => setSelectedAddress(null)}
@@ -193,7 +210,7 @@ function Card() {
             <Address id={selectedAddress} />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
