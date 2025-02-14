@@ -141,7 +141,7 @@ function Address({ id }) {
 
   return (
     // <div className="w-full   rounded-xl">
-    <div className="w-full p-4 border rounded shadow-md ">
+    <div className="w-screen p-4 border rounded shadow-md ">
       <div
         className={`${
           confirmed ? "bg-primary" : "bg-red-100"

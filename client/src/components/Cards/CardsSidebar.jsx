@@ -47,7 +47,7 @@ function CardsSidebar() {
 
   return (
     <div className="text-start text-lg w-full text-secondary">
-      <div className="space-y-5 px-4 pt-3">
+      {/* <div className="space-y-5 px-4 pt-3">
         <h1 className="text-4xl font-medium">Tarjetas</h1>
         {isSS ? (
           <p>
@@ -57,7 +57,7 @@ function CardsSidebar() {
         ) : (
           <p>En esta página, usted puede ver, las tarjetas asignadas.</p>
         )}
-      </div>
+      </div> */}
 
       <div className="flex text-center">
         {menuOptions.map((item) => (
