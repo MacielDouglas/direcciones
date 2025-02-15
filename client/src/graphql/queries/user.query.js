@@ -47,6 +47,7 @@ export const GET_USERS = gql`
         name
         codUser
         group
+        profilePicture
         id
         myCards {
           cardId

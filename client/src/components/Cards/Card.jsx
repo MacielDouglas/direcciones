@@ -14,7 +14,7 @@ import {
   MdOutlineApartment,
 } from "react-icons/md";
 import Loading from "../../context/Loading";
-import { calculateDistance } from "../../constants/direccion";
+import { calculateDistance, formatDate } from "../../constants/direccion";
 import Address from "../Address";
 import { RiCloseLargeFill } from "react-icons/ri";
 
@@ -60,12 +60,12 @@ function Card() {
         .filter(Boolean),
     }));
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${String(date.getDate()).padStart(2, "0")}/${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}/${date.getFullYear()}`;
-  };
+  // const formatDate = (dateString) => {
+  //   const date = new Date(dateString);
+  //   return `${String(date.getDate()).padStart(2, "0")}/${String(
+  //     date.getMonth() + 1
+  //   ).padStart(2, "0")}/${date.getFullYear()}`;
+  // };
 
   return (
     <div className="text-start text-lg w-full text-secondary h-full">
@@ -186,7 +186,7 @@ function Card() {
           <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-2 sm:p-8">
             <button
               onClick={() => setSelectedAddress(null)}
-              className="absolute top-4 right-4 text-red-500 text-3xl  bg-primary p-2 rounded-full border border-red-800"
+              className="absolute top-4 right-4 bg-secondary text-2xl text-slate-300 p-2 rounded-full border border-red-800"
             >
               <RiCloseLargeFill />
             </button>
@@ -196,21 +196,6 @@ function Card() {
           </div>
         </div>
       )}
-
-      {/* 
-      {selectedAddress && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-full h-full">
-          <div className="bg-secondary">
-            <button
-              onClick={() => setSelectedAddress(null)}
-              className="absolute top-4 left-8 z-10 text-red-500 text-3xl"
-            >
-              <RiCloseLargeFill />
-            </button>
-            <Address id={selectedAddress} />
-          </div>
-        </div>
-      )} */}
     </div>
   );
 }

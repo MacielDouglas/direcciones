@@ -107,7 +107,7 @@ function Header() {
             </ul>
             <button
               onClick={handleLogout}
-              className="hover:underline text-orange-500 flex items-center gap-2"
+              className=" text-orange-500 flex items-center gap-2"
               disabled={isLoggingOut}
             >
               <RiLogoutBoxRLine />

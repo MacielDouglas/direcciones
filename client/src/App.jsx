@@ -13,6 +13,7 @@ import Cards from "./pages/Cards";
 import ScrollToTop from "./context/ScrollTotop";
 import UpdateAddress from "./components/Direccion/UpdateAddress";
 import AdminUsers from "./pages/AdminUsers";
+import UserPage from "./pages/UserPage";
 
 function App() {
   const user = useSelector((state) => state.user);
@@ -29,8 +30,9 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/cards" element={<Cards />} />
             <Route path="/address" element={<Direcciones />} />
-            <Route path="/user" element={<Home />} />
+            <Route path="/user" element={<UserPage />} />
             <Route path="/adminUsers" element={<AdminUsers />} />
+
             {/* <Route path="/update-address" element={<UpdateAddress />} /> */}
           </Route>
         </Route>

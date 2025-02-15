@@ -45,4 +45,17 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   return R * c; // Distância em metros
 };
 
-export { initialFormState, gpsRegex, imagesAddresses, calculateDistance };
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return `${String(date.getDate()).padStart(2, "0")}/${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}/${date.getFullYear()}`;
+};
+
+export {
+  initialFormState,
+  gpsRegex,
+  imagesAddresses,
+  calculateDistance,
+  formatDate,
+};

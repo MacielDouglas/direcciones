@@ -131,7 +131,12 @@ function AdminUsers() {
                 key={user.id}
                 className="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-md"
               >
-                <div className="flex flex-col gap-2">
+                <img
+                  src={user.profilePicture}
+                  className="w-12 h-12 object-cover rounded-full"
+                  alt={user.name}
+                />
+                <div className="flex flex-col gap-2 w-full ml-4">
                   <span className="text-sm text-gray-600">
                     User code: {user.codUser}
                   </span>

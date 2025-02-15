@@ -56,6 +56,7 @@ type UserSummary {
     name: String!
     group: String
     codUser: Int
+    profilePicture: String
     myCards: [CardAssociation]
 }
 

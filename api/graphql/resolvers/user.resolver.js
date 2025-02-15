@@ -112,7 +112,10 @@ const userResolver = {
         }
 
         // Buscar usuários conforme o filtro
-        const users = await User.find(filter, "id name group codUser myCards");
+        const users = await User.find(
+          filter,
+          "id name group codUser myCards profilePicture"
+        );
 
         if (!users || users.length === 0) {
           return {
