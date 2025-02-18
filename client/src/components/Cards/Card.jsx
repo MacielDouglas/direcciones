@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   FaCalendarDays,
   FaTableList,
@@ -17,6 +17,11 @@ import Loading from "../../context/Loading";
 import { calculateDistance, formatDate } from "../../constants/direccion";
 import Address from "../Address";
 import { RiCloseLargeFill } from "react-icons/ri";
+import { useMutation } from "@apollo/client";
+import { RETURN_CARD } from "../../graphql/mutation/cards.mutation";
+import { toast } from "react-toastify";
+import { setCards } from "../../store/cardsSlice";
+import { setUser } from "../../store/userSlice";
 
 function Card() {
   const user = useSelector((state) => state.user);
@@ -25,6 +30,55 @@ function Card() {
   const myCards = user?.userData?.myCards || [];
   const cardsData = useSelector((state) => state.cards) || [];
   const addressesData = useSelector((state) => state.addresses);
+
+  const dispatch = useDispatch();
+
+  const [returnedCardInput] = useMutation(RETURN_CARD, {
+    onCompleted: async (data) => {
+      toast.success(data.cardMutation.message);
+
+      const returnedCards = data.cardMutation.returnedCards || [];
+
+      if (returnedCards.length > 0) {
+        const updatedCards = myCards.filter(
+          (card) => !returnedCards.some((returned) => returned.id === card.id)
+        );
+
+        const updatedUserData = {
+          ...user,
+          userData: {
+            ...user.userData,
+            myCards: updatedCards,
+          },
+        };
+        dispatch(setUser({ user: updatedUserData }));
+        dispatch(
+          setCards({
+            cards: updatedCards,
+            sessionExpiry: updatedCards.length > 0 ? undefined : null,
+          })
+        );
+      }
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  // const [returnedCardInput] = useMutation(RETURN_CARD, {
+  //   onCompleted: async (data) => {
+  //     console.log("Cartão retornado: ", data);
+  //     toast.success(data.cardMutation.message);
+  //     dispatch(setCards({ cards: null, sessionExpiry: null }));
+  //     // setModalOpen(false);
+  //     // setSelectedCard([]);
+  //     // await fetchCards();
+  //   },
+  //   onError: (error) => {
+  //     console.log(`Erro de retorno:, ${error}`);
+  //     toast.error(`Erro: ${error.message}`);
+  //   },
+  // });
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -60,12 +114,17 @@ function Card() {
         .filter(Boolean),
     }));
 
-  // const formatDate = (dateString) => {
-  //   const date = new Date(dateString);
-  //   return `${String(date.getDate()).padStart(2, "0")}/${String(
-  //     date.getMonth() + 1
-  //   ).padStart(2, "0")}/${date.getFullYear()}`;
-  // };
+  const handleReturnCard = async (cardIdReturn) => {
+    await returnedCardInput({
+      variables: {
+        action: "returnCard",
+        designateCardInput: {
+          cardId: cardIdReturn,
+          userId: user.userData.id,
+        },
+      },
+    });
+  };
 
   return (
     <div className="text-start text-lg w-full text-secondary h-full">
@@ -82,17 +141,27 @@ function Card() {
           key={card.id}
           className="bg-gradient-to-b from-details to-stone-400 rounded-md mx-2 mb-4 border border-stone-400"
         >
-          <div className="flex items-center justify-between px-6 pt-6 ">
-            <h2 className="text-lg font-semibold flex items-center gap-3">
-              <FaTableList /> Tarjeta: {card.number}
-            </h2>
-            <p className="text-sm text-stone-500 flex items-center gap-1">
-              <FaCalendarDays /> asignada en: {formatDate(card.startDate)}
-            </p>
+          <div className="flex flex-col gap-4 p-6 w-full">
+            <div className="flex items-center justify-between flex-wrap">
+              <h2 className="text-lg font-semibold flex items-center gap-3">
+                <FaTableList /> Tarjeta: {card.number}
+              </h2>
+              <p className="text-sm text-stone-500 flex items-center gap-1">
+                <FaCalendarDays /> asignada en: {formatDate(card.startDate)}
+              </p>
+            </div>
+            <div className="flex items-center justify-between w-full flex-wrap">
+              <button
+                className="px-2 py-1 bg-secondary text-white rounded text-sm"
+                onClick={() => handleReturnCard(card.id)}
+              >
+                concluir tarjeta
+              </button>
+              <h3 className="text-lg flex items-center gap-3 justify-end  text-stone-700">
+                <FaLocationDot /> Direcciones: {card.addresses.length}
+              </h3>
+            </div>
           </div>
-          <h3 className="text-lg flex items-center gap-3 justify-end pr-6 text-stone-700">
-            <FaLocationDot /> Direcciones: {card.addresses.length}
-          </h3>
           {card.addresses.length > 0 ? (
             <ul className="space-y-4 p-2">
               {card.addresses.map((address, index) => {
@@ -122,7 +191,7 @@ function Card() {
                       onClick={() => setSelectedAddress(address.id)}
                       className="flex flex-col w-full text-left"
                     >
-                      <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center justify-between w-full ">
                         <p className="text-4xl">
                           {(address.type === "house" && <MdHouse />) ||
                             (address.type === "department" && (
@@ -141,7 +210,7 @@ function Card() {
                         </p>
                       </div>
                       <div className="mt-5 w-full">
-                        <div className="w-full justify-between flex gap-5">
+                        <div className="w-full justify-between flex gap-5  ">
                           <div>
                             <p className="text-gray-800 font-semibold text-lg ">
                               {address.street}, {address.number}.
@@ -186,7 +255,7 @@ function Card() {
           <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-2 sm:p-8">
             <button
               onClick={() => setSelectedAddress(null)}
-              className="absolute top-4 right-4 bg-secondary text-2xl text-slate-300 p-2 rounded-full border border-red-800"
+              className="absolute -top-5 right-44 bg-secondary text-2xl text-slate-300 p-2 rounded-full border border-red-800"
             >
               <RiCloseLargeFill />
             </button>

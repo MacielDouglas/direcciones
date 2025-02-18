@@ -8,11 +8,15 @@ export const NEW_CARD = gql`
       card {
         id
         street
-        userId
+        number
         startDate
         endDate
-        number
         group
+        usersAssigned {
+          id
+          userId
+          date
+        }
       }
     }
   }
@@ -69,7 +73,7 @@ export const DESIGNATED_CARD = gql`
 `;
 
 export const RETURN_CARD = gql`
-  mutation RETURN_CARD(
+  mutation RETURNED_CARD(
     $action: String!
     $designateCardInput: DesignateCardInput!
   ) {
@@ -78,10 +82,14 @@ export const RETURN_CARD = gql`
       success
       card {
         id
-        number
-        userId
-        startDate
         endDate
+        startDate
+        group
+        usersAssigned {
+          id
+          userId
+          date
+        }
       }
     }
   }

@@ -15,10 +15,10 @@ import { setAddresses } from "../store/addressesSlice";
 export default function Home() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const cards = useSelector((state) => state.cards);
+
   const { name, isSS, group } = user.userData;
-  {
-    /* <FaUsers /> */
-  }
+
   // Mapeamento de ícones
   const iconsMap = {
     Tarjetas: FaRegRectangleList,

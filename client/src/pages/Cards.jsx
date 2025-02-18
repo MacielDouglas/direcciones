@@ -12,6 +12,7 @@ import NewCard from "../components/Cards/NewCard";
 import AssignCard from "../components/Cards/AssignCard";
 import Loading from "../context/Loading";
 import ScrollToTop from "../context/ScrollTotop";
+import { toast } from "react-toastify";
 
 function Cards() {
   const user = useSelector((state) => state.user);
@@ -34,13 +35,20 @@ function Cards() {
         dispatch(setCards({ cards: data.card }));
       }
     },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
   });
 
   useEffect(() => {
-    if (!cards?.cards || cards.cards.length === 0) {
-      fetchCards();
-    }
-  }, [fetchCards, cards.cards]);
+    fetchCards();
+  }, [fetchCards]);
+
+  // useEffect(() => {
+  //   if (!cards?.cards || cards.cards.length === 0) {
+  //     fetchCards();
+  //   }
+  // }, [fetchCards, cards.cards]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");

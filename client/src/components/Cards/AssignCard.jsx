@@ -9,13 +9,17 @@ import { GET_CARDS } from "../../graphql/queries/cards.query";
 import { GET_USERS } from "../../graphql/queries/user.query";
 import { setCards } from "../../store/cardsSlice";
 import Loading from "../../context/Loading";
-import { DESIGNATED_CARD } from "../../graphql/mutation/cards.mutation";
+import {
+  DESIGNATED_CARD,
+  RETURN_CARD,
+} from "../../graphql/mutation/cards.mutation";
 import { toast } from "react-toastify";
 import {
   FaTableList,
   FaUserGroup,
   FaUserCheck,
   FaLocationDot,
+  FaUserXmark,
 } from "react-icons/fa6";
 import SelectCardComponent from "../hooks/SelectCardComponent";
 
@@ -79,6 +83,20 @@ function AssignCard() {
     onError: (error) => toast.error(`Erro: ${error.message}`),
   });
 
+  const [returnedCardInput] = useMutation(RETURN_CARD, {
+    onCompleted: async (data) => {
+      console.log("Cartão retornado: ", data);
+      toast.success(data.cardMutation.message);
+      setModalOpen(false);
+      setSelectedCard([]);
+      await fetchCards();
+    },
+    onError: (error) => {
+      console.log(`Erro de retorno:, ${error}`);
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
   const getCustomIcon = (cardId, number) => {
     return new L.DivIcon({
       className: "custom-marker",
@@ -119,6 +137,18 @@ function AssignCard() {
         designateCardInput: {
           cardId: selectedCard.map((card) => card.id),
           userId: selectedUser.id,
+        },
+      },
+    });
+  };
+
+  const handleReturnCard = async () => {
+    await returnedCardInput({
+      variables: {
+        action: "returnCard",
+        designateCardInput: {
+          cardId: "",
+          userId: "",
         },
       },
     });
@@ -217,7 +247,7 @@ function AssignCard() {
               <FaUserCheck /> {usersAssigned.length}
             </p>
             <p className="flex items-center gap-2">
-              <FaLocationDot /> {usersNotAssigned.length}
+              <FaUserXmark /> {usersNotAssigned.length}
             </p>
           </div>
         )}

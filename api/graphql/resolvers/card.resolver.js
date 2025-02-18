@@ -238,7 +238,7 @@ const cardResolver = {
 
             if (lastAssignedUserId.toString() !== user._id.toString()) {
               throw new Error(
-                `Este cartão não pertence ao usuário ${user.name}.`
+                `Este cartão não pertence a esse usuário ${user.name}.`
               );
             }
 
@@ -252,8 +252,11 @@ const cardResolver = {
                   startDate: null,
                   endDate: currentDate,
                 },
+                $pull: {
+                  usersAssigned: { userId }, // Remove o último usuário designado
+                },
                 $push: {
-                  usersAssigned: { userId: null, date: null },
+                  assignedHistory: { userId, date: currentDate },
                 },
               },
               { new: true } // Retorna o documento atualizado
@@ -266,7 +269,10 @@ const cardResolver = {
                   myCards: { cardId }, // Remove o card devolvido
                 },
                 $push: {
-                  myTotalCards: { cardId, date: currentDate }, // Adiciona ao histórico
+                  myTotalCards: cardId.map((id) => ({
+                    cardId: id,
+                    date: currentDate,
+                  })), // Adiciona ao histórico
                 },
               },
               { new: true } // Retorna o documento atualizado
