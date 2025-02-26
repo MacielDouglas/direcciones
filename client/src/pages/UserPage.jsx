@@ -5,6 +5,7 @@ import { formatDate } from "../constants/direccion";
 function UserPage() {
   const user = useSelector((state) => state.user);
   const { name, isSS, group, profilePicture, myCards, codUser } = user.userData;
+  const { myCardsData } = useSelector((state) => state.cards) || [];
 
   return (
     <div className="w-full min-h-screen text-black pb-32 px-6 flex flex-col items-center">
@@ -25,8 +26,11 @@ function UserPage() {
         </h1>
         <div className="text-lg text-gray-600 w-full text-start">
           <p>
-            Usted tiene <strong>{myCards.length}</strong>{" "}
-            {myCards.length > 1 ? "tarjetas asignadas" : "tarjeta asignada"}.
+            Usted tiene <strong>{myCardsData?.length}</strong>{" "}
+            {myCardsData?.length > 1
+              ? "tarjetas asignadas"
+              : "tarjeta asignada"}
+            .
           </p>
           <p>
             Tu código de usuario: <strong>{codUser}</strong>{" "}

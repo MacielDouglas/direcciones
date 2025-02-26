@@ -1,4 +1,3 @@
-import validator from "validator";
 import mongoose from "mongoose";
 import Address from "../../models/address.models.js";
 import Card from "../../models/card.models.js";
@@ -7,7 +6,7 @@ import { validateObjectId, verifyAuthorization } from "../../utils/utils.js";
 
 const addressResolver = {
   Query: {
-    address: async (_, { action, input, id }, { req }) => {
+    address: async (_, { input, id }, { req }) => {
       try {
         const decodedToken = verifyAuthorization(req);
         if (!decodedToken) {
@@ -31,6 +30,10 @@ const addressResolver = {
         }
         if (input?.type) {
           query.type = input.type.trim().toLowerCase();
+        }
+        if (input?.id) {
+          console.log(input);
+          query.id = input.id;
         }
 
         // Configurando paginação com valores padrão
@@ -73,13 +76,13 @@ const addressResolver = {
 
         return {
           message: addresses.length
-            ? "Endereços encontrados."
+            ? `Encontrado ${addresses.length} direcciones.`
             : "Nenhum endereço encontrado.",
           success: true,
           address: addresses.map((address) => ({
             ...address,
             id: address._id.toString(),
-            userId: address.userId.name,
+            // userId: address.userId.name,
           })),
         };
       } catch (error) {

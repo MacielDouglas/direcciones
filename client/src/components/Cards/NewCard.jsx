@@ -1,10 +1,8 @@
 import { useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import { useMutation } from "@apollo/client";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { NEW_CARD } from "../../graphql/mutation/cards.mutation";
+// import { NEW_CARD } from "../../graphql/mutation/cards.mutation";
 import Loading from "../../context/Loading";
 import {
   MdHouse,
@@ -14,30 +12,17 @@ import {
   MdOutlineApartment,
 } from "react-icons/md";
 import MapComponent from "../hooks/Mapcomponent";
+import { useCard } from "../../graphql/hooks/useCard";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
-  const cards = useSelector((state) => state.cards.cardsData?.card || []);
+  const { cardsData } = useSelector((state) => state.cards) || [];
   const [selectedAddresses, setSelectedAddresses] = useState([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const [newCard] = useMutation(NEW_CARD, {
-    onCompleted: (data) => {
-      setTimeout(() => {
-        setLoading(false);
-        toast.success(data.cardMutation.message);
-        navigate("/cards?tab=asignar");
-      }, 2000);
-    },
-    onError: (error) => {
-      setTimeout(() => {
-        setLoading(false);
-        toast.error(`Error al crear una nueva tarjeta: ${error.message}`);
-      }, 2000);
-    },
-  });
+  const { newCard, newCardLoading } = useCard();
 
   const handleCreateCard = useCallback(
     async (e) => {
@@ -60,6 +45,17 @@ function NewCard() {
     [newCard, selectedAddresses]
   );
 
+  const typeIcons = useMemo(
+    () => ({
+      house: <MdHouse />,
+      department: <MdOutlineApartment />,
+      store: <MdOutlineStorefront />,
+      restaurant: <MdRestaurant />,
+      hotel: <MdHotel />,
+    }),
+    []
+  );
+
   if (!addresses) {
     return (
       <div className="p-8">
@@ -69,7 +65,7 @@ function NewCard() {
   }
 
   const availableAddresses = Object.values(addresses).filter(
-    (address) => !cards.some((card) => card.street.includes(address.id))
+    (address) => !cardsData.some((card) => card.street.includes(address.id))
   );
 
   const toggleSelectAddress = (addressId) => {
@@ -86,18 +82,7 @@ function NewCard() {
       )
     : availableAddresses;
 
-  const typeIcons = useMemo(
-    () => ({
-      house: <MdHouse />,
-      department: <MdOutlineApartment />,
-      store: <MdOutlineStorefront />,
-      restaurant: <MdRestaurant />,
-      hotel: <MdHotel />,
-    }),
-    []
-  );
-
-  if (loading) {
+  if (newCardLoading) {
     return <Loading text="Creando una nueva tarjeta..." />;
   }
 
@@ -125,7 +110,7 @@ function NewCard() {
             direcciones disponibles.
           </p>
           <p>
-            <span className="font-semibold">{cards.length}</span> tarjetas
+            <span className="font-semibold">{cardsData.length}</span> tarjetas
             creadas.
           </p>
         </div>

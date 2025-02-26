@@ -1,21 +1,22 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation } from "@apollo/client";
+// import { useNavigate } from "react-router-dom";
+// import { useMutation } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import InputField from "../../context/InputField";
 import FormUploadImage from "../../forms/FormUploadImage";
-import { NEW_ADDRESS } from "../../graphql/mutation/address.mutation";
+// import { NEW_ADDRESS } from "../../graphql/mutation/address.mutation";
 import {
   gpsRegex,
   imagesAddresses,
   initialFormState,
 } from "../../constants/direccion.js";
-import { setAddresses } from "../../store/addressesSlice";
+// import { setAddresses } from "../../store/addressesSlice";
+import { useAddress } from "../../graphql/hooks/useAddress.js";
 
 function NewAddress() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const dispatch = useDispatch();
+  // const navigate = useNavigate();
   const user = useSelector((state) => state.user.userData);
   const direccion = useSelector((state) => state.addresses);
 
@@ -27,19 +28,21 @@ function NewAddress() {
   const [isUploading, setIsUploading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  const [newAddress] = useMutation(NEW_ADDRESS, {
-    onCompleted: async (data) => {
-      toast.success("Endereço cadastrado com sucesso!");
-      dispatch(
-        setAddresses({
-          addresses: [...addresses, data.addressMutation.address],
-        })
-      );
-      navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
-    },
-    onError: (error) =>
-      toast.error(`Erro ao cadastrar endereço: ${error.message}`),
-  });
+  const { newAddress } = useAddress();
+
+  // const [newAddress] = useMutation(NEW_ADDRESS, {
+  //   onCompleted: async (data) => {
+  //     toast.success("Endereço cadastrado com sucesso!");
+  //     dispatch(
+  //       setAddresses({
+  //         addresses: [...addresses, data.addressMutation.address],
+  //       })
+  //     );
+  //     navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
+  //   },
+  //   onError: (error) =>
+  //     toast.error(`Erro ao cadastrar endereço: ${error.message}`),
+  // });
 
   useEffect(() => {
     setCharCount(250 - formData.complement.length);

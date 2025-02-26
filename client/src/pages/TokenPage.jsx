@@ -1,33 +1,14 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { FaCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import SessionProvider from "../context/SessionProvider";
 import { useCallback } from "react";
-import { useLazyQuery } from "@apollo/client";
-import { LOGOUT } from "../graphql/queries/user.query";
-import { clearUser } from "../store/userSlice";
+import { useUser } from "../graphql/hooks/useUser";
 
 function TokenPage() {
   const user = useSelector((state) => state.user);
   const { name, codUser } = user.userData;
-
-  const dispatch = useDispatch();
-
-  const [logoutUser] = useLazyQuery(LOGOUT, {
-    onCompleted: (data) => {
-      if (data.user.success) {
-        dispatch(clearUser());
-        toast.success("¡Cierre de sesión exitoso!");
-      } else {
-        toast.error(`Error al cerrar sesión: ${data.user.message}`);
-      }
-    },
-    onError: (error) => {
-      toast.error(
-        `Error en la solicitud de cierre de sesión: ${error.message}`
-      );
-    },
-  });
+  const { logoutUser } = useUser();
 
   const copyToken = () => {
     navigator.clipboard.writeText(codUser);
@@ -35,7 +16,7 @@ function TokenPage() {
   };
 
   const handleLogout = useCallback(() => {
-    logoutUser({ variables: { action: "logout" } });
+    logoutUser();
   }, [logoutUser]);
 
   return (

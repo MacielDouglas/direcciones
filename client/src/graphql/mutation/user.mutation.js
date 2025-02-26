@@ -1,17 +1,30 @@
 import { gql } from "@apollo/client";
 
-export const DELETE_USER = gql`
-  mutation DeleteUser($action: String!, $userMutationId: ID!) {
-    userMutation(action: $action, id: $userMutationId) {
+export const LOGIN = gql`
+  mutation LOGIN_USER($user: UserGoogleInput!) {
+    loginWithGoogle(user: $user) {
       message
       success
+      user {
+        id
+        name
+        codUser
+        group
+        isAdmin
+        isSS
+        profilePicture
+      }
     }
   }
 `;
 
 export const UPDATE_USER = gql`
-  mutation UPDATE_USER($action: String!, $updateUserInput: UpdateUserInput!) {
-    userMutation(action: $action, updateUserInput: $updateUserInput) {
+  mutation UPDATE_USER(
+    $updateUserId: ID!
+    $action: String!
+    $updates: UpdateUserInput!
+  ) {
+    updateUser(id: $updateUserId, action: $action, updates: $updates) {
       message
       success
       user {
@@ -21,45 +34,17 @@ export const UPDATE_USER = gql`
         group
         isAdmin
         isSS
-        myCards {
-          date
-          cardId
-        }
-        myTotalCards {
-          cardId
-          date
-        }
+        profilePicture
       }
     }
   }
 `;
 
-export const LOGIN_GOOGLE = gql`
-  mutation LOGIN_GOOGLE($user: UserGoogle!) {
-    loginGoogle(user: $user) {
+export const DELETE_USER = gql`
+  mutation DELETE_USER($deleteUserId: ID!) {
+    deleteUser(id: $deleteUserId) {
       message
       success
-      user {
-        name
-        id
-        isAdmin
-        group
-        isSS
-        codUser
-        profilePicture
-        myCards {
-          cardId
-          date
-        }
-        myTotalCards {
-          cardId
-          date
-        }
-        comments {
-          cardId
-          text
-        }
-      }
     }
   }
 `;

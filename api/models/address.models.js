@@ -12,10 +12,6 @@ const addressSchema = new Schema(
     number: {
       type: String,
       required: [true, "O campo 'number' é obrigatório."],
-      // match: [
-      //   /^\d+[a-zA-Z]?$/,
-      //   "O campo 'number' deve conter um número válido (ex: '123', '123A').",
-      // ],
     },
     city: {
       type: String,
@@ -82,7 +78,7 @@ const addressSchema = new Schema(
     confirmed: {
       type: Boolean,
       required: true,
-      // default: false, // Define padrão como não confirmado
+      default: false, // Define padrão como não confirmado
     },
     group: {
       type: String,
@@ -91,9 +87,6 @@ const addressSchema = new Schema(
     visited: {
       type: Boolean,
       required: true,
-      // enum: ["yes", "no", null],
-      // default: false,
-      // message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
     },
   },
   { timestamps: true }

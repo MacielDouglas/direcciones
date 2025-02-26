@@ -1,6 +1,5 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { useLazyQuery } from "@apollo/client";
 import { motion } from "framer-motion";
 import {
   FaRegUser,
@@ -9,15 +8,10 @@ import {
   FaUsers,
 } from "react-icons/fa6";
 import menuOptions from "../constants/menu";
-import { GET_ADDRESS } from "../graphql/queries/address.query";
-import { setAddresses } from "../store/addressesSlice";
 
 export default function Home() {
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const cards = useSelector((state) => state.cards);
-
-  const { name, isSS, group } = user.userData;
+  const { name, isSS } = user.userData;
 
   // Mapeamento de ícones
   const iconsMap = {
@@ -26,21 +20,6 @@ export default function Home() {
     Admin: FaUsers,
     Perfil: FaRegUser,
   };
-
-  // Lazy Query para obter endereços
-  const [fetchAddresses, { data, loading, error }] = useLazyQuery(GET_ADDRESS, {
-    variables: {
-      action: "get",
-      input: {
-        street: "",
-      },
-    },
-    onCompleted: (data) => {
-      if (data) {
-        dispatch(setAddresses({ addresses: data.address.address }));
-      }
-    },
-  });
 
   return (
     <div className="w-full min-h-screen text-black pb-32 px-6 flex flex-col items-center">
@@ -117,11 +96,11 @@ export default function Home() {
       </div>
 
       {/* Exibe erros se houver */}
-      {error && (
+      {/* {error && (
         <p className="text-red-500 mt-4">
           Ocorreu um erro ao atualizar os endereços.
         </p>
-      )}
+      )} */}
     </div>
   );
 }

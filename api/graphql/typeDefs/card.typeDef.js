@@ -2,73 +2,128 @@ const cardTypeDef = `#graphql
 
 type Card {
     id: ID!
-    street: [String]!
-    usersAssigned: [Assigned]!
+    street: [String!]!
+    usersAssigned: [Assigned!]!
     number: Int
     startDate: String
     endDate: String
-    group: String! # O grupo está alinhado ao grupo do usuário
+    group: String!
+    assignedHistory: [Assigned!]!
+}
+
+type Address {
+    id: ID!
+    street: String!
+    number: String!
+    city: String!
+    neighborhood: String!
+    gps: String
+    complement: String
+    type: String!
+    photo: String
+    userId: String!
+    active: Boolean!
+    confirmed: Boolean!
+    group: String!
+    visited: Boolean!
 }
 
 type Assigned {
-    userId: String!
-    date: String!
     id: ID!
+    userId: ID!
+    date: String!
 }
 
 type Query {
-    card(action: String!, id: ID): CardResponse
+    getCard(id: ID!): CardResponse!
+    listCards: CardListResponse!
+    # myCards: CardListResponse!
 }
 
 type Mutation {
-    cardMutation(
-        action: String!,
-        newCard: NewCardInput,
-        id: ID,
-        updateCardInput: UpdateCardInput
-        designateCardInput: DesignateCardInput!
-    ): CardMutationResponse
+    createCard(input: NewCardInput!): CardMutationResponse!
+    updateCard(id: ID!, input: UpdateCardInput!): CardMutationResponse!
+    assignCard(input: DesignateCardInput!): AssignedCardResponse!
+    returnCard(input: ReturnCardInput!): CardMutationResponse!
+    deleteCard(id: ID!): CardMutationResponse
 }
 
 type CardResponse {
-    card: [Card]
-    success: Boolean
+    card: Card
+    success: Boolean!
+    message: String
+}
+
+type CardListResponse {
+    cards: [Card]
+    success: Boolean!
     message: String
 }
 
 input NewCardInput {
-    street: [String]!
-    userId: String
+    street: [String!]!
     number: Int
     startDate: String
     endDate: String
-    # group: String! # O grupo deve ser obrigatório e associado a um grupo existente
+    group: String
 }
 
 input UpdateCardInput {
-    street: [String]
-    usersAssigned: [AssignedInput]
-    number: Int
-    startDate: String
-    endDate: String
-    group: String # O grupo pode ser atualizado
+    street: [String!]!
+    # usersAssigned: [AssignedInput]
+    # number: Int
+    # startDate: String
+    # endDate: String
+    # group: String
 }
 
 input AssignedInput {
-    userId: String!
+    userId: ID!
     date: String!
 }
 
 input DesignateCardInput {
-    cardId: [ID]!
+    cardIds: [ID!]!
+    userId: ID!
+}
+
+input ReturnCardInput {
+    cardId: ID!
     userId: ID!
 }
 
 type CardMutationResponse {
-    success: Boolean
+    success: Boolean!
     message: String
     card: Card
 }
+type AssignedCardResponse {
+    success: Boolean!
+    message: String
+    card: [Card]
+}
+
+type MyCard {
+    id: ID!
+    street: [Address!]! # Agora retorna os endereços completos
+    usersAssigned: [Assigned!]!
+    number: Int
+    startDate: String
+    endDate: String
+    group: String!
+    assignedHistory: [Assigned!]!
+}
+
+type MyCardListResponse {
+    cards: [MyCard]
+    success: Boolean!
+    message: String
+}
+
+extend type Query {
+    myCards: MyCardListResponse!
+}
+
 `;
 
 export default cardTypeDef;

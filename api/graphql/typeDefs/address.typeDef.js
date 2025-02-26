@@ -18,11 +18,12 @@ type Address {
 }
 
 type Query {
-    address(action: String!, id: ID, input: FilterAddressInput): AddressResponse
+    address( id: ID, input: FilterAddressInput): AddressResponse
 }
 
 input FilterAddressInput {
     street: String
+    id:[ID!]
 }
 
 type AddressResponse {

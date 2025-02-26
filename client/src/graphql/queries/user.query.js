@@ -1,58 +1,42 @@
 import { gql } from "@apollo/client";
 
-export const LOGIN_USER = gql`
-  query Login($action: String!, $email: String!, $password: String!) {
-    user(action: $action, email: $email, password: $password) {
+export const LOGOUT = gql`
+  query LOGOUT {
+    logoutUser {
+      message
+      success
+    }
+  }
+`;
+
+export const GET_USER = gql`
+  query GET_USER($getUserId: ID!) {
+    getUser(id: $getUserId) {
       message
       success
       user {
-        name
         id
-        isAdmin
-        group
-        isSS
+        codUser
+        name
         profilePicture
-        myCards {
-          cardId
-          date
-        }
-        myTotalCards {
-          cardId
-          date
-        }
-        comments {
-          cardId
-          text
-        }
+        isSS
+        isAdmin
       }
     }
   }
 `;
 
-export const LOGOUT = gql`
-  query Logout($action: String!) {
-    user(action: $action) {
-      message
-      success
-    }
-  }
-`;
-
-export const GET_USERS = gql`
+export const USERS = gql`
   query GET_USERS {
     getUsers {
-      success
+      message
       success
       users {
+        id
         name
         codUser
         group
         profilePicture
-        id
-        myCards {
-          cardId
-          date
-        }
       }
     }
   }

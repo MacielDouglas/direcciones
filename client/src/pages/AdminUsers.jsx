@@ -1,31 +1,29 @@
-import { useMutation, useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
-import { GET_USERS } from "../graphql/queries/user.query";
 import { useState } from "react";
-import { UPDATE_USER } from "../graphql/mutation/user.mutation";
-import { toast } from "react-toastify";
+import { useUser } from "../graphql/hooks/useUser";
 
 function AdminUsers() {
   const user = useSelector((state) => state.user.userData); // Usuário logado
   const { group } = user;
-  const { data: usersData, loading, error, refetch } = useQuery(GET_USERS);
-  const [updateUserInput] = useMutation(UPDATE_USER, {
-    onCompleted: (data) => {
-      refetch();
-      toast.success(data.userMutation.message);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+  const { usersData, usersLoading, usersError } = useUser();
+  // const { data: usersData, loading, error, refetch } = useQuery(GET_USERS);
+  // const [updateUserInput] = useMutation(UPDATE_USER, {
+  //   onCompleted: (data) => {
+  //     refetch();
+  //     toast.success(data.userMutation.message);
+  //   },
+  //   onError: (error) => {
+  //     toast.error(error.message);
+  //   },
+  // });
 
   const [selectedUser, setSelectedUser] = useState(null); // Usuário selecionado
   const [newName, setNewName] = useState(""); // Novo nome para o usuário em caso de duplicação
   const [seeNewName, setSeeNewName] = useState(""); // Novo nome para o usuário em caso de duplicação
   const [isNameDuplicate, setIsNameDuplicate] = useState(false); // Verifica se o nome está duplicado
 
-  if (loading) return <p>Carregando usuários...</p>;
-  if (error) return <p>Erro ao carregar usuários: {error.message}</p>;
+  if (usersLoading) return <p>Carregando usuários...</p>;
+  if (usersError) return <p>Erro ao carregar usuários: {usersError.message}</p>;
 
   const users = usersData?.getUsers.users || [];
   const groupedUsers = users.filter((u) => u.group === group);

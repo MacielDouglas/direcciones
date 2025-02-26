@@ -1,33 +1,34 @@
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { motion } from "framer-motion";
-import { GET_CARDS } from "../../graphql/queries/cards.query";
-import { GET_USERS } from "../../graphql/queries/user.query";
-import { setCards } from "../../store/cardsSlice";
+
 import Loading from "../../context/Loading";
 import {
-  DESIGNATED_CARD,
   RETURN_CARD,
+  SENDING_CARD,
 } from "../../graphql/mutation/cards.mutation";
 import { toast } from "react-toastify";
 import {
   FaTableList,
   FaUserGroup,
   FaUserCheck,
-  FaLocationDot,
   FaUserXmark,
 } from "react-icons/fa6";
 import SelectCardComponent from "../hooks/SelectCardComponent";
+import { useCard } from "../../graphql/hooks/useCard";
+import { useUser } from "../../graphql/hooks/useUser";
 
 function AssignCard() {
-  const dispatch = useDispatch();
-  const cards = useSelector((state) => state.cards.cardsData.card || []);
+  const { cardsData } = useSelector((state) => state.cards) || [];
   const addresses = useSelector((state) => state.addresses.addressesData || []);
   const user = useSelector((state) => state.user.userData);
+  const { usersData, usersLoading, usersError } = useUser();
+
+  const { fetchUsers, fetchUsersData } = useUser();
 
   const [selectedCard, setSelectedCard] = useState([]);
   const [cardColors, setCardColors] = useState({});
@@ -38,22 +39,7 @@ function AssignCard() {
   const [usersAssigned, setUsersAssigned] = useState([]);
   const [cardAssigned, setCardAssigned] = useState([]);
   const [cardNotAssigned, setCardNotAssigned] = useState([]);
-
-  const [fetchCards, { loading: cardsLoading, error: cardsError }] =
-    useLazyQuery(GET_CARDS, {
-      variables: { action: "get" },
-      fetchPolicy: "network-only",
-      onCompleted: (data) => {
-        if (data?.card) {
-          dispatch(setCards({ cards: data.card }));
-        }
-      },
-    });
-
-  const [fetchUsers, { data: usersData }] = useLazyQuery(GET_USERS, {
-    variables: { group: user.group },
-    fetchPolicy: "network-only",
-  });
+  const { fetchCards } = useCard();
 
   useEffect(() => {
     fetchCards(); // Chama a query apenas na montagem do componente
@@ -67,13 +53,13 @@ function AssignCard() {
   );
 
   useEffect(() => {
-    setUsersNotAssigned(users.filter((user) => user.myCards.length === 0));
-    setUsersAssigned(users.filter((user) => user.myCards.length > 0));
-    setCardAssigned(cards.filter((card) => card.startDate !== null));
-    setCardNotAssigned(cards.filter((card) => card.startDate === null));
-  }, [users, cards]);
+    // setUsersNotAssigned(users.filter((user) => user.myCards.length === 0));
+    // setUsersAssigned(users.filter((user) => user.myCards.length > 0));
+    setCardAssigned(cardsData.filter((card) => card.startDate !== null));
+    setCardNotAssigned(cardsData.filter((card) => card.startDate === null));
+  }, [users, cardsData]);
 
-  const [designateCardInput] = useMutation(DESIGNATED_CARD, {
+  const [designateCardInput] = useMutation(SENDING_CARD, {
     onCompleted: async (data) => {
       toast.success(data.cardMutation.message);
       setModalOpen(false);
@@ -133,9 +119,8 @@ function AssignCard() {
     if (!selectedUser) return alert("Selecione um usuário!");
     await designateCardInput({
       variables: {
-        action: "designateCard",
-        designateCardInput: {
-          cardId: selectedCard.map((card) => card.id),
+        input: {
+          cardIds: selectedCard.map((card) => card.id),
           userId: selectedUser.id,
         },
       },
@@ -155,8 +140,8 @@ function AssignCard() {
   };
 
   useEffect(() => {
-    if (cards.length && addresses.length) {
-      const firstCard = cards[0];
+    if (cardsData.length && addresses.length) {
+      const firstCard = cardsData[0];
       if (firstCard?.street.length > 0) {
         const firstAddress = addressMap.get(firstCard.street[0]);
         if (firstAddress?.gps) {
@@ -174,17 +159,17 @@ function AssignCard() {
           : "#ef4444"; // Vermelho para não selecionados
       };
 
-      const colors = cards.reduce((acc, card) => {
+      const colors = cardsData.reduce((acc, card) => {
         acc[card.id] = getCardColor(card.id);
         return acc;
       }, {});
 
       setCardColors(colors);
     }
-  }, [cards, addressMap, selectedCard, addresses]);
+  }, [cardsData, addressMap, selectedCard, addresses]);
 
   const displayedMarkers = useMemo(() => {
-    return cards.flatMap((card) =>
+    return cardsData.flatMap((card) =>
       card.street.map((addressId) => {
         const address = addressMap.get(addressId);
         if (!address?.gps) return null;
@@ -219,10 +204,10 @@ function AssignCard() {
         );
       })
     );
-  }, [cards, addressMap, cardColors, handleSelectCard]); // Dependências corrigidas
+  }, [cardsData, addressMap, cardColors, handleSelectCard]); // Dependências corrigidas
 
-  if (cardsLoading) return <Loading text="Carregando dados dos cartões..." />;
-  if (cardsError) return <p>Erro ao carregar cartões: {cardsError.message}</p>;
+  // if (cardsLoading) return <Loading text="Carregando dados dos cartões..." />;
+  // if (cardsError) return <p>Erro ao carregar cartões: {cardsError.message}</p>;
 
   return (
     <div className="min-h-screen bg-details p-3 md:p-10 flex flex-col justify-center  mb-[40px]">
@@ -235,10 +220,10 @@ function AssignCard() {
         <h1 className="text-3xl font-medium text-gray-700 mb-4">
           Asignar Tarjetas
         </h1>
-        {cards && (
+        {cardsData && (
           <div className="flex justify-between mb-2">
             <p className="flex items-center gap-2">
-              <FaTableList /> {cards.length}
+              <FaTableList /> {cardsData.length}
             </p>
             <p className="flex items-center gap-2">
               <FaUserGroup /> {users.length}

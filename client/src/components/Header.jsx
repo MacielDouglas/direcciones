@@ -4,34 +4,12 @@ import { RiMenu3Line, RiCloseLine, RiLogoutBoxRLine } from "react-icons/ri";
 import { motion, AnimatePresence } from "framer-motion";
 import SessionProvider from "../context/SessionProvider";
 import menuOptions from "../constants/menu.js";
-import { useLazyQuery } from "@apollo/client";
-import { LOGOUT } from "../graphql/queries/user.query.js";
-import { useDispatch } from "react-redux";
-import { clearUser } from "../store/userSlice.js";
-import { toast } from "react-toastify";
 import { FaClock } from "react-icons/fa6";
-import { clearCards } from "../store/cardsSlice.js";
-import { clearAddresses } from "../store/addressesSlice.js";
+import { useUser } from "../graphql/hooks/useUser.js";
 
 function Header() {
+  const { logoutUser, isLoggingOut } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const dispatch = useDispatch();
-
-  const [logoutUser, { loading: isLoggingOut }] = useLazyQuery(LOGOUT, {
-    onCompleted: (data) => {
-      if (data.user.success) {
-        dispatch(clearUser());
-        dispatch(clearCards());
-        dispatch(clearAddresses());
-        toast.success("¡Cierre de sesión exitoso!");
-      } else {
-        toast.error(`Erro ao fazer logout: ${data.user.message}`);
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro na solicitação de logout: ${error.message}`);
-    },
-  });
 
   const handleMenuToggle = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
@@ -39,7 +17,7 @@ function Header() {
 
   const handleLogout = useCallback(() => {
     if (!isLoggingOut) {
-      logoutUser({ variables: { action: "logout" } });
+      logoutUser();
     }
   }, [logoutUser, isLoggingOut]);
 

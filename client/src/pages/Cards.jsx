@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyQuery } from "@apollo/client";
-import { GET_CARDS } from "../graphql/queries/cards.query";
-import { setCards } from "../store/cardsSlice";
-
+import { useSelector } from "react-redux";
 import CardsSidebar from "../components/Cards/CardsSidebar";
 import Card from "../components/Cards/Card";
 import UpdateCard from "../components/Cards/UpdateCard";
@@ -12,14 +8,16 @@ import NewCard from "../components/Cards/NewCard";
 import AssignCard from "../components/Cards/AssignCard";
 import Loading from "../context/Loading";
 import ScrollToTop from "../context/ScrollTotop";
-import { toast } from "react-toastify";
+
+import { useCard } from "../graphql/hooks/useCard";
 
 function Cards() {
   const user = useSelector((state) => state.user);
-  const cards = useSelector((state) => state.cards);
-  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const myCardsData = useSelector((state) => state.cards);
+
+  const { fetchMyCards, fetchCards, cardLoading, errorCards } = useCard();
 
   // const admin = user.userData.isAdmmin;
   const isSS = user.userData.isSS;
@@ -28,27 +26,10 @@ function Cards() {
     () => new URLSearchParams(location.search).get("tab") || "new-address"
   );
 
-  const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
-    variables: { action: "get" },
-    onCompleted: (data) => {
-      if (data && data.card) {
-        dispatch(setCards({ cards: data.card }));
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro: ${error.message}`);
-    },
-  });
-
   useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
-
-  // useEffect(() => {
-  //   if (!cards?.cards || cards.cards.length === 0) {
-  //     fetchCards();
-  //   }
-  // }, [fetchCards, cards.cards]);
+    fetchMyCards();
+    isSS && fetchCards();
+  }, [fetchMyCards, fetchCards, isSS]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");
@@ -62,12 +43,12 @@ function Cards() {
     }
   }, [location.search, navigate, tab]);
 
-  if (loading) {
+  if (cardLoading) {
     return <Loading text={"Cargando direcciones..."} w />;
   }
 
-  if (error) {
-    console.error("Erro ao buscar os cards:", error);
+  if (errorCards) {
+    console.error("Erro ao buscar os cards:", errorCards);
     return <p>Error al cargar las tarjetas. Tente novamente más tarde.</p>;
   }
 
