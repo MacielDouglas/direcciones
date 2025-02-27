@@ -10,6 +10,8 @@ import Loading from "../context/Loading";
 import ScrollToTop from "../context/ScrollTotop";
 
 import { useCard } from "../graphql/hooks/useCard";
+import { useSubscription } from "@apollo/client";
+import { MY_CARDS_SUBSCRIPTION } from "../graphql/queries/user.query";
 
 function Cards() {
   const user = useSelector((state) => state.user);
@@ -18,6 +20,12 @@ function Cards() {
   const myCardsData = useSelector((state) => state.cards);
 
   const { fetchMyCards, fetchCards, cardLoading, errorCards } = useCard();
+
+  const { data, loading, error } = useSubscription(MY_CARDS_SUBSCRIPTION);
+
+  console.log("SUBSCRiption DATA", data);
+  console.log("SUBSCRiption LOADING", loading);
+  console.log("SUBSCRiption ERROR", error);
 
   // const admin = user.userData.isAdmmin;
   const isSS = user.userData.isSS;

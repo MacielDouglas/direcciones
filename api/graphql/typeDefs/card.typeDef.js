@@ -124,6 +124,10 @@ extend type Query {
     myCards: MyCardListResponse!
 }
 
+type Subscription {
+    myCardsUpdated: AssignedCardResponse
+}
+
 `;
 
 export default cardTypeDef;

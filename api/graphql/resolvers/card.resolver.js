@@ -7,6 +7,11 @@ import {
   verifyAuthorization,
 } from "../../utils/utils.js";
 import Address from "../../models/address.models.js";
+import { PubSub } from "graphql-subscriptions";
+import { subscribe } from "graphql";
+
+const pubsub = new PubSub();
+const MY_CARDS_UPDATED = "MY_CARDS_UPDATED";
 
 const findUserById = async (userId) =>
   userId ? await User.findById(userId, "id name").lean() : null;
@@ -110,6 +115,8 @@ const cardResolver = {
             street: updatedStreets, // Atualiza a street com os endereços mapeados
           };
         });
+
+        notifyMyCardsUpdated(updatedCards);
 
         return {
           success: true,
@@ -229,6 +236,8 @@ const cardResolver = {
         )
       );
 
+      notifyMyCardsUpdated(updatedCards);
+
       return {
         message: "Cartões designados com sucesso.",
         success: true,
@@ -253,6 +262,8 @@ const cardResolver = {
         { new: true }
       );
 
+      notifyMyCardsUpdated(updatedCard);
+
       return {
         success: true,
         message: "Cartão devolvido com sucesso.",
@@ -260,15 +271,32 @@ const cardResolver = {
       };
     },
   },
+  Subscription: {
+    myCardsUpdated: {
+      subscribe: () => pubsub.asyncIterator([MY_CARDS_UPDATED]),
+    },
+  },
 };
 
-export default cardResolver;
+const notifyMyCardsUpdated = async (updatedCards) => {
+  console.log("Funcionado,", updatedCards),
+    pubsub.publish(MY_CARDS_UPDATED, {
+      myCardsUpdated: {
+        success: true,
+        message: "Cartões atualizados.",
+        cards: updatedCards,
+      },
+    });
+};
+
+export { cardResolver, notifyMyCardsUpdated };
 
 // import mongoose from "mongoose";
 // import Card from "../../models/card.models.js";
 // import User from "../../models/user.models.js";
 // import {
-//   findCardById,
+// import { Subscription } from './../../../client/node_modules/@apollo/client/react/components/Subscription';
+// findCardById,
 //   validateObjectId,
 //   verifyAuthorization,
 // } from "../../utils/utils.js";

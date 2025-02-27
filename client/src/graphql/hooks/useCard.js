@@ -7,6 +7,7 @@ import { CREATE_CARD, RETURN_CARD } from "../mutation/cards.mutation";
 import { setUser } from "../../store/userSlice";
 import { useCallback, useMemo } from "react";
 import { LIST_CARDS, MY_CARDS } from "../queries/cards.query";
+// import { MY_CARDS_SUBSCRIPTION } from "../queries/user.query";
 
 export const useCard = () => {
   const dispatch = useDispatch();

@@ -41,3 +41,37 @@ export const USERS = gql`
     }
   }
 `;
+
+export const MY_CARDS_SUBSCRIPTION = gql`
+  subscription MY_CARDS_SUBSCRIPTION {
+    myCardsUpdated {
+      success
+      message
+      card {
+        id
+        number
+      }
+      # cards {
+      #   id
+      #   number
+      #   startDate
+      #   street {
+      #     id
+      #     street
+      #     number
+      #     neighborhood
+      #     city
+      #     type
+      #     gps
+      #     group
+      #     complement
+      #     confirmed
+      #     visited
+      #     active
+      #     photo
+      #     userId
+      #   }
+      # }
+    }
+  }
+`;

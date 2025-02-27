@@ -18,6 +18,8 @@ import {
 } from "react-icons/md";
 import { RiCloseLargeFill } from "react-icons/ri";
 import { useCard } from "../../graphql/hooks/useCard";
+import { useSubscription } from "@apollo/client";
+import { MY_CARDS_SUBSCRIPTION } from "../../graphql/queries/user.query";
 
 function Card() {
   const user = useSelector((state) => state.user);
