@@ -18,8 +18,6 @@ import {
 } from "react-icons/md";
 import { RiCloseLargeFill } from "react-icons/ri";
 import { useCard } from "../../graphql/hooks/useCard";
-import { useSubscription } from "@apollo/client";
-import { MY_CARDS_SUBSCRIPTION } from "../../graphql/queries/user.query";
 
 function Card() {
   const user = useSelector((state) => state.user);
@@ -74,7 +72,7 @@ function Card() {
           {myCardsData.length > 1 ? "tarjetas asignadas" : "tarjeta asignada"}.
         </p>
       </div>
-      {myCardsData.length > 1 &&
+      {myCardsData.length >= 1 &&
         myCardsData.map((card) => (
           <div
             key={card.id}
@@ -104,6 +102,7 @@ function Card() {
               </button>
             </div>
             <ul className="space-y-4 p-2">
+              {console.log(card)}
               {card.street.map((street, index) => {
                 const [latitude, longitude] = street.gps
                   .split(",")
@@ -186,6 +185,30 @@ function Card() {
             </ul>
           </div>
         ))}
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-full h-full p-4">
+          <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-8">
+            <p className="text-lg font-semibold">
+              ¿Está seguro de que desea concluir esta tarjeta?
+            </p>
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleReturnCard}
+                className="px-4 py-2 bg-red-600 text-white rounded"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedAddress && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-full h-full p-4">

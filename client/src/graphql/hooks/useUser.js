@@ -27,11 +27,8 @@ export const useUser = () => {
         dispatch(setUser({ user: userData }));
         toast.success("¡Inicio de sesión exitoso!");
 
-        if (userData.isSS) {
-          await fetchCards();
-        }
-
         if (userData.group !== "0") {
+          await fetchCards();
           await fetchAddresses();
           navigate("/");
         } else {

@@ -32,7 +32,6 @@ const addressResolver = {
           query.type = input.type.trim().toLowerCase();
         }
         if (input?.id) {
-          console.log(input);
           query.id = input.id;
         }
 

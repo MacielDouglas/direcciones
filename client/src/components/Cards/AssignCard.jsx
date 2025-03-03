@@ -66,7 +66,7 @@ function AssignCard() {
       setSelectedCard([]);
       await fetchCards();
     },
-    onError: (error) => toast.error(`Erro: ${error.message}`),
+    onError: (error) => toast.error(`Erro : ${error.message}`),
   });
 
   const [returnedCardInput] = useMutation(RETURN_CARD, {

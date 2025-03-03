@@ -11,7 +11,6 @@ const httpLink = new HttpLink({
 
 // Configuração do link WebSocket para Subscriptions
 const wsLink = new GraphQLWsLink(
-  // console.log(`ws://${window.location.host}/graphql`),
   createClient({
     // url: `ws://${window.location.host}/graphql`, // Para ambiente local
     url: `ws://localhost:8000/graphql`, // Para ambiente local

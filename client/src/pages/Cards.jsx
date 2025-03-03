@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CardsSidebar from "../components/Cards/CardsSidebar";
 import Card from "../components/Cards/Card";
 import UpdateCard from "../components/Cards/UpdateCard";
@@ -11,59 +11,76 @@ import ScrollToTop from "../context/ScrollTotop";
 
 import { useCard } from "../graphql/hooks/useCard";
 import { useSubscription } from "@apollo/client";
-import { MY_CARDS_SUBSCRIPTION } from "../graphql/queries/user.query";
+import { setCards, setMyCards } from "../store/cardsSlice";
+import { CARD_SUBSCRIPTION } from "../graphql/queries/cards.query";
+import { toast } from "react-toastify";
 
 function Cards() {
   const user = useSelector((state) => state.user);
   const location = useLocation();
   const navigate = useNavigate();
-  const myCardsData = useSelector((state) => state.cards);
+  const dispatch = useDispatch();
+  const { cardsData } = useSelector((state) => state.cards) || [];
+  const [prevCardCount, setPrevCardCount] = useState(null);
+  const { data } = useSubscription(CARD_SUBSCRIPTION);
 
-  const { fetchMyCards, fetchCards, cardLoading, errorCards } = useCard();
+  const myCards = useMemo(() => {
+    return cardsData.filter((card) =>
+      card?.usersAssigned.some(
+        (assigned) => assigned.userId === user.userData.id
+      )
+    );
+  }, [cardsData, user.userData.id]);
 
-  const { data, loading, error } = useSubscription(MY_CARDS_SUBSCRIPTION);
+  useEffect(() => {
+    if (prevCardCount !== null && myCards.length !== prevCardCount) {
+      toast.info(
+        `Ahora tienes ${
+          myCards.length === 1
+            ? myCards.length + " tarjeta"
+            : myCards.length + " tarjetas"
+        }`
+      );
+    }
+    setPrevCardCount(myCards.length);
+    dispatch(setMyCards({ myCards }));
+  }, [myCards, dispatch, prevCardCount]);
 
-  console.log("SUBSCRiption DATA", data);
-  console.log("SUBSCRiption LOADING", loading);
-  console.log("SUBSCRiption ERROR", error);
-
-  // const admin = user.userData.isAdmmin;
+  const { cardLoading, errorCards } = useCard();
   const isSS = user.userData.isSS;
 
   const [tab, setTab] = useState(
-    () => new URLSearchParams(location.search).get("tab") || "new-address"
+    () => new URLSearchParams(location.search).get("tab") || "cards"
   );
 
   useEffect(() => {
-    fetchMyCards();
-    isSS && fetchCards();
-  }, [fetchMyCards, fetchCards, isSS]);
+    if (data) {
+      const cards = data?.fullCard?.cards || [];
+      dispatch(setCards({ cards }));
+    }
+  }, [data, dispatch]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");
-
-    if (!tabFromUrl) {
-      if (tab !== "cards") {
-        navigate("?tab=cards", { replace: true });
-      }
-    } else if (tabFromUrl !== tab) {
-      setTab(tabFromUrl);
+    if (tabFromUrl !== tab) {
+      setTab(tabFromUrl || "cards");
+      navigate(`?tab=${tabFromUrl || "cards"}`, { replace: true });
     }
   }, [location.search, navigate, tab]);
 
   if (cardLoading) {
-    return <Loading text={"Cargando direcciones..."} w />;
+    return <Loading text={"Carregando cartões..."} w />;
   }
 
   if (errorCards) {
     console.error("Erro ao buscar os cards:", errorCards);
-    return <p>Error al cargar las tarjetas. Tente novamente más tarde.</p>;
+    return <p>Erro ao carregar os cartões. Tente novamente mais tarde.</p>;
   }
 
   return (
     <div>
       <ScrollToTop />
-      {isSS && <div>{<CardsSidebar />}</div>}
+      {isSS && <CardsSidebar />}
       {tab === "cards" && <Card />}
       {tab === "crear" && <NewCard />}
       {tab === "modificar" && <UpdateCard />}
