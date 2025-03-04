@@ -1,18 +1,35 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
-// https://direcciones.vercel.app/graphql
 export default defineConfig({
   server: {
     proxy: {
       "/graphql": {
-        // target: "http://localhost:8000",
-        target: "https://direcciones.vercel.app",
+        target: "http://localhost:8000",
         changeOrigin: true,
-        secure: true,
+        secure: false,
+        ws: true, // Permite WebSockets no ambiente local
       },
     },
   },
   plugins: [react()],
 });
+
+// import { defineConfig } from "vite";
+// import react from "@vitejs/plugin-react";
+
+// // https://vite.dev/config/
+// // https://direcciones.vercel.app/graphql
+// export default defineConfig({
+//   server: {
+//     proxy: {
+//       "/graphql": {
+//         // target: "http://localhost:8000",
+//         target: "https://direcciones.vercel.app",
+//         changeOrigin: true,
+//         secure: true,
+//       },
+//     },
+//   },
+//   plugins: [react()],
+// });
