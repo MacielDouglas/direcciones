@@ -5,14 +5,15 @@ import { getMainDefinition } from "@apollo/client/utilities";
 
 // Configuração do link HTTP para Queries e Mutations
 const httpLink = new HttpLink({
-  uri: "https://direcciones.vercel.app/graphql",
+  uri: "/graphql",
   credentials: "include",
 });
 
 // Configuração do link WebSocket para Subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: "wss://direcciones.vercel.app/graphql", // Para ambiente de produção no Vercel
+    // url: `ws://${window.location.host}/graphql`, // Para ambiente local
+    url: `ws://localhost:8000/graphql`, // Para ambiente local
     connectionParams: {
       credentials: "include",
     },

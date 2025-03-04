@@ -82,7 +82,7 @@ const startServer = async () => {
       origin: [
         "http://localhost:5173",
         "https://direcciones.vercel.app",
-        "wss://direcciones.vercel.app/graphql",
+        "ws://localhost:8000/graphql",
       ],
       credentials: true,
     }),
@@ -127,7 +127,7 @@ export default async (req, res) => {
 // import cardTypeDef from "./graphql/typeDefs/card.typeDef.js";
 // import addressTypeDef from "./graphql/typeDefs/address.typeDef.js";
 // import userResolver from "./graphql/resolvers/user.resolver.js";
-// import cardResolver from "./graphql/resolvers/card.resolver.js";
+// import { cardResolver } from "./graphql/resolvers/card.resolver.js";
 // import addressResolver from "./graphql/resolvers/address.resolver.js";
 
 // dotenv.config();
