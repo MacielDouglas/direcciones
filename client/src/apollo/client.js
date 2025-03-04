@@ -13,7 +13,8 @@ const httpLink = new HttpLink({
 const wsLink = new GraphQLWsLink(
   createClient({
     // url: `ws://${window.location.host}/graphql`, // Para ambiente local
-    url: `ws://localhost:8000/graphql`, // Para ambiente local
+    // url: `ws://localhost:8000/graphql`, // Para ambiente local
+    url: `ws://direcciones.vercel.app/graphql`, // Para ambiente local
     connectionParams: {
       credentials: "include",
     },
