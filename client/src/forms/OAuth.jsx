@@ -4,7 +4,7 @@ import { app } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { LOGIN_GOOGLE } from "../graphql/mutation/user.mutation";
-import { GET_ADDRESS } from "../graphql/queries/address.query";
+import { ADDRESSES } from "../graphql/queries/address.query";
 import { useDispatch } from "react-redux";
 import { useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
@@ -18,13 +18,14 @@ function OAuth() {
 
   // Mutação para login via Google
   const [loginGoogle, { loading: loginLoading }] = useMutation(LOGIN_GOOGLE, {
-    onCompleted: (data) => handleLoginResponse(data),
+    onCompleted: (data) => {
+      handleLoginResponse(data);
+    },
     onError: (error) => toast.error(`Erro no login: ${error.message}`),
   });
 
   // Query para buscar endereços
-  const [fetchAddresses] = useLazyQuery(GET_ADDRESS, {
-    variables: { action: "get", input: { street: "" } },
+  const [fetchAddresses] = useLazyQuery(ADDRESSES, {
     fetchPolicy: "network-only",
     onCompleted: (data) => handleAddressResponse(data),
     onError: (error) =>
@@ -34,9 +35,9 @@ function OAuth() {
   // Processa a resposta do login
   const handleLoginResponse = useCallback(
     (data) => {
-      const userData = data.loginGoogle?.user;
+      const userData = data.loginWithGoogle?.user;
 
-      if (data?.loginGoogle?.success && userData) {
+      if (data?.loginWithGoogle?.success && userData) {
         dispatch(setUser({ user: userData }));
         toast.success("¡Inicio de sesión exitoso!");
 
@@ -47,7 +48,9 @@ function OAuth() {
         }
       } else {
         toast.error(
-          `Erro no login: ${data?.loginGoogle?.message || "Erro desconhecido"}`
+          `Erro no login: ${
+            data?.loginWithGoogle?.message || "Erro desconhecido"
+          }`
         );
       }
     },
@@ -57,7 +60,7 @@ function OAuth() {
   // Processa a resposta da busca de endereços
   const handleAddressResponse = useCallback(
     (data) => {
-      const addresses = data?.address?.address;
+      const addresses = data?.addresses?.addresses;
 
       if (addresses && addresses.length > 0) {
         dispatch(setAddresses({ addresses }));

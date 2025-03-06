@@ -29,7 +29,6 @@ function Cards() {
   );
 
   const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
-    variables: { action: "get" },
     onCompleted: (data) => {
       if (data && data.card) {
         dispatch(setCards({ cards: data.card }));
@@ -43,12 +42,6 @@ function Cards() {
   useEffect(() => {
     fetchCards();
   }, [fetchCards]);
-
-  // useEffect(() => {
-  //   if (!cards?.cards || cards.cards.length === 0) {
-  //     fetchCards();
-  //   }
-  // }, [fetchCards, cards.cards]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");

@@ -17,7 +17,7 @@ import MapComponent from "../hooks/Mapcomponent";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
-  const cards = useSelector((state) => state.cards.cardsData?.card || []);
+  const cards = useSelector((state) => state.cards.cardsData || []);
   const [selectedAddresses, setSelectedAddresses] = useState([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [loading, setLoading] = useState(false);

@@ -10,8 +10,8 @@ import { GET_USERS } from "../../graphql/queries/user.query";
 import { setCards } from "../../store/cardsSlice";
 import Loading from "../../context/Loading";
 import {
-  DESIGNATED_CARD,
   RETURN_CARD,
+  SENDING_CARD,
 } from "../../graphql/mutation/cards.mutation";
 import { toast } from "react-toastify";
 import {
@@ -25,7 +25,7 @@ import SelectCardComponent from "../hooks/SelectCardComponent";
 
 function AssignCard() {
   const dispatch = useDispatch();
-  const cards = useSelector((state) => state.cards.cardsData.card || []);
+  const cards = useSelector((state) => state.cards.cardsData || []);
   const addresses = useSelector((state) => state.addresses.addressesData || []);
   const user = useSelector((state) => state.user.userData);
 
@@ -73,7 +73,7 @@ function AssignCard() {
     setCardNotAssigned(cards.filter((card) => card.startDate === null));
   }, [users, cards]);
 
-  const [designateCardInput] = useMutation(DESIGNATED_CARD, {
+  const [designateCardInput] = useMutation(SENDING_CARD, {
     onCompleted: async (data) => {
       toast.success(data.cardMutation.message);
       setModalOpen(false);

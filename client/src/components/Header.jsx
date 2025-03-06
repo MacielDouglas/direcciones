@@ -19,7 +19,7 @@ function Header() {
 
   const [logoutUser, { loading: isLoggingOut }] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
-      if (data.user.success) {
+      if (data.logout.success) {
         dispatch(clearUser());
         dispatch(clearCards());
         dispatch(clearAddresses());

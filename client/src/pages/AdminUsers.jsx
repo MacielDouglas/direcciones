@@ -8,10 +8,9 @@ import { toast } from "react-toastify";
 function AdminUsers() {
   const user = useSelector((state) => state.user.userData); // Usuário logado
   const { group } = user;
-  const { data: usersData, loading, error, refetch } = useQuery(GET_USERS);
+  const { data: usersData, loading, error } = useQuery(GET_USERS);
   const [updateUserInput] = useMutation(UPDATE_USER, {
     onCompleted: (data) => {
-      refetch();
       toast.success(data.userMutation.message);
     },
     onError: (error) => {
@@ -27,7 +26,7 @@ function AdminUsers() {
   if (loading) return <p>Carregando usuários...</p>;
   if (error) return <p>Erro ao carregar usuários: {error.message}</p>;
 
-  const users = usersData?.getUsers.users || [];
+  const users = usersData?.getUsers || [];
   const groupedUsers = users.filter((u) => u.group === group);
   const ungroupedUsers = users.filter((u) => u.group !== group);
 

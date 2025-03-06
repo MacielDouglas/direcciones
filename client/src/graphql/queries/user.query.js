@@ -1,37 +1,8 @@
 import { gql } from "@apollo/client";
 
-export const LOGIN_USER = gql`
-  query Login($action: String!, $email: String!, $password: String!) {
-    user(action: $action, email: $email, password: $password) {
-      message
-      success
-      user {
-        name
-        id
-        isAdmin
-        group
-        isSS
-        profilePicture
-        myCards {
-          cardId
-          date
-        }
-        myTotalCards {
-          cardId
-          date
-        }
-        comments {
-          cardId
-          text
-        }
-      }
-    }
-  }
-`;
-
 export const LOGOUT = gql`
-  query Logout($action: String!) {
-    user(action: $action) {
+  query LOGOUT {
+    logout {
       message
       success
     }
@@ -41,19 +12,11 @@ export const LOGOUT = gql`
 export const GET_USERS = gql`
   query GET_USERS {
     getUsers {
-      success
-      success
-      users {
-        name
-        codUser
-        group
-        profilePicture
-        id
-        myCards {
-          cardId
-          date
-        }
-      }
+      id
+      name
+      profilePicture
+      group
+      codUser
     }
   }
 `;

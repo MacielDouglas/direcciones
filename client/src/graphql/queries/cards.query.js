@@ -1,21 +1,31 @@
 import { gql } from "@apollo/client";
 
 export const GET_CARDS = gql`
-  query GET_CARDS($action: String!) {
-    card(action: $action) {
-      message
-      success
-      card {
+  query GET_CARDS {
+    card {
+      id
+      number
+      startDate
+      endDate
+      group
+      street {
         id
-        number
-        group
-        endDate
-        startDate
         street
-        usersAssigned {
-          userId
-          date
-        }
+        number
+        neighborhood
+        city
+        complement
+        gps
+        group
+        type
+        confirmed
+        visited
+        active
+        photo
+      }
+      usersAssigned {
+        date
+        userId
       }
     }
   }

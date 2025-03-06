@@ -1,24 +1,25 @@
 import { gql } from "@apollo/client";
 
-export const GET_ADDRESS = gql`
-  query GET_ADDRESS($action: String!, $input: FilterAddressInput!) {
-    address(action: $action, input: $input) {
+export const ADDRESSES = gql`
+  query ADDRESSES {
+    addresses {
       message
       success
-      address {
-        active
+      addresses {
+        id
         street
         number
-        complement
         neighborhood
         city
         gps
-        confirmed
-        id
+        complement
         photo
-        type
-        userId
+        confirmed
         visited
+        type
+        active
+        group
+        createdAt
       }
     }
   }

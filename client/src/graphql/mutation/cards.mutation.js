@@ -1,21 +1,20 @@
 import { gql } from "@apollo/client";
 
 export const NEW_CARD = gql`
-  mutation NewCard($action: String!, $newCard: NewCardInput!) {
-    cardMutation(action: $action, newCard: $newCard) {
+  mutation CREATE_CARD($newCard: NewCardInput!) {
+    createCard(newCard: $newCard) {
       message
       success
       card {
         id
-        street
         number
         startDate
         endDate
         group
+        street
         usersAssigned {
-          id
-          userId
           date
+          userId
         }
       }
     }
@@ -23,72 +22,71 @@ export const NEW_CARD = gql`
 `;
 
 export const UPDATE_CARD = gql`
-  mutation UpdateCard(
-    $action: String!
-    $cardMutationId: ID!
-    $updateCardInput: UpdateCardInput!
-  ) {
-    cardMutation(
-      action: $action
-      id: $cardMutationId
-      updateCardInput: $updateCardInput
-    ) {
-      message
+  mutation UPDATE_CARD($updateCardInput: UpdateCardInput!) {
+    updateCard(updateCardInput: $updateCardInput) {
       success
+      message
       card {
+        id
         number
-        street
-        userId
         startDate
         endDate
+        group
+        street
+        usersAssigned {
+          date
+          userId
+        }
       }
     }
   }
 `;
 
 export const DELETE_CARD = gql`
-  mutation DeleteCard($action: String!, $cardMutationId: ID!) {
-    cardMutation(action: $action, id: $cardMutationId) {
+  mutation DELETE_CARD($deleteCardId: ID!) {
+    deleteCard(id: $deleteCardId) {
       message
       success
     }
   }
 `;
 
-export const DESIGNATED_CARD = gql`
-  mutation DESIGNATED_CARD(
-    $action: String!
-    $designateCardInput: DesignateCardInput!
-  ) {
-    cardMutation(action: $action, designateCardInput: $designateCardInput) {
+export const SENDING_CARD = gql`
+  mutation SENDING_CARD($assignCardInput: AssignCardInput!) {
+    assignCard(assignCardInput: $assignCardInput) {
       message
       success
-      # card {
-      #   id
-      #   number
-      #   startDate
-      # }
+      card {
+        id
+        number
+        startDate
+        endDate
+        group
+        street
+        usersAssigned {
+          date
+          userId
+        }
+      }
     }
   }
 `;
 
 export const RETURN_CARD = gql`
-  mutation RETURNED_CARD(
-    $action: String!
-    $designateCardInput: DesignateCardInput!
-  ) {
-    cardMutation(action: $action, designateCardInput: $designateCardInput) {
+  mutation RETURN_CARD($returnCardInput: ReturnCardInput!) {
+    returnCard(returnCardInput: $returnCardInput) {
       message
       success
       card {
         id
-        endDate
+        number
         startDate
+        endDate
         group
+        street
         usersAssigned {
-          id
-          userId
           date
+          userId
         }
       }
     }

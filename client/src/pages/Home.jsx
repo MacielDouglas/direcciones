@@ -9,13 +9,14 @@ import {
   FaUsers,
 } from "react-icons/fa6";
 import menuOptions from "../constants/menu";
-import { GET_ADDRESS } from "../graphql/queries/address.query";
+import { ADDRESSES } from "../graphql/queries/address.query";
 import { setAddresses } from "../store/addressesSlice";
 
 export default function Home() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const cards = useSelector((state) => state.cards);
+  const addresses = useSelector((state) => state.addresses);
 
   const { name, isSS, group } = user.userData;
 
@@ -28,13 +29,7 @@ export default function Home() {
   };
 
   // Lazy Query para obter endereços
-  const [fetchAddresses, { data, loading, error }] = useLazyQuery(GET_ADDRESS, {
-    variables: {
-      action: "get",
-      input: {
-        street: "",
-      },
-    },
+  const [fetchAddresses, { data, loading, error }] = useLazyQuery(ADDRESSES, {
     onCompleted: (data) => {
       if (data) {
         dispatch(setAddresses({ addresses: data.address.address }));

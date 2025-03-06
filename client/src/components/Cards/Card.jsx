@@ -27,9 +27,9 @@ function Card() {
   const user = useSelector((state) => state.user);
   const [userLocation, setUserLocation] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const myCards = user?.userData?.myCards || [];
   const cardsData = useSelector((state) => state.cards) || [];
   const addressesData = useSelector((state) => state.addresses);
+  const myCards = cardsData?.myCardsData || [];
 
   const dispatch = useDispatch();
 
@@ -65,21 +65,6 @@ function Card() {
     },
   });
 
-  // const [returnedCardInput] = useMutation(RETURN_CARD, {
-  //   onCompleted: async (data) => {
-  //     console.log("Cartão retornado: ", data);
-  //     toast.success(data.cardMutation.message);
-  //     dispatch(setCards({ cards: null, sessionExpiry: null }));
-  //     // setModalOpen(false);
-  //     // setSelectedCard([]);
-  //     // await fetchCards();
-  //   },
-  //   onError: (error) => {
-  //     console.log(`Erro de retorno:, ${error}`);
-  //     toast.error(`Erro: ${error.message}`);
-  //   },
-  // });
-
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -100,19 +85,7 @@ function Card() {
     return <Loading text="No hay tarjetas disponible." />;
   if (myCards.length <= 0) return <Loading text="No hay tarjetas asignadas." />;
 
-  const filteredCards = myCards
-    .map((myCards) =>
-      cardsData?.cardsData.card.find((card) => card.id === myCards.cardId)
-    )
-    .filter(Boolean)
-    .map((card) => ({
-      ...card,
-      addresses: card.street
-        .map((streetId) =>
-          addressesData.addressesData.find((address) => address.id === streetId)
-        )
-        .filter(Boolean),
-    }));
+  const filteredCards = myCards;
 
   const handleReturnCard = async (cardIdReturn) => {
     await returnedCardInput({
@@ -158,13 +131,13 @@ function Card() {
                 concluir tarjeta
               </button>
               <h3 className="text-lg flex items-center gap-3 justify-end  text-stone-700">
-                <FaLocationDot /> Direcciones: {card.addresses.length}
+                <FaLocationDot /> Direcciones: {card.street.length}
               </h3>
             </div>
           </div>
-          {card.addresses.length > 0 ? (
+          {card.street.length > 0 ? (
             <ul className="space-y-4 p-2">
-              {card.addresses.map((address, index) => {
+              {card.street.map((address, index) => {
                 const [latitude, longitude] = address.gps
                   .split(",")
                   .map(parseFloat);
