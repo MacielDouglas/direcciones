@@ -14,427 +14,113 @@ import {
 
 const userResolver = {
   Query: {
-    user: async (_, { action, id, email, password }, { req, res }) => {
-      switch (action) {
-        case "get":
-          const decodedToken = verifyAuthorization(req);
-          if (!decodedToken) {
-            throw new Error("Você não tem permissão para acessar os usuários.");
-          }
+    getUsers: async (_, __, { req }) => {
+      try {
+        const decodedToken = verifyAuthorization(req);
+        if (!decodedToken) throw new Error("Você não tem permissão.");
 
-          try {
-            const user = await existing(id, "user");
+        const users = await User.find({}).lean();
 
-            const cards = await Card.find({ userId: user.id });
+        // ✅ Converte `_id` para `id` e remove `_id`
+        const formattedUsers = users.map((user) => ({
+          ...user,
+          id: user._id ? user._id.toString() : null, // Garante que `id` seja string
+        }));
 
-            const myCards = await Promise.all(
-              cards.map(async (card) => {
-                const streets = await Address.find({
-                  street: { $in: card.street },
-                });
-
-                return {
-                  id: card.id,
-                  number: card.number,
-                  startDate: card.startDate,
-                  endDate: card.endDate,
-                  streets,
-                };
-              })
-            );
-
-            return {
-              success: true,
-              message: `Usuário: ${user.name}, encontrado.`,
-              user: {
-                ...sanitizeUser(user),
-                myCards,
-              },
-            };
-          } catch (error) {
-            throw new Error(`Error get User: ${error.message}`);
-          }
-
-        case "login":
-          try {
-            const user = await validateUserCredentials(email, password);
-            const token = createToken(user);
-            setTokenCookie(res, token);
-
-            const cards = await Card.find({ userId: user.id });
-
-            return {
-              success: true,
-              message: `Usuário: ${user.name}, encontrado.`,
-              user: {
-                ...sanitizeUser(user),
-              },
-            };
-          } catch (error) {
-            throw new Error(`Error login User: ${error.message}`);
-          }
-
-        case "logout":
-          try {
-            res.clearCookie("access_token");
-            return {
-              success: true,
-              message: "User logged out successfully!!!",
-            };
-          } catch (error) {
-            throw new Error(`Error logout User: ${error.message}`);
-          }
-
-        default:
-          throw new Error("Ação inválida.");
+        return formattedUsers.filter((user) => user.id !== null); // ✅ Remove usuários sem `id`
+      } catch (error) {
+        console.error("Erro ao buscar usuários:", error);
+        return [];
       }
     },
-    getUsers: async (_, __, { req }) => {
+
+    // Consulta para pegar um único usuário com base no id ou email
+    user: async (_, { id, email }, { req }) => {
       const decodedToken = verifyAuthorization(req);
 
       if (!decodedToken) {
-        throw new Error("Você não tem permissão para acessar os usuários.");
+        throw new Error("Você não tem permissão para acessar este usuário.");
       }
 
       try {
-        let filter = {};
-
-        // Condições para definir o filtro baseado nas permissões do usuário
-        if (decodedToken.isAdmin) {
-          // Admin pode buscar todos os usuários
-          filter = {}; // Filtro vazio para pegar todos os usuários
-        } else if (decodedToken.isSS) {
-          // SS pode buscar usuários do seu grupo ou de group = 0
-          filter = { $or: [{ group: decodedToken.group }, { group: 0 }] };
-        } else {
-          // Usuário normal pode buscar apenas usuários do seu grupo
-          filter = { group: decodedToken.group };
+        let user;
+        if (id) {
+          user = await existing(id, "user");
+        } else if (email) {
+          user = await User.findOne({ email });
         }
 
-        // Buscar usuários conforme o filtro
-        const users = await User.find(
-          filter,
-          "id name group codUser myCards profilePicture"
+        if (!user) {
+          throw new Error("Usuário não encontrado.");
+        }
+
+        const cards = await Card.find({ userId: user.id });
+        const myCards = await Promise.all(
+          cards.map(async (card) => {
+            const streets = await Address.find({
+              street: { $in: card.street },
+            });
+
+            return {
+              id: card.id,
+              number: card.number,
+              startDate: card.startDate,
+              endDate: card.endDate,
+              streets,
+            };
+          })
         );
-
-        if (!users || users.length === 0) {
-          return {
-            success: false,
-            message: "Nenhum usuário encontrado para o grupo fornecido.",
-            users: [],
-          };
-        }
 
         return {
           success: true,
-          message: `Usuários encontrados.`,
-          users, // A lista já contém apenas `id` e `name`
+          message: `Usuário: ${user.name}, encontrado.`,
+          user: {
+            ...sanitizeUser(user),
+            myCards,
+          },
         };
       } catch (error) {
-        throw new Error(`Erro ao buscar usuários: ${error.message}`);
+        throw new Error(`Erro ao buscar o usuário: ${error.message}`);
+      }
+    },
+    logout: async (_, __, { req, res }) => {
+      try {
+        const decodedToken = verifyAuthorization(req);
+        if (!decodedToken) {
+          throw new Error("Você não tem permissão para acessar este usuário.");
+        }
+
+        res.clearCookie("access_token");
+        return {
+          success: true,
+          message: "Usuário deslogado com sucesso.",
+        };
+      } catch (error) {
+        throw new Error(`Error logout User: ${error.message}`);
       }
     },
   },
 
   Mutation: {
-    userMutation: async (
-      _,
-      { action, user, id, updateUserInput, cardIds },
-      { req, res }
-    ) => {
-      switch (action) {
-        case "create":
-          try {
-            const [existingEmail, existingNameUser] = await Promise.all([
-              User.findOne({ email: user.email }),
-              // User.findOne({ name: user.name }),
-            ]);
-
-            if (existingEmail) {
-              throw new Error("Email already in use");
-            }
-
-            // if (existingNameUser) {
-            //   throw new Error("Name already in use");
-            // }
-
-            const sanitizedEmail = user.email.trim().toLowerCase();
-            const sanitizedName = user.name.trim();
-
-            const defaultProfilePicture =
-              "https://firebasestorage.googleapis.com/v0/b/queimando-panela.appspot.com/o/perfil%2F1722454447282user.webp?alt=media&token=3dd585aa-5ce9-4bb3-9d46-5ecf11d1e60c";
-
-            const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
-            const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-
-            const newUser = new User({
-              ...user,
-              email: sanitizedEmail,
-              name: sanitizedName,
-              password: hashedPassword,
-              profilePicture: defaultProfilePicture,
-              group: "0",
-            });
-
-            await newUser.save();
-
-            return {
-              success: true,
-              message: `Usuário: ${user.name}, criado.`,
-              user: sanitizeUser(newUser),
-            };
-          } catch (error) {
-            throw new Error(`Error creating new User: ${error.message}`);
-          }
-
-        case "delete":
-          try {
-            const decodedToken = verifyAuthorization(req);
-            if (!decodedToken) {
-              throw new Error(
-                "Você não tem permissão para excluir esse usuário."
-              );
-            }
-            const user = await existing(id, "user");
-
-            // Validação das permissões: pode deletar se for o próprio usuário ou se for admin ou SS
-            const hasPermission =
-              decodedToken.userId === user.id ||
-              decodedToken.isAdmin ||
-              decodedToken.isSS;
-
-            if (!hasPermission) {
-              throw new Error(
-                "Você não tem permissão para excluir este usuário."
-              );
-            }
-
-            const deleteResult = await User.deleteOne({ _id: user.id });
-            if (deleteResult.deletedCount === 0) {
-              throw new Error(
-                "Erro ao excluir o usuário. Usuário não encontrado."
-              );
-            }
-
-            res.clearCookie("access_token");
-
-            return {
-              success: true,
-              message: `Usuário: ${user.name} foi excluído com sucesso.`,
-            };
-          } catch (error) {
-            throw new Error(`Erro ao excluir usuário: ${error.message}`);
-          }
-
-        case "addGroup":
-          try {
-            const { newName, userMutationId } = updateUserInput; // Obtém o novo nome do corpo da requisição
-            const userToUpdate = await existing(userMutationId, "user"); // Inicializa primeiro
-            const decodedToken = verifyAuthorization(req);
-
-            if (!decodedToken || !decodedToken.isSS) {
-              throw new Error("No tienes permiso para cambiar este usuario.");
-            }
-
-            if (userToUpdate.isAdmin) {
-              throw new Error("No tienes permiso para cambiar este usuario.");
-            }
-
-            const userUpdate = {};
-            const group = decodedToken.group;
-
-            // Verifica se o usuário já pertence ao grupo
-            if (decodedToken.group === userToUpdate.group) {
-              // Usuário já pertence ao grupo, resetar informações e removê-lo do grupo
-              userUpdate.group = "0";
-              userUpdate.myCards = [];
-              userUpdate.myTotalCards = [];
-              userUpdate.comments = [];
-              userUpdate.isAdmin = false;
-              userUpdate.isSS = false;
-              userUpdate.isSCards = false;
-
-              const updatedUser = await User.findByIdAndUpdate(
-                userMutationId,
-                userUpdate,
-                {
-                  new: true,
-                }
-              );
-
-              return {
-                success: true,
-                message: `El usuario ${updatedUser.name}, ha sido eliminado del grupo y sus informaciónes fue borrada.`,
-                user: sanitizeUser(updatedUser),
-              };
-            }
-
-            if (userToUpdate.group !== "0") {
-              throw new Error(
-                "Este usuario ya pertenece a otro grupo. Primero, elimínelo del grupo actual.."
-              );
-            }
-
-            // Valida e atualiza o nome, se fornecido
-            if (newName) {
-              if (!newName.trim()) {
-                throw new Error(
-                  "El nombre proporcionado no es válido. Por favor, introduzca un nombre válido"
-                );
-              }
-
-              // Valida duplicação de nome dentro do mesmo grupo
-              const isDuplicateName = await User.exists({
-                name: newName.trim(),
-                group: decodedToken.group,
-              });
-
-              if (isDuplicateName) {
-                throw new Error(
-                  `Ya hay un usuario con el nombre '${newName.trim()}' en el grupo. Por favor elija otro nombre.`
-                );
-              }
-
-              userUpdate.name = newName.trim();
-            }
-
-            // Valida e atualiza o grupo apenas se o usuário tiver permissão
-            if (group && group.trim()) {
-              if (!decodedToken.isSS && !decodedToken.isSCards) {
-                throw new Error(
-                  "No tienes permiso para cambiar el campo 'grupo'."
-                );
-              }
-
-              userUpdate.group = group;
-            }
-
-            const updatedUser = await User.findByIdAndUpdate(
-              userMutationId,
-              userUpdate,
-              {
-                new: true,
-              }
-            );
-
-            return {
-              success: true,
-              message: `El usuario ${updatedUser.name} se agregó correctamente al grupo.`,
-              user: sanitizeUser(updatedUser),
-            };
-          } catch (error) {
-            throw new Error(`Error al actualizar el usuario: ${error.message}`);
-          }
-
-        case "update":
-          try {
-            const userToUpdate = await existing(id, "user"); // Inicializa primeiro
-
-            const decodedToken = verifyAuthorization(req);
-            if (!decodedToken || decodedToken.userId !== userToUpdate.id) {
-              throw new Error(
-                "Você não tem permissão para alterar esse usuário."
-              );
-            }
-
-            const userUpdate = {};
-            const { name } = updateUserInput;
-
-            // Atualiza o nome, se fornecido
-            if (name && name.trim()) {
-              userUpdate.name = name;
-            }
-
-            const updatedUser = await User.findByIdAndUpdate(id, userUpdate, {
-              new: true,
-            });
-
-            return {
-              success: true,
-              message: `Usuário atualizado com sucesso.`,
-              user: sanitizeUser(updatedUser),
-            };
-          } catch (error) {
-            throw new Error(`Erro ao atualizar o usuário: ${error.message}`);
-          }
-
-        case "designateIss":
-          try {
-            const decodedToken = verifyAuthorization(req);
-
-            if (!decodedToken || !decodedToken.isAdmin) {
-              throw new Error("Apenas administradores podem designar 'isSS'.");
-            }
-
-            const userToDesignate = await existing(id, "user");
-
-            userToDesignate.isSS = true;
-            await userToDesignate.save();
-
-            return {
-              success: true,
-              message: `Usuário ${userToDesignate.name} agora é SS.`,
-              user: sanitizeUser(userToDesignate),
-            };
-          } catch (error) {
-            throw new Error(`Erro ao designar 'isSS': ${error.message}`);
-          }
-
-        case "designateGroup":
-          try {
-            const decodedToken = verifyAuthorization(req);
-
-            if (
-              !decodedToken ||
-              (!decodedToken.isSS && !decodedToken.isSCards)
-            ) {
-              throw new Error("Você não tem permissão para designar grupo.");
-            }
-
-            const userToDesignate = await existing(id, "user");
-
-            const { group } = updateUserInput;
-            if (!group) {
-              throw new Error("Grupo não fornecido.");
-            }
-
-            userToDesignate.group = group;
-            await userToDesignate.save();
-
-            return {
-              success: true,
-              message: `Usuário ${userToDesignate.name} agora está no grupo ${group}.`,
-              user: sanitizeUser(userToDesignate),
-            };
-          } catch (error) {
-            throw new Error(`Erro ao designar grupo: ${error.message}`);
-          }
-
-        default:
-          throw new Error("Ação inválida.");
-      }
-    },
-
-    loginGoogle: async (_, { user }, { res }) => {
+    // Login usando o Google
+    loginWithGoogle: async (_, { user }, { res }) => {
       const { email, displayName, photoUrl, uid } = user;
 
       try {
-        // Validação básica do e-mail
+        // Validação do e-mail
         if (!email || typeof email !== "string") {
           throw new Error("E-mail inválido.");
         }
 
         // Verifica se o usuário já existe
-        const existUser = await User.findOne({ email: email });
+        let existUser = await User.findOne({ email });
 
         if (!existUser) {
           const saltRounds = parseInt(process.env.SALT_ROUNDS) || 10;
           const hashedPassword = await bcrypt.hash(uid, saltRounds);
 
-          // Gera o número único
+          // Criação do novo usuário
           const numberUnique = await hashToNumbers(uid);
-
-          // Cria um novo usuário
           const newUser = new User({
             name: displayName,
             email: email,
@@ -444,34 +130,91 @@ const userResolver = {
             codUser: numberUnique,
           });
 
-          // Tenta salvar o novo usuário no banco
-          try {
-            await newUser.save();
-          } catch (saveError) {
-            throw new Error(
-              `Erro ao salvar novo usuário: ${saveError.message}`
-            );
-          }
+          await newUser.save();
+          existUser = newUser;
         }
 
+        // Valida as credenciais do usuário
         const user = await validateUserCredentials(email, uid);
 
-        // Gera um token para o usuário
+        // Cria o token de acesso
         const token = createToken(user);
-
-        // Define o token no cookie
         setTokenCookie(res, token);
 
-        // Retorna sucesso
         return {
           success: true,
           message: `Usuário: ${user.name}, encontrado.`,
-          user: {
-            ...sanitizeUser(user),
-          },
+          user: sanitizeUser(user),
         };
       } catch (error) {
-        throw new Error(`Erro ao fazer login: ${error.message}`);
+        throw new Error(`Erro ao fazer login com Google: ${error.message}`);
+      }
+    },
+
+    // Deleta um usuário
+    deleteUser: async (_, { id }, { req, res }) => {
+      const decodedToken = verifyAuthorization(req);
+
+      if (!decodedToken) {
+        throw new Error("Você não tem permissão para excluir esse usuário.");
+      }
+
+      try {
+        const user = await existing(id, "user");
+
+        // Verifica se o usuário tem permissão para excluir
+        const hasPermission =
+          decodedToken.userId === user.id ||
+          decodedToken.isAdmin ||
+          decodedToken.isSS;
+
+        if (!hasPermission) {
+          throw new Error("Você não tem permissão para excluir este usuário.");
+        }
+
+        const deleteResult = await User.deleteOne({ _id: user.id });
+        if (deleteResult.deletedCount === 0) {
+          throw new Error("Erro ao excluir o usuário. Usuário não encontrado.");
+        }
+
+        res.clearCookie("access_token");
+
+        return {
+          success: true,
+          message: `Usuário: ${user.name} foi excluído com sucesso.`,
+        };
+      } catch (error) {
+        throw new Error(`Erro ao excluir usuário: ${error.message}`);
+      }
+    },
+
+    // Atualiza informações de um usuário
+    updateUser: async (_, { id, user }, { req }) => {
+      const decodedToken = verifyAuthorization(req);
+
+      if (!decodedToken || decodedToken.userId !== id) {
+        throw new Error("Você não tem permissão para alterar esse usuário.");
+      }
+
+      try {
+        const userToUpdate = await existing(id, "user");
+        const userUpdate = { ...user };
+
+        if (user.name) {
+          userUpdate.name = user.name.trim();
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(id, userUpdate, {
+          new: true,
+        });
+
+        return {
+          success: true,
+          message: "Usuário atualizado com sucesso.",
+          user: sanitizeUser(updatedUser),
+        };
+      } catch (error) {
+        throw new Error(`Erro ao atualizar o usuário: ${error.message}`);
       }
     },
   },

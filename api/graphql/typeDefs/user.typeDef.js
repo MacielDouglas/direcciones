@@ -1,8 +1,8 @@
 const userTypeDef = `#graphql
 
 type Comment {
-    cardId: ID!  
-    text: String!   
+    cardId: ID!
+    text: String!
 }
 
 type Address {
@@ -13,7 +13,7 @@ type Address {
     city: String!
     gps: String
     complement: String
-    userId: String!
+    userId: ID!
     type: String!
     photo: String
     confirmed: Boolean!
@@ -31,24 +31,8 @@ type User {
     group: String!
     isSS: Boolean!
     isSCards: Boolean!
-    myCards: [CardAssociation]
-    myTotalCards: [CardAssociation]
-    comments: [Comment] 
     idToken: String
     codUser: Int!
-}
-
-type CardAssociation {
-    cardId: ID!
-    date: String!
-}
-
-type CardWithStreet {
-    id: ID!
-    number: Int
-    startDate: String
-    endDate: String
-    streets: [Address]
 }
 
 type UserSummary {
@@ -57,29 +41,22 @@ type UserSummary {
     group: String
     codUser: Int
     profilePicture: String
-    myCards: [CardAssociation]
 }
 
 type Query {
-    user(action: String!, id: ID, email: String, password: String, group: String): UserResponse
-    getUsers: UsersResponse
-    firebaseConfig: EncryptedConfig
+    getUsers: [UserSummary]
+    user(id: ID, email: String): UserResponse
+    logout: UserResponse
 }
 
-
 type Mutation {
-    userMutation(action: String!, user: NewUserInput, id: ID, updateUserInput: UpdateUserInput, idToken: String): UserMutationResponse!
-    loginGoogle(user: UserGoogle!): UserResponse
+    loginWithGoogle(user: UserGoogle!): UserResponse!
+    deleteUser(id: ID!): UserMutationResponse!
+    updateUser(id: ID!, user: UpdateUserInput!): UserMutationResponse!
 }
 
 type UserResponse {
     user: User
-    success: Boolean
-    message: String
-}
-
-type UsersResponse {
-    users: [UserSummary]
     success: Boolean!
     message: String
 }
@@ -94,8 +71,17 @@ input UserGoogle {
     displayName: String!
     email: String!
     photoUrl: String!
-    # name: String!
     uid: String!
+}
+
+input UpdateUserInput {
+    name: String
+    email: String
+    profilePicture: String
+    isAdmin: Boolean
+    group: String
+    isSS: Boolean
+    isSCards: Boolean
 }
 
 type LoginGoogleResponse {
@@ -103,27 +89,6 @@ type LoginGoogleResponse {
     message: String!
     name: String!
     photoUrl: String
-    
-}
-
-input UpdateUserInput {
-    userMutationId: String
-    newName: String
-}
-
-input NewUserInput {
-    name: String!
-    email: String!
-    password: String!
-    profilePicture: String!
-    isAdmin: Boolean
-    group: String
-    isSS: Boolean
-}
-
-type EncryptedConfig {
-  encryptedData: String
 }
 `;
-
 export default userTypeDef;

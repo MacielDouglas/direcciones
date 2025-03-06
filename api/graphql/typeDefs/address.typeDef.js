@@ -1,82 +1,75 @@
 const addressTypeDef = `#graphql
 
-type Address {
+  type Address {
     id: ID!
     street: String!
     number: String!
-    neighborhood: String
     city: String!
+    neighborhood: String!
     gps: String
     complement: String
-    userId: String!
     type: String!
     photo: String
+    userId: ID!
+    active: Boolean
     confirmed: Boolean!
-    active: Boolean!
+    group: String!
     visited: Boolean!
-    group: String! # Campo obrigatório para alinhar com User e Card
-}
+    createdAt: String
+    updatedAt: String
+  }
 
-type Query {
-    address(action: String!, id: ID, input: FilterAddressInput): AddressResponse
-}
+  type AddressResponse {
+    success: Boolean!
+    message: String!
+    address: Address
+  }
 
-input FilterAddressInput {
-    street: String
-}
+  type AddressListResponse {
+    success: Boolean!
+    message: String!
+    addresses: [Address]!
+  }
 
-type AddressResponse {
-    address: [Address]
-    success: Boolean
-    message: String
-}
+  type Query {
+    addresses: AddressListResponse!
+  }
 
-type Mutation {
-    addressMutation(
-        action: String!, 
-        newAddress: NewAddressInput, 
-        id: ID, 
-        updateAddressInput: UpdateAddressInput
-    ): AddressMutationResponse!
-}
-
-input NewAddressInput {
-    userId: String!
+  input AddressInput {
     street: String!
     number: String!
-    neighborhood: String
     city: String!
+    neighborhood: String!
     gps: String
     complement: String
     type: String!
     photo: String
+    active: Boolean
     confirmed: Boolean!
-    active: Boolean!
-    visited: Boolean
-    group: String! # O grupo é obrigatório para criação de um novo endereço
-}
+    visited: Boolean!
+  }
 
-input UpdateAddressInput {
-    userId: String
+  input UpdateAddressInput {
+    id: ID!
     street: String
     number: String
-    neighborhood: String
     city: String
+    neighborhood: String
     gps: String
     complement: String
     type: String
     photo: String
-    confirmed: Boolean
     active: Boolean
+    confirmed: Boolean
+    group: String
     visited: Boolean
-    group: String # O grupo pode ser atualizado
-}
+  }
 
-type AddressMutationResponse {
-    success: Boolean
-    message: String
-    address: Address
-}
+  type Mutation {
+    createAddress(newAddressInput: AddressInput!): AddressResponse!
+    updateAddress(input: UpdateAddressInput!): AddressResponse!
+    deleteAddress(id: ID!): AddressResponse!
+  }
 `;
 
 export default addressTypeDef;

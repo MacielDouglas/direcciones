@@ -2,12 +2,29 @@ const cardTypeDef = `#graphql
 
 type Card {
     id: ID!
-    street: [String]!
+    street: [String]!  # Retorna todos os endereços
     usersAssigned: [Assigned]!
     number: Int
     startDate: String
     endDate: String
-    group: String! # O grupo está alinhado ao grupo do usuário
+    group: String!
+}
+
+type Address {
+    id: ID
+    street: String!
+    number: String!
+    city: String!
+    neighborhood: String!
+    gps: String
+    complement: String
+    type: String!
+    photo: String
+    userId: ID!
+    active: Boolean!
+    confirmed: Boolean!
+    group: String!
+    visited: Boolean!
 }
 
 type Assigned {
@@ -17,41 +34,48 @@ type Assigned {
 }
 
 type Query {
-    card(action: String!, id: ID): CardResponse
+    card: [CardResponse]!
 }
 
 type Mutation {
-    cardMutation(
-        action: String!,
-        newCard: NewCardInput,
-        id: ID,
-        updateCardInput: UpdateCardInput
-        designateCardInput: DesignateCardInput!
-    ): CardMutationResponse
+    createCard(newCard: NewCardInput!): CardMutationResponse
+    updateCard(updateCardInput: UpdateCardInput!): CardMutationResponse
+    deleteCard(id: ID!): CardMutationResponse
+    assignCard(assignCardInput: AssignCardInput!): AssignCardMutationResponse
+    returnCard(returnCardInput: ReturnCardInput!): CardMutationResponse
 }
 
-type CardResponse {
-    card: [Card]
-    success: Boolean
-    message: String
-}
 
-input NewCardInput {
-    street: [String]!
-    userId: String
+
+ type CardResponse {
+    id: ID!
+    street: [Address]!  # Retorna todos os endereços
+    usersAssigned: [Assigned]!
     number: Int
     startDate: String
     endDate: String
-    # group: String! # O grupo deve ser obrigatório e associado a um grupo existente
+    group: String!
+ }
+
+type CardMutationResponse {
+    success: Boolean!
+    message: String!
+    card: Card
+}
+type AssignCardMutationResponse {
+    success: Boolean!
+    message: String!
+    card: [Card]
+}
+
+
+input NewCardInput {
+    street: [String]!  # Referência aos endereços
 }
 
 input UpdateCardInput {
+    id: ID!
     street: [String]
-    usersAssigned: [AssignedInput]
-    number: Int
-    startDate: String
-    endDate: String
-    group: String # O grupo pode ser atualizado
 }
 
 input AssignedInput {
@@ -59,15 +83,14 @@ input AssignedInput {
     date: String!
 }
 
-input DesignateCardInput {
-    cardId: [ID]!
+input ReturnCardInput {
     userId: ID!
+    cardId: ID!
 }
 
-type CardMutationResponse {
-    success: Boolean
-    message: String
-    card: Card
+input AssignCardInput {
+    cardIds: [ID]!
+    userId: ID!
 }
 `;
 

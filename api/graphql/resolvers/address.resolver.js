@@ -1,256 +1,176 @@
-import validator from "validator";
-import mongoose from "mongoose";
 import Address from "../../models/address.models.js";
-import Card from "../../models/card.models.js";
-import User from "../../models/user.models.js";
-import { validateObjectId, verifyAuthorization } from "../../utils/utils.js";
+import { verifyAuthorization } from "../../utils/utils.js";
 
-const addressResolver = {
+const addressResolvers = {
   Query: {
-    address: async (_, { action, input, id }, { req }) => {
+    addresses: async (_, __, { req }) => {
       try {
         const decodedToken = verifyAuthorization(req);
         if (!decodedToken) {
           throw new Error("Você não tem permissão.");
         }
 
-        // Obtendo o grupo do token decodificado
         const group = decodedToken.group;
-        if (!group) {
-          throw new Error("Grupo não fornecido.");
-        }
-
-        const query = { group };
-
-        // Filtros adicionais opcionais
-        if (input?.street) {
-          query.street = { $regex: new RegExp(input.street, "i") };
-        }
-        if (input?.city) {
-          query.city = input.city.trim().toLowerCase();
-        }
-        if (input?.type) {
-          query.type = input.type.trim().toLowerCase();
-        }
-
-        // Configurando paginação com valores padrão
-        const limit = Math.min(input?.limit || 50, 100);
-        const skip = input?.skip || 0;
-
-        // Buscando pelo ID específico, se fornecido
-        if (id) {
-          if (!mongoose.Types.ObjectId.isValid(id)) {
-            throw new Error("ID inválido.");
-          }
-
-          const addressById = await Address.findOne({ _id: id, group })
-            .populate("userId", "name email")
-            .lean();
-
-          if (!addressById) {
-            throw new Error("Endereço não encontrado.");
-          }
-
-          return {
-            message: "Endereço encontrados.",
-            success: true,
-            address: [
-              {
-                ...addressById,
-                id: addressById._id.toString(),
-                userId: addressById.userId.name,
-              },
-            ],
-          };
-        }
-
-        // Buscando lista de endereços com base nos filtros
-        const addresses = await Address.find(query)
-          .populate("userId", "name email")
-          .limit(limit)
-          .skip(skip)
-          .lean();
+        const addresses = await Address.find({ group });
 
         return {
-          message: addresses.length
-            ? "Endereços encontrados."
-            : "Nenhum endereço encontrado.",
           success: true,
-          address: addresses.map((address) => ({
-            ...address,
-            id: address._id.toString(),
-            userId: address.userId.name,
-          })),
+          message: "Endereços recuperados com sucesso.",
+          addresses,
         };
       } catch (error) {
-        throw new Error(`Erro ao buscar endereços: ${error.message}`);
+        return {
+          success: false,
+          message: error.message,
+          addresses: [],
+        };
       }
     },
   },
 
   Mutation: {
-    addressMutation: async (
-      _,
-      { action, id, newAddress, updateAddressInput },
-      { req }
-    ) => {
-      const decodedToken = verifyAuthorization(req);
-      if (!decodedToken) {
-        throw new Error("Você não tem permissão.");
-      }
+    createAddress: async (_, { newAddressInput }, { req }) => {
+      try {
+        const decodedToken = verifyAuthorization(req);
+        if (!decodedToken) {
+          throw new Error("Você não tem permissão.");
+        }
 
-      switch (action) {
-        case "create":
-          try {
-            const formattedAddress = {
-              street: newAddress.street?.trim().toLowerCase(),
-              number: newAddress.number?.trim().toLowerCase(),
-              city: newAddress.city?.trim().toLowerCase(),
-              neighborhood: newAddress.neighborhood?.trim().toLowerCase() || "",
-              complement: newAddress.complement?.trim().toLowerCase() || "",
-              type: newAddress.type?.trim().toLowerCase(),
-              photo: newAddress.photo?.trim(),
-              gps: newAddress.gps?.trim(),
-              group: decodedToken.group,
-              userId: decodedToken.userId, // Relacionar com o usuário autenticado
-              visited: newAddress.visited,
-              confirmed: newAddress.confirmed,
-              active: newAddress.active,
-            };
+        const { street, number, neighborhood, city, type, complement } =
+          newAddressInput;
 
-            if (
-              !formattedAddress.street ||
-              !formattedAddress.number ||
-              !formattedAddress.city ||
-              !formattedAddress.type
-            ) {
-              throw new Error(
-                "Os campos rua, número, cidade e tipo são obrigatórios."
-              );
-            }
+        // Verifica se existe street
+        if (street) {
+          // Verifica se existe um endereço com o mesmo número, bairro, cidade
+          const existingAddress = await Address.findOne({
+            street,
+            number,
+            neighborhood,
+            city,
+            type,
+            complement,
+            group: decodedToken.group, // Garantir que o endereço seja do mesmo grupo
+          });
 
-            const existingAddress = await Address.findOne({
-              street: formattedAddress.street,
-              number: formattedAddress.number,
-              city: formattedAddress.city,
-            });
-
-            if (existingAddress) {
-              throw new Error("Endereço já existente.");
-            }
-
-            const address = new Address(formattedAddress);
-
-            await address.save();
-
+          if (
+            existingAddress &&
+            existingAddress.type === "department" &&
+            existingAddress.complement === complement
+          ) {
             return {
-              message: "Novo endereço criado.",
-              success: true,
-              address: { ...address.toObject(), id: address._id.toString() },
-            };
-          } catch (error) {
-            throw new Error(`Erro ao criar endereço: ${error.message}`);
-          }
-
-        case "update":
-          try {
-            validateObjectId(id);
-            const address = await Address.findById(id);
-            if (!address) {
-              throw new Error("Endereço não encontrado.");
-            }
-
-            const addressUpdate = {};
-            const {
-              street,
-              number,
-              city,
-              neighborhood,
-              complement,
-              gps,
-              type,
-              photo,
-              confirmed,
-              visited,
-            } = updateAddressInput;
-
-            if (street) addressUpdate.street = street.trim().toLowerCase();
-            if (number) addressUpdate.number = number.trim();
-            if (city) addressUpdate.city = city.trim().toLowerCase();
-            if (neighborhood)
-              addressUpdate.neighborhood = neighborhood.trim().toLowerCase();
-            if (complement) addressUpdate.complement = complement.trim();
-            if (gps) addressUpdate.gps = gps.trim();
-            if (type) addressUpdate.type = type.trim().toLowerCase();
-            if (photo) addressUpdate.photo = photo.trim();
-            if (typeof confirmed === "boolean")
-              addressUpdate.confirmed = confirmed;
-            if (typeof visited === "boolean") addressUpdate.visited = visited;
-
-            if (Object.keys(addressUpdate).length > 0) {
-              const updatedAddress = await Address.findByIdAndUpdate(
-                id,
-                { $set: addressUpdate },
-                { new: true, runValidators: true }
-              ).lean();
-
-              return {
-                message: "Endereço atualizado com sucesso.",
-                success: true,
-                address: {
-                  ...updatedAddress,
-                  id: updatedAddress._id.toString(),
-                },
-              };
-            } else {
-              return {
-                message: "Nenhuma alteração realizada.",
-                success: false,
-                address: address.toObject(),
-              };
-            }
-          } catch (error) {
-            throw new Error(`Erro ao atualizar endereço: ${error.message}`);
-          }
-
-        case "delete":
-          try {
-            validateObjectId(id);
-
-            const address = await Address.findById(id);
-            if (!address) {
-              throw new Error("Endereço não encontrado.");
-            }
-
-            // Atualizar todos os cartões relacionados para remover o endereço
-            await Card.updateMany(
-              { street: id },
-              { $pull: { street: id } },
-              { multi: true }
-            );
-
-            // Atualizar todos os usuários relacionados
-            await User.updateMany(
-              { "myCards.address": id },
-              { $pull: { "myCards.address": id } }
-            );
-
-            await Address.deleteOne({ _id: id });
-
-            return {
-              message: "Endereço deletado com sucesso.",
-              success: true,
+              success: false,
+              message:
+                "Já existe um APARTAMENTO com mesmo endereço, numero, complemento, bairro e cidade...",
               address: null,
             };
-          } catch (error) {
-            throw new Error(`Erro ao deletar endereço: ${error.message}`);
           }
 
-        default:
-          throw new Error("Ação inválida.");
+          if (existingAddress && existingAddress.type !== "department") {
+            return {
+              success: false,
+              message: "Este endereço já existe.",
+              address: null,
+            };
+          }
+        }
+
+        // Criação do novo endereço se não existir um duplicado
+        const newAddress = new Address({
+          ...newAddressInput,
+          group: decodedToken.group, // Define o grupo do usuário
+          userId: decodedToken.userId,
+        });
+
+        const savedAddress = await newAddress.save();
+
+        return {
+          success: true,
+          message: "Endereço criado com sucesso.",
+          address: savedAddress,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          address: null,
+        };
+      }
+    },
+
+    updateAddress: async (_, { input }, { req }) => {
+      try {
+        const decodedToken = verifyAuthorization(req);
+        if (!decodedToken) {
+          throw new Error("Você não tem permissão.");
+        }
+
+        const existingAddress = await Address.findById(input.id);
+        if (!existingAddress) {
+          throw new Error("Endereço não encontrado.");
+        }
+
+        // Filtra apenas os campos que realmente foram alterados
+        const updatedFields = {};
+        Object.keys(input).forEach((key) => {
+          if (
+            input[key] !== undefined &&
+            input[key] !== null &&
+            input[key] !== existingAddress[key]
+          ) {
+            updatedFields[key] = input[key];
+          }
+        });
+
+        if (Object.keys(updatedFields).length === 0) {
+          throw new Error("Nenhuma alteração detectada.");
+        }
+
+        const updatedAddress = await Address.findByIdAndUpdate(
+          input.id,
+          updatedFields,
+          { new: true }
+        );
+
+        return {
+          success: true,
+          message: "Endereço atualizado com sucesso.",
+          address: updatedAddress,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          address: null,
+        };
+      }
+    },
+
+    deleteAddress: async (_, { id }, { req }) => {
+      try {
+        const decodedToken = verifyAuthorization(req);
+        if (!decodedToken) {
+          throw new Error("Você não tem permissão.");
+        }
+
+        const deletedAddress = await Address.findByIdAndDelete(id);
+        if (!deletedAddress) {
+          throw new Error("Endereço não encontrado.");
+        }
+
+        return {
+          success: true,
+          message: "Endereço excluído com sucesso.",
+          address: deletedAddress,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          message: error.message,
+          address: null,
+        };
       }
     },
   },
 };
 
-export default addressResolver;
+export default addressResolvers;

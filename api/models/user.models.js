@@ -48,54 +48,6 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
-    myCards: {
-      type: [
-        {
-          cardId: {
-            type: Types.ObjectId,
-            ref: "Card",
-            required: true,
-          },
-          date: {
-            type: String,
-            required: true,
-          },
-        },
-      ],
-      default: [],
-    },
-    myTotalCards: {
-      type: [
-        {
-          cardId: {
-            type: Types.ObjectId,
-            ref: "Card",
-            required: true,
-          },
-          date: {
-            type: String,
-            required: true,
-          },
-        },
-      ],
-      default: [],
-    },
-    comments: {
-      type: [
-        {
-          cardId: {
-            type: Types.ObjectId,
-            ref: "Card",
-            required: true,
-          },
-          text: {
-            type: String,
-            maxlength: 250,
-          },
-        },
-      ],
-      default: [],
-    },
   },
   { timestamps: true }
 );
@@ -106,22 +58,7 @@ userSchema.pre("save", function (next) {
     this.isAdmin = false;
     this.isSS = false;
     this.isSCards = false;
-    this.myCards = [];
-    this.myTotalCards = [];
-    this.comments = [];
   }
-  next();
-});
-
-// Middleware para remover myTotalCards após um ano
-userSchema.pre("save", function (next) {
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-  this.myTotalCards = this.myTotalCards.filter((card) => {
-    return new Date(card.date) >= oneYearAgo;
-  });
-
   next();
 });
 
