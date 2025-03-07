@@ -6,6 +6,8 @@ import { useCallback } from "react";
 import { useLazyQuery } from "@apollo/client";
 import { LOGOUT } from "../graphql/queries/user.query";
 import { clearUser } from "../store/userSlice";
+import { clearAddresses } from "../store/addressesSlice";
+import { clearCards } from "../store/cardsSlice";
 
 function TokenPage() {
   const user = useSelector((state) => state.user);
@@ -16,6 +18,8 @@ function TokenPage() {
   const [logoutUser] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
       if (data.user.success) {
+        dispatch(clearAddresses());
+        dispatch(clearCards());
         dispatch(clearUser());
         toast.success("¡Cierre de sesión exitoso!");
       } else {

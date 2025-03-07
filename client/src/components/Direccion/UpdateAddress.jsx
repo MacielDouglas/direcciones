@@ -1,4 +1,5 @@
 import { useMutation } from "@apollo/client";
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { UPDATE_ADDRESS } from "../../graphql/mutation/address.mutation";
@@ -65,18 +66,16 @@ function UpdateAddress({ id }) {
       setIsButtonDisabled(true);
       toast.success("Endereço atualizado com sucesso!");
 
-      const updatedAddress = data.addressMutation.address;
+      const updateAdd = data.updateAddress.address;
 
       dispatch(
         setAddresses({
           addresses: addresses.addressesData.map((addr) =>
-            addr.id === updatedAddress.id ? updatedAddress : addr
+            addr.id === updateAdd.id ? updateAdd : addr
           ),
         })
       );
-
-      navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
-      // navigate("/address?tab=search-address");
+      navigate(`/address?tab=/address/${updateAdd.id}`);
     },
     onError: (error) => {
       setIsButtonDisabled(false);
@@ -178,13 +177,16 @@ function UpdateAddress({ id }) {
       toast.error("Erro: endereço não encontrado.");
       return;
     }
+    const updateAd = {
+      ...updatedData,
+      id: address.id,
+    };
 
     if (Object.keys(updatedData).length > 0) {
+      console.log(updatedData);
       await updateAddress({
         variables: {
-          action: "update",
-          id: address.id,
-          updateAddressInput: updatedData,
+          input: updateAd,
         },
       });
       // onClose();
@@ -349,5 +351,8 @@ function UpdateAddress({ id }) {
     </div>
   );
 }
+UpdateAddress.propTypes = {
+  id: PropTypes.string.isRequired,
+};
 
 export default UpdateAddress;

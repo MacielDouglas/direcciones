@@ -16,7 +16,6 @@ import { setAddresses } from "../../store/addressesSlice";
 function NewAddress() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.userData);
   const direccion = useSelector((state) => state.addresses);
 
   const addresses = direccion.addressesData || [];
@@ -27,15 +26,20 @@ function NewAddress() {
   const [isUploading, setIsUploading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  const [newAddress] = useMutation(NEW_ADDRESS, {
+  const [newAddressInput] = useMutation(NEW_ADDRESS, {
     onCompleted: async (data) => {
+      if (!data.createAddress.success) {
+        return toast.error(
+          `Erro ao cadastrar endereço: ${data.createAddress.message}`
+        );
+      }
       toast.success("Endereço cadastrado com sucesso!");
       dispatch(
         setAddresses({
-          addresses: [...addresses, data.addressMutation.address],
+          addresses: [...addresses, data.createAddress.address],
         })
       );
-      navigate(`/address?tab=/address/${data.addressMutation.address.id}`);
+      navigate(`/address?tab=/address/${data.createAddress.address.id}`);
     },
     onError: (error) =>
       toast.error(`Erro ao cadastrar endereço: ${error.message}`),
@@ -124,16 +128,17 @@ function NewAddress() {
 
     const photoUrl = formData.photo || imagesAddresses[formData.type];
 
+    const inputs = {
+      ...formData,
+      photo: photoUrl,
+    };
+
+    console.log(inputs);
+
     try {
-      await newAddress({
+      await newAddressInput({
         variables: {
-          action: "create",
-          newAddress: {
-            ...formData,
-            userId: user.id,
-            group: user.group,
-            photo: photoUrl,
-          },
+          newAddressInput: { ...formData, photo: photoUrl },
         },
       });
     } catch (error) {

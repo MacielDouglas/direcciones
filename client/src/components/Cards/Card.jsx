@@ -28,7 +28,6 @@ function Card() {
   const [userLocation, setUserLocation] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const cardsData = useSelector((state) => state.cards) || [];
-  const addressesData = useSelector((state) => state.addresses);
   const myCards = cardsData?.myCardsData || [];
 
   const dispatch = useDispatch();
@@ -48,7 +47,6 @@ function Card() {
           ...user,
           userData: {
             ...user.userData,
-            myCards: updatedCards,
           },
         };
         dispatch(setUser({ user: updatedUserData }));
@@ -100,7 +98,7 @@ function Card() {
   };
 
   return (
-    <div className="text-start text-lg w-full text-secondary h-full">
+    <div className="text-start text-lg w-full text-secondary h-full mb-24">
       <div className="space-y-5 px-4 pt-3">
         <h1 className="text-4xl font-medium">Tarjetas</h1>
         <p>

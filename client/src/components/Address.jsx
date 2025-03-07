@@ -29,7 +29,7 @@ const pinMapIcon = createCustomIcon("pinMap.svg");
 function Routing({ userLocation, destination }) {
   const map = useMap();
   const [route, setRoute] = useState(null);
-  const [isMounted, setIsMounted] = useState(null);
+  const [isMounted, setIsMounted] = useState(true);
 
   const fetchRoute = useCallback(async () => {
     if (!map || !userLocation || !destination) return;
@@ -52,7 +52,7 @@ function Routing({ userLocation, destination }) {
         }
       }
     } catch (error) {
-      console.error("Error al obtener la ruta:", error);
+      console.error("Erro ao obter a rota:", error);
     }
   }, [map, userLocation, destination, isMounted]);
 
@@ -99,10 +99,19 @@ function Address({ id }) {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         }),
-      (error) =>
-        console.error("Error al obtener la ubicación del usuario:", error)
+      (error) => console.error("Erro ao obter localização do usuário:", error)
     );
   }, []);
+
+  const distance =
+    userLocation && latitude && longitude
+      ? calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          latitude,
+          longitude
+        ).toFixed(0)
+      : "N/A";
 
   const typeIcons = useMemo(
     () => ({
@@ -116,16 +125,6 @@ function Address({ id }) {
   );
 
   if (!address) return <p className="text-center">Endereço não encontrado.</p>;
-
-  const distance =
-    userLocation && latitude && longitude
-      ? calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          latitude,
-          longitude
-        ).toFixed(0)
-      : "N/A";
 
   const openMap = () => {
     const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLocation?.lat},${userLocation?.lng}&destination=${latitude},${longitude}&travelmode=walking`;
@@ -151,7 +150,7 @@ function Address({ id }) {
         }`}
       >
         <h2 className="text-xl font-medium text-center mb-4">
-          Información de la dirección
+          Informações da Direção
         </h2>
         {photo && (
           <img
@@ -165,7 +164,7 @@ function Address({ id }) {
             confirmed ? "text-green-600" : "text-red-600"
           }`}
         >
-          {confirmed ? "Dirección confirmada" : "Necessita confirmación"}
+          {confirmed ? "Direção confirmada" : "Necessita confirmar"}
         </p>
         <div className="flex flex-col items-center space-y-3 text-sm">
           <div className="flex justify-between items-center w-full">
@@ -179,10 +178,10 @@ function Address({ id }) {
               </p>
             </div>
           </div>
-          <p className="text-lg  text-start w-full">
-            Calle: <strong>{`${street}, ${number}`}</strong>
+          <p className="text-lg font-semibold text-start w-full">
+            Calle: {`${street}, ${number}`}
           </p>
-          <div className="flex justify-between w-full ">
+          <div className="flex justify-between w-full">
             <p>
               Barrio: <strong>{neighborhood}</strong>
             </p>
@@ -190,31 +189,28 @@ function Address({ id }) {
               Ciudad: <strong>{city}</strong>
             </p>
           </div>
+
           <button
             onClick={openMap}
-            className="bg-blue-500 text-white px-3 py-1 rounded-md"
+            className="bg-blue-500 text-white px-3 py-1 rounded-md mt-2"
           >
-            ver en el mapa
+            Ver no Mapa
           </button>
         </div>
-        {complement && (
-          <div className="flex flex-col  w-full text-center bg-white rounded-md gap-2 p-3 mt-3">
-            <p className="text-sm font-medium">Otras informaciones</p>
-            <p>{complement}</p>
-          </div>
-        )}
+        {complement && <p className="mt-2 text-center">{complement}</p>}
+
         <button
-          className="w-full bg-black text-white py-2 rounded-md mt-4"
+          className="w-full bg-black text-white py-2 rounded-md mt-3"
           onClick={handleEdit}
         >
-          Editar dirección
+          Editar Direção
         </button>
       </div>
-      <div className="w-full h-72 rounded-md overflow-hidden">
+      <div className="w-full h-72 rounded-md overflow-hidden ">
         <MapContainer
           center={[latitude, longitude]}
           zoom={15}
-          className="h-full w-full"
+          className="h-full w-full z-10"
         >
           <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
           <Marker position={[latitude, longitude]} icon={pinMapIcon}>
@@ -225,7 +221,7 @@ function Address({ id }) {
               position={[userLocation.lat, userLocation.lng]}
               icon={personIcon}
             >
-              <Popup>¡Usted está aquí!</Popup>
+              <Popup>Você está aqui!</Popup>
             </Marker>
           )}
           {userLocation && (

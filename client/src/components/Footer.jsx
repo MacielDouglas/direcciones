@@ -16,17 +16,17 @@ function Footer() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const user = useSelector((state) => state.user);
   const { isSS } = user.userData;
-  // const isSS = false;
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const scrollDiff = currentScrollY - lastScrollY;
+      const threshold = window.innerHeight * 0.2;
+      const topThreshold = window.innerHeight * 0.5; // 30% do topo
 
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Scroll para baixo
+      if (scrollDiff > 0 && currentScrollY > threshold) {
         setIsVisible(false);
-      } else {
-        // Scroll para cima
+      } else if (scrollDiff < 0 && currentScrollY < topThreshold) {
         setIsVisible(true);
       }
 
@@ -34,10 +34,7 @@ function Footer() {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   const menuItems = [
@@ -53,7 +50,7 @@ function Footer() {
 
   return (
     <motion.footer
-      className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20 z-50"
+      className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20 z-40"
       initial={{ translateY: 0 }}
       animate={{ translateY: isVisible ? 0 : 100 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
