@@ -183,7 +183,6 @@ function UpdateAddress({ id }) {
     };
 
     if (Object.keys(updatedData).length > 0) {
-      console.log(updatedData);
       await updateAddress({
         variables: {
           input: updateAd,

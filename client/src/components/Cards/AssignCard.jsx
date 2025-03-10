@@ -1,81 +1,57 @@
-import { useLazyQuery, useMutation, useQuery } from "@apollo/client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { useDispatch, useSelector } from "react-redux";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { motion } from "framer-motion";
 import { GET_CARDS } from "../../graphql/queries/cards.query";
 import { GET_USERS } from "../../graphql/queries/user.query";
 import { setCards } from "../../store/cardsSlice";
-import Loading from "../../context/Loading";
-import {
-  RETURN_CARD,
-  SENDING_CARD,
-} from "../../graphql/mutation/cards.mutation";
 import { toast } from "react-toastify";
 import {
   FaTableList,
   FaUserGroup,
   FaUserCheck,
-  FaLocationDot,
   FaUserXmark,
 } from "react-icons/fa6";
-import SelectCardComponent from "../hooks/SelectCardComponent";
+import SelectCardComponent from "./../hooks/SelectCardComponent";
+import {
+  RETURN_CARD,
+  SENDING_CARD,
+} from "../../graphql/mutation/cards.mutation";
 
 function AssignCard() {
   const dispatch = useDispatch();
   const cards = useSelector((state) => state.cards.cardsData || []);
   const addresses = useSelector((state) => state.addresses.addressesData || []);
-  const user = useSelector((state) => state.user.userData);
-
-  const [selectedCard, setSelectedCard] = useState([]);
-  const [cardColors, setCardColors] = useState({});
-  const [mapCenter, setMapCenter] = useState([0, 0]);
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [usersNotAssigned, setUsersNotAssigned] = useState([]);
   const [usersAssigned, setUsersAssigned] = useState([]);
   const [cardAssigned, setCardAssigned] = useState([]);
   const [cardNotAssigned, setCardNotAssigned] = useState([]);
+  const [cardColors, setCardColors] = useState({});
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const [fetchCards, { loading: cardsLoading, error: cardsError }] =
-    useLazyQuery(GET_CARDS, {
-      variables: { action: "get" },
-      fetchPolicy: "network-only",
-      onCompleted: (data) => {
-        if (data?.card) {
-          dispatch(setCards({ cards: data.card }));
-        }
-      },
-    });
+  const [users, setUsers] = useState([]);
+  const [mapCenter, setMapCenter] = useState([0, 0]);
+  const [selectedCard, setSelectedCard] = useState([]);
 
-  const [fetchUsers, { data: usersData }] = useLazyQuery(GET_USERS, {
-    variables: { group: user.group },
+  const [fetchUsers] = useLazyQuery(GET_USERS, {
     fetchPolicy: "network-only",
+    onCompleted: (data) => setUsers(data.getUsers),
+    onError: (err) => console.error("Erro ao buscar usuários: ", err),
   });
 
-  useEffect(() => {
-    fetchCards(); // Chama a query apenas na montagem do componente
-    fetchUsers();
-  }, [fetchCards, fetchUsers]);
-
-  const users = useMemo(() => usersData?.getUsers?.users || [], [usersData]);
-  const addressMap = useMemo(
-    () => new Map(addresses.map((a) => [a.id, a])),
-    [addresses]
-  );
-
-  useEffect(() => {
-    setUsersNotAssigned(users.filter((user) => user.myCards.length === 0));
-    setUsersAssigned(users.filter((user) => user.myCards.length > 0));
-    setCardAssigned(cards.filter((card) => card.startDate !== null));
-    setCardNotAssigned(cards.filter((card) => card.startDate === null));
-  }, [users, cards]);
+  const [fetchCards] = useLazyQuery(GET_CARDS, {
+    fetchPolicy: "network-only",
+    onCompleted: (data) => dispatch(setCards({ cards: data.card })),
+    onError: (err) => toast.error("Erro ao carregar cartões: ", err),
+  });
 
   const [designateCardInput] = useMutation(SENDING_CARD, {
     onCompleted: async (data) => {
-      toast.success(data.cardMutation.message);
+      toast.success(data.assignCard.message);
       setModalOpen(false);
       setSelectedCard([]);
       await fetchCards();
@@ -85,22 +61,93 @@ function AssignCard() {
 
   const [returnedCardInput] = useMutation(RETURN_CARD, {
     onCompleted: async (data) => {
-      console.log("Cartão retornado: ", data);
-      toast.success(data.cardMutation.message);
+      toast.success(data.returnCard.message);
       setModalOpen(false);
       setSelectedCard([]);
       await fetchCards();
     },
     onError: (error) => {
-      console.log(`Erro de retorno:, ${error}`);
       toast.error(`Erro: ${error.message}`);
     },
   });
 
-  const getCustomIcon = (cardId, number) => {
-    return new L.DivIcon({
-      className: "custom-marker",
-      html: `
+  useEffect(() => {
+    fetchUsers();
+    fetchCards();
+  }, []);
+
+  useEffect(() => {
+    if (cards.length > 0) {
+      const gpsCoordinates = cards.flatMap((card) =>
+        card.street.map((address) => address.gps.split(", ").map(Number))
+      );
+
+      if (gpsCoordinates.length > 0) {
+        const avgLat = Number(
+          (
+            gpsCoordinates.reduce((sum, [lat]) => sum + lat, 0) /
+            gpsCoordinates.length
+          ).toFixed(7)
+        );
+        const avgLng = Number(
+          (
+            gpsCoordinates.reduce((sum, [, lng]) => sum + lng, 0) /
+            gpsCoordinates.length
+          ).toFixed(7)
+        );
+
+        setMapCenter([avgLat, avgLng]);
+      }
+    }
+  }, [cards]);
+
+  function ChangeView({ center }) {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, 14, { animate: true });
+    }, [center, map]);
+    return null;
+  }
+
+  useEffect(() => {
+    const newCardAssigned = [];
+    const newCardNotAssigned = [];
+    const newUsersAssigned = [];
+    const newUsersNotAssigned = [];
+
+    // Separar os cards com base na startDate
+    cards.forEach((card) => {
+      if (card.startDate !== null) {
+        newCardAssigned.push(card);
+
+        // Filtrar usuários atribuídos aos cards com startDate não nulo
+        card.usersAssigned.forEach((userAssigned) => {
+          const user = users.find((user) => user.id === userAssigned.userId);
+          if (user) {
+            newUsersAssigned.push(user);
+          }
+        });
+      } else {
+        newCardNotAssigned.push(card);
+      }
+    });
+
+    setCardAssigned(newCardAssigned);
+    setCardNotAssigned(newCardNotAssigned);
+    setUsersAssigned(newUsersAssigned);
+    setUsersNotAssigned(newUsersNotAssigned);
+  }, [cards, users]);
+
+  const addressMap = useMemo(
+    () => new Map(addresses.map((a) => [a.id, a])),
+    [addresses] // Apenas recalcula se `addresses` mudar
+  );
+
+  const getCustomIcon = useCallback(
+    (cardId, number) => {
+      return new L.DivIcon({
+        className: "custom-marker",
+        html: `
       <div style="position: relative; display: flex; align-items: center; justify-content: center">
       <svg
       fill="${cardColors[cardId]}"
@@ -114,28 +161,33 @@ function AssignCard() {
           <span style="position: absolute; top: 10%; transform: translateY(-50%); font-size: 20px; font-weight: bold; color: black; text-align: center;">
             ${number}
           </span>
-        </div>
+        </d>
       `,
-      iconSize: [30, 42],
-      iconAnchor: [15, 42],
-    });
-  };
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+      });
+    },
+    [cardColors]
+  );
 
-  const handleSelectCard = useCallback((cardId, number) => {
-    setSelectedCard((prev) =>
-      prev.some((card) => card.id === cardId)
-        ? prev.filter((card) => card.id !== cardId)
-        : [...prev, { id: cardId, number }]
-    );
-  }, []);
+  const handleSelectCard = useCallback(
+    (cardId, number, startDate, usersAssigned) => {
+      setSelectedCard((prev) =>
+        prev.some((card) => card.id === cardId)
+          ? prev.filter((card) => card.id !== cardId)
+          : [...prev, { id: cardId, number, startDate, usersAssigned }]
+      );
+    },
+    []
+  );
 
   const handleSendCard = async () => {
     if (!selectedUser) return alert("Selecione um usuário!");
+
     await designateCardInput({
       variables: {
-        action: "designateCard",
-        designateCardInput: {
-          cardId: selectedCard.map((card) => card.id),
+        assignCardInput: {
+          cardIds: selectedCard.map((card) => card.id),
           userId: selectedUser.id,
         },
       },
@@ -145,14 +197,53 @@ function AssignCard() {
   const handleReturnCard = async () => {
     await returnedCardInput({
       variables: {
-        action: "returnCard",
-        designateCardInput: {
-          cardId: "",
-          userId: "",
+        returnCardInput: {
+          cardId: selectedCard[0].id,
+          userId: selectedCard[0].usersAssigned,
         },
       },
     });
   };
+
+  const displayedMarkers = useMemo(() => {
+    return cards.flatMap((card) =>
+      card.street.map((address) => {
+        const location = addressMap.get(address.id);
+        if (!location?.gps) return null;
+        const [lat, lng] = location.gps.split(", ").map(Number);
+
+        return (
+          <Marker
+            key={`${card.id}-${address.id}`}
+            position={[lat, lng]}
+            icon={getCustomIcon(card.id, card.number)}
+            eventHandlers={{
+              click: () =>
+                handleSelectCard(card.id, card.number, card.startDate),
+            }}
+          >
+            <Popup>
+              <div>
+                <p>
+                  Tarjeta:{" "}
+                  <span style={{ color: cardColors[card.id] }}>
+                    {card.number}
+                  </span>
+                </p>
+                <p>
+                  Dirección:{" "}
+                  <strong>
+                    {location.street}, {location.number}
+                  </strong>
+                </p>
+                <p>Barrio: {location.city}</p>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })
+    );
+  }, [cards, addressMap, cardColors, handleSelectCard, getCustomIcon]);
 
   useEffect(() => {
     if (cards.length && addresses.length) {
@@ -183,47 +274,6 @@ function AssignCard() {
     }
   }, [cards, addressMap, selectedCard, addresses]);
 
-  const displayedMarkers = useMemo(() => {
-    return cards.flatMap((card) =>
-      card.street.map((addressId) => {
-        const address = addressMap.get(addressId);
-        if (!address?.gps) return null;
-        const [lat, lng] = address.gps.split(", ").map(Number);
-        return (
-          <Marker
-            key={`${card.id}-${address.id}`}
-            position={[lat, lng]}
-            icon={getCustomIcon(card.id, card.number)}
-            eventHandlers={{
-              click: () => handleSelectCard(card.id, card.number), // Passando apenas ID e número
-            }}
-          >
-            <Popup>
-              <div>
-                <p>
-                  Tarjeta:{" "}
-                  <span style={{ color: cardColors[card.id] }}>
-                    {card.number}
-                  </span>
-                </p>
-                <p>
-                  Dirección:{" "}
-                  <strong>
-                    {address.street}, {address.number}
-                  </strong>
-                </p>
-                <p>Barrio: {address.city}</p>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })
-    );
-  }, [cards, addressMap, cardColors, handleSelectCard]); // Dependências corrigidas
-
-  if (cardsLoading) return <Loading text="Carregando dados dos cartões..." />;
-  if (cardsError) return <p>Erro ao carregar cartões: {cardsError.message}</p>;
-
   return (
     <div className="min-h-screen bg-details p-3 md:p-10 flex flex-col justify-center  mb-[40px]">
       <motion.div
@@ -235,7 +285,7 @@ function AssignCard() {
         <h1 className="text-3xl font-medium text-gray-700 mb-4">
           Asignar Tarjetas
         </h1>
-        {cards && (
+        {cards.length > 0 && (
           <div className="flex justify-between mb-2">
             <p className="flex items-center gap-2">
               <FaTableList /> {cards.length}
@@ -255,15 +305,17 @@ function AssignCard() {
           <MapContainer
             center={mapCenter}
             zoom={14}
-            className="h-64 w-full  z-0"
+            className="h-64 w-full z-0"
           >
+            {displayedMarkers}
+            <ChangeView center={mapCenter} />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            {displayedMarkers}
           </MapContainer>
         </div>
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -272,7 +324,6 @@ function AssignCard() {
           <div className="flex flex-col md:flex-row my-3 w-full">
             <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
               <h3 className="text-xl font-semibold">Tarjetas disponibles</h3>
-              <div className="w-full flex justify-between items-center"></div>
               <p>Tarjetas selecionadas: {selectedCard?.length}</p>
               <button
                 onClick={() => setModalOpen(true)}
@@ -281,23 +332,35 @@ function AssignCard() {
               >
                 asignar tarjetas
               </button>
-              <SelectCardComponent
-                cardItem={cardNotAssigned}
-                handleSelectCard={handleSelectCard}
-                addresses={addresses}
-                users={users}
-                setSelectedCard={setSelectedCard}
-                selectedCard={selectedCard}
-                cardColors={cardColors}
-              />
+
+              {cardNotAssigned.length > 0 && (
+                <SelectCardComponent
+                  cardItem={cardNotAssigned}
+                  handleSelectCard={handleSelectCard}
+                  // addresses={addresses}
+                  users={users}
+                  selectedCard={selectedCard}
+                  cardColors={cardColors}
+                />
+              )}
             </div>
             <div className="border-t border-t-stone-800 flex flex-col gap-4 md:w-2/3 md:overflow-y-auto max-h-full mt-5">
               <h3 className="text-xl font-semibold mt-3">Tarjetas en uso.</h3>
 
+              <button
+                onClick={() => handleReturnCard()}
+                disabled={
+                  !selectedCard[0]?.usersAssigned?.length ||
+                  selectedCard.length !== 1
+                }
+                className="bg-gradient-to-b from-red-600 to-red-700 text-white px-4 py-2 rounded hover:from-red-400 hover:red-500  disabled:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                retornar tarjetas
+              </button>
               <SelectCardComponent
                 cardItem={cardAssigned}
                 handleSelectCard={handleSelectCard}
-                addresses={addresses}
+                // addresses={addresses}
                 users={users}
                 cardColors={cardColors}
                 selectedCard={selectedCard}

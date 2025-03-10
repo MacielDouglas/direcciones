@@ -23,11 +23,18 @@ function NewCard() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const filteredAddresses = addresses.filter(
+    (address) =>
+      !cards.some((card) =>
+        card.street.some((street) => street.id === address.id)
+      )
+  );
+
   const [newCard] = useMutation(NEW_CARD, {
     onCompleted: (data) => {
       setTimeout(() => {
         setLoading(false);
-        toast.success(data.cardMutation.message);
+        toast.success(data.createCard.message);
         navigate("/cards?tab=asignar");
       }, 2000);
     },
@@ -68,9 +75,9 @@ function NewCard() {
     );
   }
 
-  const availableAddresses = Object.values(addresses).filter(
-    (address) => !cards.some((card) => card.street.includes(address.id))
-  );
+  // const availableAddresses = Object.values(addresses).filter(
+  //   (address) => !cards.some((card) => card.street.includes(address.id))
+  // );
 
   const toggleSelectAddress = (addressId) => {
     setSelectedAddresses((prevSelected) =>
@@ -81,10 +88,10 @@ function NewCard() {
   };
 
   const displayedAddresses = showSelectedOnly
-    ? availableAddresses.filter((address) =>
+    ? filteredAddresses.filter((address) =>
         selectedAddresses.includes(address.id)
       )
-    : availableAddresses;
+    : filteredAddresses;
 
   const typeIcons = useMemo(
     () => ({
@@ -121,7 +128,7 @@ function NewCard() {
             direcciones en total.
           </p>
           <p>
-            <span className="font-semibold">{availableAddresses.length}</span>{" "}
+            <span className="font-semibold">{filteredAddresses?.length}</span>{" "}
             direcciones disponibles.
           </p>
           <p>
@@ -130,7 +137,7 @@ function NewCard() {
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row my-3 h-full w-full bg-white">
+        <div className="flex flex-col md:flex-row my-3 w-full bg-white">
           <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
             <h3 className="text-xl font-semibold">
               Seleccione las direcciones disponibles
@@ -140,8 +147,8 @@ function NewCard() {
               el mapa.
             </p>
             <div className="overflow-y-auto border p-4 rounded max-h-[30vh] bg-primary">
-              {availableAddresses.length ? (
-                availableAddresses.map((address) => (
+              {filteredAddresses.length ? (
+                filteredAddresses.map((address) => (
                   <div
                     key={address.id}
                     className="flex items-center text-sm lg:text-lg justify-between border-b py-2"

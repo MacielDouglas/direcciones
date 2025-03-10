@@ -133,8 +133,6 @@ function NewAddress() {
       photo: photoUrl,
     };
 
-    console.log(inputs);
-
     try {
       await newAddressInput({
         variables: {

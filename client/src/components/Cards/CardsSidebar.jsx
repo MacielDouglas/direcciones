@@ -58,7 +58,7 @@ function CardsSidebar() {
 
   return (
     <motion.nav
-      className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20 z-50"
+      className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20 z-50 lowercase"
       initial={{ translateY: 0 }}
       animate={{ translateY: isVisible ? 0 : 100 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}

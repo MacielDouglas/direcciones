@@ -24,7 +24,6 @@ import {
 function SelectCardComponent({
   cardItem,
   handleSelectCard,
-  addresses,
   users,
   selectedCard,
 }) {
@@ -62,7 +61,14 @@ function SelectCardComponent({
                   <input
                     type="checkbox"
                     checked={selectedCard?.some((item) => item.id === card.id)}
-                    onChange={() => handleSelectCard(card.id, card.number)}
+                    onChange={() =>
+                      handleSelectCard(
+                        card.id,
+                        card.number,
+                        card.startDate,
+                        card?.usersAssigned[0]?.userId
+                      )
+                    }
                     className="w-5 h-5 text-red-500"
                   />
 
@@ -105,19 +111,14 @@ function SelectCardComponent({
                   {open ? <FaAngleUp /> : <FaAngleDown />}
                 </div>
                 <DisclosurePanel className="p-4 bg-white border-t">
-                  {card.street.map((streetId, index) => {
-                    const address = addresses.find((s) => s.id === streetId);
-                    return (
-                      address && (
-                        <AddressItem
-                          key={address.id}
-                          address={address}
-                          index={index}
-                          typeIcons={typeIcons}
-                        />
-                      )
-                    );
-                  })}
+                  {card.street.map((street, index) => (
+                    <AddressItem
+                      key={street.id}
+                      address={street}
+                      index={index}
+                      typeIcons={typeIcons}
+                    />
+                  ))}
                 </DisclosurePanel>
               </div>
             )}
@@ -170,25 +171,13 @@ SelectCardComponent.propTypes = {
       number: PropTypes.number.isRequired,
       startDate: PropTypes.string,
       endDate: PropTypes.string,
-      street: PropTypes.arrayOf(PropTypes.string).isRequired,
+      street: PropTypes.arrayOf(PropTypes.object).isRequired,
       usersAssigned: PropTypes.arrayOf(
         PropTypes.shape({ userId: PropTypes.string.isRequired })
       ).isRequired,
     })
   ).isRequired,
   handleSelectCard: PropTypes.func.isRequired,
-  addresses: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      photo: PropTypes.string.isRequired,
-      street: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-      neighborhood: PropTypes.string.isRequired,
-      complement: PropTypes.string,
-      confirmed: PropTypes.bool.isRequired,
-      type: PropTypes.string.isRequired,
-    })
-  ).isRequired,
   users: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
