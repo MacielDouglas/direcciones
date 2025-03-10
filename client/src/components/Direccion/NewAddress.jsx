@@ -128,10 +128,10 @@ function NewAddress() {
 
     const photoUrl = formData.photo || imagesAddresses[formData.type];
 
-    const inputs = {
-      ...formData,
-      photo: photoUrl,
-    };
+    // const inputs = {
+    //   ...formData,
+    //   photo: photoUrl,
+    // };
 
     try {
       await newAddressInput({
