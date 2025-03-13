@@ -13,7 +13,7 @@ const httpLink = new HttpLink({
 // WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: "wss:apidirecciones-production.up.railway.app/graphql", // WebSocket endpoint
+    url: "wss://apidirecciones-production.up.railway.app/graphql", // WebSocket endpoint
     connectionParams: {
       credentials: "include", // Include cookies for authentication
     },
