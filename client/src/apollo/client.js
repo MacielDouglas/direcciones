@@ -10,15 +10,25 @@ const httpLink = new HttpLink({
   credentials: "include", // Include cookies for authentication
 });
 
-// WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: "wss://apidirecciones-production.up.railway.app/graphql", // WebSocket endpoint
+    url: "/graphql", // O Vite irá automaticamente redirecionar para o servidor de WebSocket
     connectionParams: {
       credentials: "include", // Include cookies for authentication
     },
   })
 );
+
+// WebSocket link for subscriptions
+// const wsLink = new GraphQLWsLink(
+//   createClient({
+//     url: "wss://apidirecciones-production.up.railway.app/graphql", // WebSocket endpoint
+//     // url: "http://localhost:4000/graphql", // WebSocket endpoint
+//     connectionParams: {
+//       credentials: "include", // Include cookies for authentication
+//     },
+//   })
+// );
 
 // Split links based on operation type
 const splitLink = split(

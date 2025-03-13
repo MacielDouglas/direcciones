@@ -7,14 +7,17 @@ export default defineConfig({
       "/graphql": {
         target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
         changeOrigin: true,
-        secure: false,
+        secure: true, // Certifique-se de que as conexões seguras estão habilitadas
         ws: true, // Enable WebSocket proxying
+        // opcional: pathRewrite, caso seja necessário ajustar o caminho da URL
+        pathRewrite: { "^/graphql": "/graphql" },
       },
     },
   },
   plugins: [react()],
 });
 
+// target: "http://localhost:4000/graphql", // Backend URL for HTTP
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";
 
