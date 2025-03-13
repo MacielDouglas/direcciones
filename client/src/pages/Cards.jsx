@@ -15,11 +15,13 @@ import NewCard from "../components/Cards/NewCard";
 import AssignCard from "../components/Cards/AssignCard";
 import Loading from "../context/Loading";
 import ScrollToTop from "../context/ScrollTotop";
+import { useSSE } from "../components/hooks/useSSE";
 
 function Cards() {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: cards, error } = useSSE("/sse/cards");
 
   const { userData } = useSelector((state) => state.user);
   const { isSS } = userData;
@@ -66,6 +68,15 @@ function Cards() {
   //     </p>
   //   );
   // }
+
+  if (cards) {
+    console.log(cards);
+  }
+
+  if (error) {
+    toast.error(`Erro ao carregar cartões: ${error.message}`);
+    return null;
+  }
 
   return (
     <motion.div

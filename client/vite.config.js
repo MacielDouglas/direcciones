@@ -6,11 +6,15 @@ export default defineConfig({
     proxy: {
       "/graphql": {
         target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
+        // target: "http://localhost:4000",
         changeOrigin: true,
         secure: true, // Certifique-se de que as conexões seguras estão habilitadas
-        ws: true, // Enable WebSocket proxying
-        // opcional: pathRewrite, caso seja necessário ajustar o caminho da URL
-        pathRewrite: { "^/graphql": "/graphql" },
+      },
+      "/sse": {
+        target: "https://apidirecciones-production.up.railway.app", // Backend URL for SSE
+        // target: "http://localhost:4000",
+        changeOrigin: true,
+        secure: true,
       },
     },
   },
@@ -25,7 +29,6 @@ export default defineConfig({
 //   server: {
 //     proxy: {
 //       "/graphql": {
-//         target: "http://localhost:4000",
 //         changeOrigin: true,
 //         secure: false,
 //       },

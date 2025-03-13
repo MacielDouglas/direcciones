@@ -17,11 +17,8 @@ import Loading from "../../context/Loading";
 import { calculateDistance, formatDate } from "../../constants/direccion";
 import Address from "../Address";
 import { RiCloseLargeFill } from "react-icons/ri";
-import { useMutation, useSubscription } from "@apollo/client";
-import {
-  CARD_SUBSCRIPTION,
-  RETURN_CARD,
-} from "../../graphql/mutation/cards.mutation";
+import { useMutation } from "@apollo/client";
+import { RETURN_CARD } from "../../graphql/mutation/cards.mutation";
 import { toast } from "react-toastify";
 import { setCards } from "../../store/cardsSlice";
 import { setUser } from "../../store/userSlice";
