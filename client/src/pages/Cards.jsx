@@ -26,21 +26,21 @@ function Cards() {
 
   const [tab, setTab] = useState("cards");
 
-  const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
-    fetchPolicy: "network-only",
-    onCompleted: (data) => {
-      if (data?.card) {
-        dispatch(setCards({ cards: data.card }));
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro ao buscar cartões: ${error.message}`);
-    },
-  });
+  // const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
+  //   fetchPolicy: "network-only",
+  //   onCompleted: (data) => {
+  //     if (data?.card) {
+  //       dispatch(setCards({ cards: data.card }));
+  //     }
+  //   },
+  //   onError: (error) => {
+  //     toast.error(`Erro ao buscar cartões: ${error.message}`);
+  //   },
+  // });
 
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
+  // useEffect(() => {
+  //   fetchCards();
+  // }, [fetchCards]);
 
   useEffect(() => {
     const tabFromUrl =
@@ -55,17 +55,17 @@ function Cards() {
     [navigate]
   );
 
-  if (loading) {
-    return <Loading text="Carregando cartões..." />;
-  }
+  // if (loading) {
+  //   return <Loading text="Carregando cartões..." />;
+  // }
 
-  if (error) {
-    return (
-      <p className="text-red-500">
-        Erro ao carregar os cartões. Tente novamente.
-      </p>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <p className="text-red-500">
+  //       Erro ao carregar os cartões. Tente novamente.
+  //     </p>
+  //   );
+  // }
 
   return (
     <motion.div
