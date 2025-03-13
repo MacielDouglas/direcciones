@@ -5,14 +5,12 @@ export default defineConfig({
   server: {
     proxy: {
       "/graphql": {
-        target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
-        // target: "http://localhost:4000",
+        target: process.env.VITE_API_URL || "http://localhost:4000", // Usa a variável de ambiente ou o valor padrão
         changeOrigin: true,
-        secure: true, // Certifique-se de que as conexões seguras estão habilitadas
+        secure: true,
       },
-      "/sse": {
-        target: "https://apidirecciones-production.up.railway.app", // Backend URL for SSE
-        // target: "http://localhost:4000",
+      "/sse/cards": {
+        target: process.env.VITE_API_URL || "http://localhost:4000", // Usa a variável de ambiente ou o valor padrão
         changeOrigin: true,
         secure: true,
       },
