@@ -11,12 +11,17 @@ const httpLink = new HttpLink({
 });
 
 // WebSocket link for subscriptions
+// url: "ws://localhost:4000/graphql", // WebSocket endpoint
 const wsLink = new GraphQLWsLink(
   createClient({
-    // url: "ws://localhost:4000/graphql", // WebSocket endpoint
-    url: "wss://apidirecciones-production.up.railway.app/graphql", // WebSocket endpoint
+    url: "wss://apidirecciones-production.up.railway.app/graphql",
     connectionParams: {
-      credentials: "include", // Include cookies for authentication
+      credentials: "include",
+    },
+    on: {
+      connected: () => console.log("✅ WebSocket connected"),
+      error: (err) => console.error("❌ WebSocket error:", err),
+      closed: () => console.log("🔴 WebSocket closed"),
     },
   })
 );
