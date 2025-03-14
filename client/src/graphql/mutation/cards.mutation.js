@@ -93,33 +93,33 @@ export const RETURN_CARD = gql`
   }
 `;
 
-// export const CARD_SUBSCRIPTION = gql`
-//   subscription CARD_SUBSCRIPTION {
-//     card {
-//       id
-//       number
-//       startDate
-//       endDate
-//       group
-//       street {
-//         id
-//         street
-//         number
-//         neighborhood
-//         city
-//         complement
-//         gps
-//         group
-//         type
-//         confirmed
-//         visited
-//         active
-//         photo
-//       }
-//       usersAssigned {
-//         date
-//         userId
-//       }
-//     }
-//   }
-// `;
+export const CARD_SUBSCRIPTION = gql`
+  subscription CARD_SUBSCRIPTION {
+    card {
+      id
+      number
+      startDate
+      endDate
+      group
+      street {
+        id
+        street
+        number
+        neighborhood
+        city
+        complement
+        gps
+        group
+        type
+        confirmed
+        visited
+        active
+        photo
+      }
+      usersAssigned {
+        date
+        userId
+      }
+    }
+  }
+`;

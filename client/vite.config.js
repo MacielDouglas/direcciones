@@ -5,21 +5,17 @@ export default defineConfig({
   server: {
     proxy: {
       "/graphql": {
-        target: process.env.VITE_API_URL || "http://localhost:4000", // Usa a variável de ambiente ou o valor padrão
+        target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
+
         changeOrigin: true,
         secure: true,
-      },
-      "/sse/cards": {
-        target: process.env.VITE_API_URL || "http://localhost:4000", // Usa a variável de ambiente ou o valor padrão
-        changeOrigin: true,
-        secure: true,
+        // ws: true, // Enable WebSocket proxying
       },
     },
   },
   plugins: [react()],
 });
 
-// target: "http://localhost:4000/graphql", // Backend URL for HTTP
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";
 
@@ -27,6 +23,7 @@ export default defineConfig({
 //   server: {
 //     proxy: {
 //       "/graphql": {
+//         target: "http://localhost:4000",
 //         changeOrigin: true,
 //         secure: false,
 //       },

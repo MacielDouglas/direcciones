@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useSubscription } from "@apollo/client";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 
@@ -15,34 +15,41 @@ import NewCard from "../components/Cards/NewCard";
 import AssignCard from "../components/Cards/AssignCard";
 import Loading from "../context/Loading";
 import ScrollToTop from "../context/ScrollTotop";
-import { useSSE } from "../components/hooks/useSSE";
+import { CARD_SUBSCRIPTION } from "../graphql/mutation/cards.mutation";
 
 function Cards() {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { data: cards, error } = useSSE("/sse/cards");
 
   const { userData } = useSelector((state) => state.user);
   const { isSS } = userData;
 
+  const { data, loading, error } = useSubscription(CARD_SUBSCRIPTION);
+  // console.log(user);
+  // if (user.isAuthenticated) {
+  console.log("DATA, CARD Subes: ", data);
+  console.log("Error, subscribe: ", error);
+  console.log("Carregandooooo: ", loading);
+  // }
+
   const [tab, setTab] = useState("cards");
 
-  // const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
-  //   fetchPolicy: "network-only",
-  //   onCompleted: (data) => {
-  //     if (data?.card) {
-  //       dispatch(setCards({ cards: data.card }));
-  //     }
-  //   },
-  //   onError: (error) => {
-  //     toast.error(`Erro ao buscar cartões: ${error.message}`);
-  //   },
-  // });
+  const [fetchCards] = useLazyQuery(GET_CARDS, {
+    fetchPolicy: "network-only",
+    onCompleted: (data) => {
+      if (data?.card) {
+        dispatch(setCards({ cards: data.card }));
+      }
+    },
+    onError: (error) => {
+      toast.error(`Erro ao buscar cartões: ${error.message}`);
+    },
+  });
 
-  // useEffect(() => {
-  //   fetchCards();
-  // }, [fetchCards]);
+  useEffect(() => {
+    fetchCards();
+  }, [fetchCards]);
 
   useEffect(() => {
     const tabFromUrl =
@@ -68,10 +75,6 @@ function Cards() {
   //     </p>
   //   );
   // }
-
-  if (cards) {
-    console.log(cards);
-  }
 
   if (error) {
     toast.error(`Erro ao carregar cartões: ${error.message}`);
