@@ -6,6 +6,7 @@ export default defineConfig({
     proxy: {
       "/graphql": {
         target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
+        // target: "http://localhost:4000", // Backend URL for HTTP
 
         changeOrigin: true,
         secure: true,
