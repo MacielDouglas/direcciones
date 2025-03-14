@@ -33,6 +33,10 @@ function Cards() {
   console.log("Carregandooooo: ", loading);
   // }
 
+  if (data) {
+    toast.info("DATA, CARD Subes: ", data.length);
+  }
+
   const [tab, setTab] = useState("cards");
 
   const [fetchCards] = useLazyQuery(GET_CARDS, {
