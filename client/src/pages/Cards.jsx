@@ -28,13 +28,13 @@ function Cards() {
   const { data, loading, error } = useSubscription(CARD_SUBSCRIPTION);
   // console.log(user);
   // if (user.isAuthenticated) {
-  console.log("DATA, CARD Subes: ", data);
+  console.log("DATA, CARD Subes: ", data?.card?.message);
   console.log("Error, subscribe: ", error);
   console.log("Carregandooooo: ", loading);
   // }
 
   if (data) {
-    toast.info("DATA, CARD Subes: ", data.length);
+    toast.info(`Data e sua mensagem: ${data?.card?.message}`);
   }
 
   const [tab, setTab] = useState("cards");
