@@ -5,18 +5,43 @@ export default defineConfig({
   server: {
     proxy: {
       "/graphql": {
-        // target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
-        // target: "http://localhost:4000", // Backend URL for HTTP
-        target: "https://api-direcciones.onrender.com", // Backend URL for HTTP
-
-        changeOrigin: true,
-        secure: true,
-        // ws: true, // Enable WebSocket proxying
+        target: "https://api-direcciones.onrender.com", // URL da API no Render
+        changeOrigin: true, // Altera o cabeçalho 'Origin' para o destino da API
+        secure: true, // Habilita HTTPS para a conexão com a API
+        // ws: true, // Descomente se precisar de WebSocket (não é o caso para GraphQL)
       },
     },
   },
-  plugins: [react()],
+  plugins: [react()], // Plugin do React para suporte a JSX e React
+  build: {
+    chunkSizeWarningLimit: 1000, // Aumenta o limite de tamanho dos chunks para 1000 kB (1 MB)
+    outDir: "dist", // Diretório de saída para os arquivos de build
+    sourcemap: true, // Gera source maps para facilitar a depuração em produção
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom"], // Otimiza dependências comuns
+  },
 });
+
+// import { defineConfig } from "vite";
+// import react from "@vitejs/plugin-react";
+
+// export default defineConfig({
+//   server: {
+//     proxy: {
+//       "/graphql": {
+//         // target: "https://apidirecciones-production.up.railway.app", // Backend URL for HTTP
+//         // target: "http://localhost:4000", // Backend URL for HTTP
+//         target: "https://api-direcciones.onrender.com", // Backend URL for HTTP
+
+//         changeOrigin: true,
+//         secure: true,
+//         // ws: true, // Enable WebSocket proxying
+//       },
+//     },
+//   },
+//   plugins: [react()],
+// });
 
 // import { defineConfig } from "vite";
 // import react from "@vitejs/plugin-react";
