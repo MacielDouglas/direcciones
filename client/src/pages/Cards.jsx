@@ -21,21 +21,32 @@ function Cards() {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const [sucesso, setSucesso] = useState("");
 
   const { userData } = useSelector((state) => state.user);
   const { isSS } = userData;
 
   const { data, loading, error } = useSubscription(CARD_SUBSCRIPTION);
-  // console.log(user);
-  // if (user.isAuthenticated) {
-  console.log("DATA, CARD Subes: ", data?.card?.message);
-  console.log("Error, subscribe: ", error);
-  console.log("Carregandooooo: ", loading);
-  // }
+
+  useEffect(() => {
+    if (data) {
+      toast.success(`Data e sua mensagem: ${data?.card?.message}`);
+      setSucesso(data?.card?.message);
+    }
+
+    if (error) {
+      toast.error(`Erro ao carregar cartões: ${error.message}`);
+    }
+    if (loading) {
+      toast.info("Esta Carregando....");
+    }
+  }, [data, error, loading]);
 
   if (data) {
     toast.info(`Data e sua mensagem: ${data?.card?.message}`);
   }
+
+  console.log("O sucesso é: ", sucesso);
 
   const [tab, setTab] = useState("cards");
 
