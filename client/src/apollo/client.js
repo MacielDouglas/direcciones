@@ -11,10 +11,11 @@ const httpLink = new HttpLink({
 });
 
 // WebSocket link for subscriptions
-// url: "ws://localhost:4000/graphql", // WebSocket endpoint
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: "wss://apidirecciones-production.up.railway.app/graphql",
+    // url: "ws://localhost:4000/graphql", // WebSocket endpoint
+    url: "wss://api-direcciones.onrender.com/graphql", // WebSocket endpoint
+    // url: "wss://apidirecciones-production.up.railway.app/graphql",
     connectionParams: {
       credentials: "include",
     },
