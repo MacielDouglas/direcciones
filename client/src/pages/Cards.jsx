@@ -28,23 +28,32 @@ function Cards() {
 
   const { data, loading, error } = useSubscription(CARD_SUBSCRIPTION);
 
-  useEffect(() => {
-    if (data) {
-      toast.success(`Data e sua mensagem: ${data?.card?.message}`);
-      setSucesso(data?.card?.message);
-    }
-
-    if (error) {
-      toast.error(`Erro ao carregar cartões: ${error.message}`);
-    }
-    if (loading) {
-      toast.info("Esta Carregando....");
-    }
-  }, [data, error, loading]);
-
   if (data) {
-    toast.info(`Data e sua mensagem: ${data?.card?.message}`);
+    toast.success(`Data e sua mensagem: ${data?.card?.message}`);
+    setSucesso(data?.card?.message);
   }
+
+  if (loading) {
+    console.log("Esta Carregando....");
+  }
+
+  // useEffect(() => {
+  //   if (data) {
+  //     toast.success(`Data e sua mensagem: ${data?.card?.message}`);
+  //     setSucesso(data?.card?.message);
+  //   }
+
+  //   if (error) {
+  //     toast.error(`Erro ao carregar cartões: ${error.message}`);
+  //   }
+  //   if (loading) {
+  //     toast.info("Esta Carregando....");
+  //   }
+  // }, [data, error, loading]);
+
+  // if (data) {
+  //   toast.info(`Data e sua mensagem: ${data?.card?.message}`);
+  // }
 
   console.log("O sucesso é: ", sucesso);
 
