@@ -30,12 +30,6 @@ function Card() {
   const cardsData = useSelector((state) => state.cards) || [];
   const myCards = cardsData?.myCardsData || [];
 
-  // const { data, loading, error } = useSubscription(CARD_SUBSCRIPTION);
-
-  // console.log("DATA, CARD Subes: ", data);
-  // console.log("Error, subscribe: ", error);
-  // console.log("Carregandooooo: ", loading);
-
   const dispatch = useDispatch();
 
   const [returnedCardInput] = useMutation(RETURN_CARD, {

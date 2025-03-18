@@ -12,18 +12,10 @@ import { toast } from "react-toastify";
 import menuOptions from "../constants/menu";
 import SessionProvider from "../context/SessionProvider";
 import { FaClock } from "react-icons/fa6";
-// import { CARD_SUBSCRIPTION } from "../graphql/mutation/cards.mutation";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
-  // const { data, loading, error } = useSubscription(CARD_SUBSCRIPTION);
-  // // console.log(user);
-  // // if (user.isAuthenticated) {
-  // console.log("DATA, CARD Subes: ", data);
-  // console.log("Error, subscribe: ", error);
-  // console.log("Carregandooooo: ", loading);
-  // // }
 
   const [logoutUser, { loading: isLoggingOut }] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
