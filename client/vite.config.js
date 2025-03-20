@@ -6,7 +6,7 @@ export default defineConfig({
     proxy: {
       "/graphql": {
         // target: "http://localhost:8000",
-        target: "https://direcciones.vercel.app",
+        target: "https://direccioness.onrender.com",
         changeOrigin: true,
         secure: false,
         ws: true,
