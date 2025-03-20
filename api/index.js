@@ -9,6 +9,8 @@ import { useServer } from "graphql-ws/lib/use/ws";
 import http from "http";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import path from "path"; // Importa o módulo path
+import { fileURLToPath } from "url"; // Importa fileURLToPath
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
 import userTypeDef from "./graphql/typeDefs/user.typeDef.js";
 import cardTypeDef from "./graphql/typeDefs/card.typeDef.js";
@@ -20,7 +22,7 @@ import addressResolver from "./graphql/resolvers/address.resolver.js";
 dotenv.config();
 
 const MONGODB_URI = process.env.MONGO_DB;
-console.log("Conectando ao MongoDB....");
+console.log("Conectando ao MongoDB...");
 
 mongoose
   .connect(MONGODB_URI)
@@ -38,7 +40,6 @@ const mergedTypeDefs = mergeTypeDefs([
   cardTypeDef,
   addressTypeDef,
 ]);
-
 const mergedResolvers = mergeResolvers([
   userResolver,
   cardResolver,
@@ -78,13 +79,17 @@ const startServer = async () => {
 
   await server.start();
 
+  // Usando `import.meta.url` para resolver o caminho
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   app.use(
     "/graphql",
     cors({
       origin: [
-        "http://localhost:5173",
+        "http://localhost:5173", // Durante desenvolvimento
         "https://direcciones.vercel.app",
-        "https://direcciones.onrender.com",
+        "https://direcciones.onrender.com", // URL do frontend no Render
       ],
       credentials: true,
     }),
@@ -94,23 +99,144 @@ const startServer = async () => {
     })
   );
 
+  // Serve os arquivos estáticos do frontend
+  app.use(express.static(path.join(__dirname, "client", "dist"))); // Ajuste para a pasta de build do Vite
+
+  // Rota para servir o frontend
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+  });
+
   return httpServer;
 };
 
-// Condição para rodar em modo local
-// if (process.env.NODE_ENV !== "production") {
+// Porta para rodar no Render ou localmente
 const PORT = process.env.PORT || 3000;
 startServer().then((httpServer) => {
   httpServer.listen(PORT, () => {
-    console.log(
-      `Servidor rodando localmente em http://localhost:${PORT}/graphql`
-    );
+    console.log(`Servidor rodando em http://localhost:${PORT}/graphql`);
   });
 });
-// }
 
 // Exporta para ser utilizado no Vercel
 export default async (req, res) => {
   const httpServer = await startServer();
   httpServer.emit("request", req, res);
 };
+
+// import express from "express";
+// import cors from "cors";
+// import { ApolloServer } from "@apollo/server";
+// import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+// import { expressMiddleware } from "@apollo/server/express4";
+// import { makeExecutableSchema } from "@graphql-tools/schema";
+// import { WebSocketServer } from "ws";
+// import { useServer } from "graphql-ws/lib/use/ws";
+// import http from "http";
+// import mongoose from "mongoose";
+// import dotenv from "dotenv";
+// import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
+// import userTypeDef from "./graphql/typeDefs/user.typeDef.js";
+// import cardTypeDef from "./graphql/typeDefs/card.typeDef.js";
+// import addressTypeDef from "./graphql/typeDefs/address.typeDef.js";
+// import userResolver from "./graphql/resolvers/user.resolver.js";
+// import cardResolver from "./graphql/resolvers/card.resolver.js";
+// import addressResolver from "./graphql/resolvers/address.resolver.js";
+
+// dotenv.config();
+
+// const MONGODB_URI = process.env.MONGO_DB;
+// console.log("Conectando ao MongoDB....");
+
+// mongoose
+//   .connect(MONGODB_URI)
+//   .then(() => {
+//     console.log("Conectado ao MongoDB");
+//   })
+//   .catch((error) => {
+//     console.log("Erro de conexão com MongoDB: ", error.message);
+//   });
+
+// const app = express();
+
+// const mergedTypeDefs = mergeTypeDefs([
+//   userTypeDef,
+//   cardTypeDef,
+//   addressTypeDef,
+// ]);
+
+// const mergedResolvers = mergeResolvers([
+//   userResolver,
+//   cardResolver,
+//   addressResolver,
+// ]);
+
+// const startServer = async () => {
+//   const httpServer = http.createServer(app);
+
+//   const wsServer = new WebSocketServer({
+//     server: httpServer,
+//     path: "/graphql",
+//   });
+
+//   const schema = makeExecutableSchema({
+//     typeDefs: mergedTypeDefs,
+//     resolvers: mergedResolvers,
+//   });
+
+//   const serverCleanup = useServer({ schema }, wsServer);
+
+//   const server = new ApolloServer({
+//     schema,
+//     plugins: [
+//       ApolloServerPluginDrainHttpServer({ httpServer }),
+//       {
+//         async serverWillStart() {
+//           return {
+//             async drainServer() {
+//               await serverCleanup.dispose();
+//             },
+//           };
+//         },
+//       },
+//     ],
+//   });
+
+//   await server.start();
+
+//   app.use(
+//     "/graphql",
+//     cors({
+//       origin: [
+//         "http://localhost:5173",
+//         "https://direcciones.vercel.app",
+//         "https://direcciones.onrender.com",
+//       ],
+//       credentials: true,
+//     }),
+//     express.json(),
+//     expressMiddleware(server, {
+//       context: ({ req, res }) => ({ req, res }),
+//     })
+//   );
+
+//   return httpServer;
+// };
+
+// // Condição para rodar em modo local
+// // if (process.env.NODE_ENV !== "production") {
+// const PORT = process.env.PORT || 3000;
+// startServer().then((httpServer) => {
+//   httpServer.listen(PORT, () => {
+//     console.log(
+//       `Servidor rodando localmente em http://localhost:${PORT}/graphql`
+//     );
+//   });
+// });
+// // }
+
+// // Exporta para ser utilizado no Vercel
+// export default async (req, res) => {
+//   const httpServer = await startServer();
+//   httpServer.emit("request", req, res);
+// };
