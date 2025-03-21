@@ -43,18 +43,18 @@ function AssignCard() {
     onError: (err) => console.error("Erro ao buscar usuários: ", err),
   });
 
-  const [fetchCards] = useLazyQuery(GET_CARDS, {
-    fetchPolicy: "network-only",
-    onCompleted: (data) => dispatch(setCards({ cards: data.card })),
-    onError: (err) => toast.error("Erro ao carregar cartões: ", err),
-  });
+  // const [fetchCards] = useLazyQuery(GET_CARDS, {
+  //   fetchPolicy: "network-only",
+  //   onCompleted: (data) => dispatch(setCards({ cards: data.card })),
+  //   onError: (err) => toast.error("Erro ao carregar cartões: ", err),
+  // });
 
   const [designateCardInput] = useMutation(SENDING_CARD, {
     onCompleted: async (data) => {
       toast.success(data.assignCard.message);
       setModalOpen(false);
       setSelectedCard([]);
-      await fetchCards();
+      // await fetchCards();
     },
     onError: (error) => toast.error(`Erro: ${error.message}`),
   });
@@ -64,7 +64,7 @@ function AssignCard() {
       toast.success(data.returnCard.message);
       setModalOpen(false);
       setSelectedCard([]);
-      await fetchCards();
+      // await fetchCards();
     },
     onError: (error) => {
       toast.error(`Erro: ${error.message}`);
@@ -73,7 +73,7 @@ function AssignCard() {
 
   useEffect(() => {
     fetchUsers();
-    fetchCards();
+    // fetchCards();
   }, []);
 
   useEffect(() => {

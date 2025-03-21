@@ -24,7 +24,11 @@ function OAuth() {
   const [fetchAddresses] = useLazyQuery(ADDRESSES, {
     fetchPolicy: "network-only",
   });
-  const [fetchCards] = useLazyQuery(GET_CARDS);
+  const [fetchCards] = useLazyQuery(GET_CARDS, {
+    fetchPolicy: "network-only",
+    onCompleted: (data) => dispatch(setCards({ cards: data.card })),
+    onError: (err) => toast.error("Erro ao carregar cartões: ", err),
+  });
 
   const handleGoogleLogin = useCallback(async () => {
     setLoading(true);
@@ -48,11 +52,13 @@ function OAuth() {
       toast.success("Login bem-sucedido!");
 
       const [cardsData, addressesData] = await Promise.all([
-        fetchCards(),
-        userData.group !== "0" ? fetchAddresses() : null,
+        userData.group !== "0"
+          ? (await fetchAddresses(), await fetchCards())
+          : null,
       ]);
 
       if (cardsData?.data?.card) {
+        console.log("CARDS: ", cardsData.data.card);
         dispatch(setCards({ cards: cardsData.data.card }));
       }
       if (addressesData?.data?.addresses?.addresses) {
