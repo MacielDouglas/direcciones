@@ -29,7 +29,7 @@ function Cards() {
   );
 
   const socket = new WebSocket(import.meta.env.VITE_API_URL_SOCKET);
-  console.log(import.meta.env.VITE_API_URL_SOCKET);
+  console.log("Importe: META: ! ", import.meta.env.VITE_API_URL_SOCKET);
   // const socket = new WebSocket("ws://localhost:4000");
 
   socket.onmessage = (event) => {
