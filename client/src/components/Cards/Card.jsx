@@ -30,7 +30,24 @@ function Card() {
   const cardsData = useSelector((state) => state.cards) || [];
   const myCards = cardsData?.myCardsData || [];
 
+  console.log(cardsData.myCardsData);
+
   const dispatch = useDispatch();
+  useEffect(() => {});
+  // const socket = new WebSocket(import.meta.env.VITE_API_URL_SOCKET);
+
+  // useEffect(() => {
+  //   socket.onmessage = (event) => {
+  //     const cardsReceived = JSON.parse(event.data);
+  //     if (cardsReceived) {
+  //       dispatch(setCards({ cards: cardsReceived }));
+  //     }
+  //   };
+
+  //   return () => {
+  //     socket.close();
+  //   };
+  // }, [dispatch, cardsData, socket]);
 
   const [returnedCardInput] = useMutation(RETURN_CARD, {
     onCompleted: async (data) => {

@@ -16,7 +16,8 @@ import { toast } from "react-toastify";
 
 function Cards() {
   const user = useSelector((state) => state.user);
-  // const cards = useSelector((state) => state.cards);
+  const cards = useSelector((state) => state.cards) || [];
+  const myCards = cards?.myCardsData || [];
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,28 +30,43 @@ function Cards() {
   );
 
   const socket = new WebSocket(import.meta.env.VITE_API_URL_SOCKET);
-  console.log("Importe: META: ! ", import.meta.env.VITE_API_URL_SOCKET);
-  // const socket = new WebSocket("ws://localhost:4000");
-
   socket.onmessage = (event) => {
-    const cards = JSON.parse(event.data);
-    console.log("Mudança no banco:", cards);
+    const cardsReceived = JSON.parse(event.data);
+    if (cardsReceived) {
+      dispatch(setCards({ cards: cardsReceived }));
+    }
   };
 
-  const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
-    onCompleted: (data) => {
-      if (data && data.card) {
-        dispatch(setCards({ cards: data.card }));
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro: ${error.message}`);
-    },
-  });
-
   useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
+    if (!cards?.cardsData || !Array.isArray(cards.cardsData)) return;
+
+    const filtro = cards.cardsData.filter(
+      (ed) =>
+        Array.isArray(ed?.usersAssigned) &&
+        ed.usersAssigned.some((item) => item.userId === user?.userData?.id)
+    );
+    if (myCards.length < filtro.length)
+      toast.info("Você recebeu cartões novos.");
+    if (myCards.length > filtro.length)
+      toast.info("Foi devolvido alguns cartões.");
+
+    dispatch(setCards({ myCards: filtro })); // Alterado de myCardsData para myCards
+  }, [dispatch, cards?.cardsData, user?.userData?.id, myCards.length]);
+
+  // const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
+  //   onCompleted: (data) => {
+  //     if (data && data.card) {
+  //       dispatch(setCards({ cards: data.card }));
+  //     }
+  //   },
+  //   onError: (error) => {
+  //     toast.error(`Erro: ${error.message}`);
+  //   },
+  // });
+
+  // useEffect(() => {
+  //   fetchCards();
+  // }, [fetchCards]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");
@@ -63,15 +79,6 @@ function Cards() {
       setTab(tabFromUrl);
     }
   }, [location.search, navigate, tab]);
-
-  if (loading) {
-    return <Loading text={"Cargando direcciones..."} w />;
-  }
-
-  if (error) {
-    console.error("Erro ao buscar os cards:", error);
-    return <p>Error al cargar las tarjetas. Tente novamente más tarde.</p>;
-  }
 
   return (
     <div>
