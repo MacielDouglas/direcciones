@@ -22,6 +22,7 @@ import { RETURN_CARD } from "../../graphql/mutation/cards.mutation";
 import { toast } from "react-toastify";
 import { setCards } from "../../store/cardsSlice";
 import { setUser } from "../../store/userSlice";
+import ScrollToTop from "../../context/ScrollTotop";
 
 function Card() {
   const user = useSelector((state) => state.user);
@@ -116,6 +117,7 @@ function Card() {
 
   return (
     <div className="text-start text-lg w-full text-secondary h-full mb-24">
+      <ScrollToTop />
       <div className="space-y-5 px-4 pt-3">
         <h1 className="text-4xl font-medium">Tarjetas</h1>
         <p>

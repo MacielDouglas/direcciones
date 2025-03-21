@@ -22,7 +22,6 @@ function Cards() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // const admin = user.userData.isAdmmin;
   const isSS = user.userData.isSS;
 
   const [tab, setTab] = useState(
@@ -52,21 +51,6 @@ function Cards() {
 
     dispatch(setCards({ myCards: filtro })); // Alterado de myCardsData para myCards
   }, [dispatch, cards?.cardsData, user?.userData?.id, myCards.length]);
-
-  // const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
-  //   onCompleted: (data) => {
-  //     if (data && data.card) {
-  //       dispatch(setCards({ cards: data.card }));
-  //     }
-  //   },
-  //   onError: (error) => {
-  //     toast.error(`Erro: ${error.message}`);
-  //   },
-  // });
-
-  // useEffect(() => {
-  //   fetchCards();
-  // }, [fetchCards]);
 
   useEffect(() => {
     const tabFromUrl = new URLSearchParams(location.search).get("tab");
