@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import menuOptions from "../constants/menu";
 import SessionProvider from "../context/SessionProvider";
 import { FaClock } from "react-icons/fa6";
+import { stopKeepAlive } from "../services/keepAlive";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,6 +21,7 @@ export default function Header() {
   const [logoutUser, { loading: isLoggingOut }] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
       if (data?.logout?.success) {
+        stopKeepAlive();
         dispatch(clearAddresses());
         dispatch(clearCards());
         dispatch(clearUser());
@@ -29,6 +31,7 @@ export default function Header() {
       }
     },
     onError: () => {
+      stopKeepAlive();
       toast.error("Erro na solicitação de logout.");
     },
   });

@@ -13,6 +13,7 @@ import { setUser } from "../store/userSlice";
 import { setAddresses } from "../store/addressesSlice";
 import { setCards } from "../store/cardsSlice";
 import { motion } from "framer-motion";
+import { startKeepAlive } from "../services/keepAlive";
 
 function OAuth() {
   const auth = useMemo(() => getAuth(app), []);
@@ -27,6 +28,7 @@ function OAuth() {
   const [fetchCards] = useLazyQuery(GET_CARDS);
 
   const handleGoogleLogin = useCallback(async () => {
+    startKeepAlive();
     setLoading(true);
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: "select_account" });

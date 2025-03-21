@@ -8,6 +8,7 @@ import { LOGOUT } from "../graphql/queries/user.query";
 import { clearUser } from "../store/userSlice";
 import { clearAddresses } from "../store/addressesSlice";
 import { clearCards } from "../store/cardsSlice";
+import { stopKeepAlive } from "../services/keepAlive";
 
 function TokenPage() {
   const user = useSelector((state) => state.user);
@@ -18,11 +19,13 @@ function TokenPage() {
   const [logoutUser] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
       if (data.user.success) {
+        stopKeepAlive();
         dispatch(clearAddresses());
         dispatch(clearCards());
         dispatch(clearUser());
         toast.success("¡Cierre de sesión exitoso!");
       } else {
+        stopKeepAlive();
         toast.error(`Error al cerrar sesión: ${data.user.message}`);
       }
     },
