@@ -89,7 +89,7 @@ const startServer = async () => {
       origin: [
         "http://localhost:5173", // Durante desenvolvimento
         "https://direcciones.vercel.app",
-        "https://direcciones.onrender.com", // URL do frontend no Render
+        "https://personal-address-git-test-websocket-douglas-projects-83bb388e.vercel.app", // URL do frontend no Render
       ],
       credentials: true,
     }),

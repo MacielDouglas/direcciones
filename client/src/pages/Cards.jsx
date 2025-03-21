@@ -28,6 +28,12 @@ function Cards() {
     () => new URLSearchParams(location.search).get("tab") || "new-address"
   );
 
+  const socket = new WebSocket("https://api-websocket-r7ak.onrender.com");
+
+  socket.onmessage = (event) => {
+    console.log("Mudança no banco:", JSON.parse(event.data));
+  };
+
   const [fetchCards, { loading, error }] = useLazyQuery(GET_CARDS, {
     onCompleted: (data) => {
       if (data && data.card) {
