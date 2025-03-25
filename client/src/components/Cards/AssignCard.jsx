@@ -1,14 +1,13 @@
-import { useLazyQuery, useMutation } from "@apollo/client";
-import { useDispatch, useSelector } from "react-redux";
+import { useLazyQuery } from "@apollo/client";
+import { useSelector } from "react-redux";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { motion } from "framer-motion";
-import { GET_CARDS } from "../../graphql/queries/cards.query";
+
 import { GET_USERS } from "../../graphql/queries/user.query";
-import { setCards } from "../../store/cardsSlice";
-import { toast } from "react-toastify";
+
 import {
   FaTableList,
   FaUserGroup,
@@ -17,12 +16,13 @@ import {
 } from "react-icons/fa6";
 import SelectCardComponent from "./../hooks/SelectCardComponent";
 import {
-  RETURN_CARD,
-  SENDING_CARD,
-} from "../../graphql/mutation/cards.mutation";
+  useCardReturn,
+  useDesignateCard,
+  useFetchCards,
+} from "../../graphql/hooks/useCard";
+import { useGetUsers } from "../../graphql/hooks/useUser";
 
 function AssignCard() {
-  const dispatch = useDispatch();
   const cards = useSelector((state) => state.cards.cardsData || []);
   const addresses = useSelector((state) => state.addresses.addressesData || []);
   const [usersNotAssigned, setUsersNotAssigned] = useState([]);
@@ -33,48 +33,19 @@ function AssignCard() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const [users, setUsers] = useState([]);
+  const { returnedCardInput } = useCardReturn();
+  const { designateCardInput } = useDesignateCard();
+
   const [mapCenter, setMapCenter] = useState([0, 0]);
   const [selectedCard, setSelectedCard] = useState([]);
 
-  const [fetchUsers] = useLazyQuery(GET_USERS, {
-    fetchPolicy: "network-only",
-    onCompleted: (data) => setUsers(data.getUsers),
-    onError: (err) => console.error("Erro ao buscar usuários: ", err),
-  });
-
-  // const [fetchCards] = useLazyQuery(GET_CARDS, {
-  //   fetchPolicy: "network-only",
-  //   onCompleted: (data) => dispatch(setCards({ cards: data.card })),
-  //   onError: (err) => toast.error("Erro ao carregar cartões: ", err),
-  // });
-
-  const [designateCardInput] = useMutation(SENDING_CARD, {
-    onCompleted: async (data) => {
-      toast.success(data.assignCard.message);
-      setModalOpen(false);
-      setSelectedCard([]);
-      // await fetchCards();
-    },
-    onError: (error) => toast.error(`Erro: ${error.message}`),
-  });
-
-  const [returnedCardInput] = useMutation(RETURN_CARD, {
-    onCompleted: async (data) => {
-      toast.success(data.returnCard.message);
-      setModalOpen(false);
-      setSelectedCard([]);
-      // await fetchCards();
-    },
-    onError: (error) => {
-      toast.error(`Erro: ${error.message}`);
-    },
-  });
+  const { fetchUsers, users } = useGetUsers();
+  const { fetchCards } = useFetchCards();
 
   useEffect(() => {
     fetchUsers();
-    // fetchCards();
-  }, []);
+    fetchCards();
+  }, [fetchUsers, fetchCards]);
 
   useEffect(() => {
     if (cards.length > 0) {
@@ -192,6 +163,9 @@ function AssignCard() {
         },
       },
     });
+
+    setModalOpen(false);
+    setSelectedCard([]);
   };
 
   const handleReturnCard = async () => {
@@ -203,6 +177,9 @@ function AssignCard() {
         },
       },
     });
+
+    setModalOpen(false);
+    setSelectedCard([]);
   };
 
   const displayedMarkers = useMemo(() => {

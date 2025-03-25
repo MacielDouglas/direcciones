@@ -1,22 +1,15 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
 import { GET_USERS } from "../graphql/queries/user.query";
 import { useState } from "react";
-import { UPDATE_USER } from "../graphql/mutation/user.mutation";
-import { toast } from "react-toastify";
+import { useUpdateUser } from "../graphql/hooks/useUser";
 
 function AdminUsers() {
   const user = useSelector((state) => state.user.userData); // Usuário logado
   const { group } = user;
   const { data: usersData, loading, error } = useQuery(GET_USERS);
-  const [updateUserInput] = useMutation(UPDATE_USER, {
-    onCompleted: (data) => {
-      toast.success(data.userMutation.message);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+
+  const { updateUserInput } = useUpdateUser();
 
   const [selectedUser, setSelectedUser] = useState(null); // Usuário selecionado
   const [newName, setNewName] = useState(""); // Novo nome para o usuário em caso de duplicação

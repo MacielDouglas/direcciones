@@ -1,10 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import { useMutation } from "@apollo/client";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { NEW_CARD } from "../../graphql/mutation/cards.mutation";
 import Loading from "../../context/Loading";
 import {
   MdHouse,
@@ -14,6 +10,7 @@ import {
   MdOutlineApartment,
 } from "react-icons/md";
 import MapComponent from "../hooks/Mapcomponent";
+import { useNewCard } from "../../graphql/hooks/useCard";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -21,7 +18,8 @@ function NewCard() {
   const [selectedAddresses, setSelectedAddresses] = useState([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const { newCard } = useNewCard();
 
   const filteredAddresses = addresses.filter(
     (address) =>
@@ -29,22 +27,6 @@ function NewCard() {
         card.street.some((street) => street.id === address.id)
       )
   );
-
-  const [newCard] = useMutation(NEW_CARD, {
-    onCompleted: (data) => {
-      setTimeout(() => {
-        setLoading(false);
-        toast.success(data.createCard.message);
-        navigate("/cards?tab=asignar");
-      }, 2000);
-    },
-    onError: (error) => {
-      setTimeout(() => {
-        setLoading(false);
-        toast.error(`Error al crear una nueva tarjeta: ${error.message}`);
-      }, 2000);
-    },
-  });
 
   const handleCreateCard = useCallback(
     async (e) => {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   FaCalendarDays,
   FaTableList,
@@ -17,12 +17,8 @@ import Loading from "../../context/Loading";
 import { calculateDistance, formatDate } from "../../constants/direccion";
 import Address from "../Address";
 import { RiCloseLargeFill } from "react-icons/ri";
-import { useMutation } from "@apollo/client";
-import { RETURN_CARD } from "../../graphql/mutation/cards.mutation";
-import { toast } from "react-toastify";
-import { setCards } from "../../store/cardsSlice";
-import { setUser } from "../../store/userSlice";
 import ScrollToTop from "../../context/ScrollTotop";
+import { useCardReturn } from "../../graphql/hooks/useCard";
 
 function Card() {
   const user = useSelector((state) => state.user);
@@ -30,56 +26,13 @@ function Card() {
   const [selectedAddress, setSelectedAddress] = useState(null);
   const cardsData = useSelector((state) => state.cards) || [];
   const myCards = cardsData?.myCardsData || [];
-
-  console.log(cardsData.myCardsData);
-
-  const dispatch = useDispatch();
-  useEffect(() => {});
-  // const socket = new WebSocket(import.meta.env.VITE_API_URL_SOCKET);
-
-  // useEffect(() => {
-  //   socket.onmessage = (event) => {
-  //     const cardsReceived = JSON.parse(event.data);
-  //     if (cardsReceived) {
-  //       dispatch(setCards({ cards: cardsReceived }));
-  //     }
-  //   };
-
-  //   return () => {
-  //     socket.close();
-  //   };
-  // }, [dispatch, cardsData, socket]);
-
-  const [returnedCardInput] = useMutation(RETURN_CARD, {
-    onCompleted: async (data) => {
-      toast.success(data.cardMutation.message);
-
-      const returnedCards = data.cardMutation.returnedCards || [];
-
-      if (returnedCards.length > 0) {
-        const updatedCards = myCards.filter(
-          (card) => !returnedCards.some((returned) => returned.id === card.id)
-        );
-
-        const updatedUserData = {
-          ...user,
-          userData: {
-            ...user.userData,
-          },
-        };
-        dispatch(setUser({ user: updatedUserData }));
-        dispatch(
-          setCards({
-            cards: updatedCards,
-            sessionExpiry: updatedCards.length > 0 ? undefined : null,
-          })
-        );
-      }
-    },
-    onError: (error) => {
-      toast.error(`Erro: ${error.message}`);
-    },
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectCard, setSelectCard] = useState({
+    cardId: null,
+    cardNumber: null,
   });
+
+  const { returnedCardInput } = useCardReturn();
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -106,13 +59,13 @@ function Card() {
   const handleReturnCard = async (cardIdReturn) => {
     await returnedCardInput({
       variables: {
-        action: "returnCard",
-        designateCardInput: {
+        returnCardInput: {
           cardId: cardIdReturn,
           userId: user.userData.id,
         },
       },
     });
+    setModalOpen(false);
   };
 
   return (
@@ -143,7 +96,11 @@ function Card() {
             <div className="flex items-center justify-between w-full flex-wrap">
               <button
                 className="px-2 py-1 bg-secondary text-white rounded text-sm"
-                onClick={() => handleReturnCard(card.id)}
+                onClick={() => {
+                  setModalOpen(true),
+                    setSelectCard({ cardId: card.id, cardNumber: card.number });
+                }}
+                // onClick={() => handleReturnCard(card.id)}
               >
                 concluir tarjeta
               </button>
@@ -251,6 +208,32 @@ function Card() {
             </button>
             <div className="max-h-[80vh] overflow-auto">
               <Address id={selectedAddress} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-lg min-w-80">
+            <h2 className="text-xl font-bold mb-4">
+              ¿Estás seguro de que deseas devolver la tarjeta:{" "}
+              {selectCard.cardNumber}?
+            </h2>
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={() => setModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded"
+                onClick={() => handleReturnCard(selectCard.cardId)}
+              >
+                Devolver
+              </button>
             </div>
           </div>
         </div>
