@@ -9,7 +9,7 @@ import {
   MdOutlineStorefront,
   MdOutlineApartment,
 } from "react-icons/md";
-import MapComponent from "../hooks/Mapcomponent";
+import MapComponent from "../hooks/MapComponent";
 import { useNewCard } from "../../graphql/hooks/useCard";
 
 function NewCard() {
@@ -21,11 +21,25 @@ function NewCard() {
 
   const { newCard } = useNewCard();
 
-  const filteredAddresses = addresses.filter(
-    (address) =>
-      !cards.some((card) =>
-        card.street.some((street) => street.id === address.id)
-      )
+  const filteredAddresses = useMemo(
+    () =>
+      addresses.filter(
+        (address) =>
+          !cards.some((card) =>
+            card.street.some((street) => street.id === address.id)
+          )
+      ),
+    [addresses, cards]
+  );
+
+  const displayedAddresses = useMemo(
+    () =>
+      showSelectedOnly
+        ? filteredAddresses.filter((address) =>
+            selectedAddresses.includes(address.id)
+          )
+        : filteredAddresses,
+    [showSelectedOnly, filteredAddresses, selectedAddresses]
   );
 
   const handleCreateCard = useCallback(
@@ -49,31 +63,13 @@ function NewCard() {
     [newCard, selectedAddresses]
   );
 
-  if (!addresses) {
-    return (
-      <div className="p-8">
-        <Loading text="No tenemos direcciones para crear una tarjetar..." />
-      </div>
-    );
-  }
-
-  // const availableAddresses = Object.values(addresses).filter(
-  //   (address) => !cards.some((card) => card.street.includes(address.id))
-  // );
-
-  const toggleSelectAddress = (addressId) => {
+  const toggleSelectAddress = useCallback((addressId) => {
     setSelectedAddresses((prevSelected) =>
       prevSelected.includes(addressId)
         ? prevSelected.filter((id) => id !== addressId)
         : [...prevSelected, addressId]
     );
-  };
-
-  const displayedAddresses = showSelectedOnly
-    ? filteredAddresses.filter((address) =>
-        selectedAddresses.includes(address.id)
-      )
-    : filteredAddresses;
+  }, []);
 
   const typeIcons = useMemo(
     () => ({
@@ -85,6 +81,14 @@ function NewCard() {
     }),
     []
   );
+
+  if (!addresses) {
+    return (
+      <div className="p-8">
+        <Loading text="No tenemos direcciones para crear una tarjetar..." />
+      </div>
+    );
+  }
 
   if (loading) {
     return <Loading text="Creando una nueva tarjeta..." />;
@@ -180,6 +184,7 @@ function NewCard() {
             </button>
           </div>
           <MapComponent
+            mode="addresses"
             addresses={displayedAddresses}
             selectedAddresses={selectedAddresses}
             setSelectedAddresses={setSelectedAddresses}

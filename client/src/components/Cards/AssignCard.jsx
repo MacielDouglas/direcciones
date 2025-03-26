@@ -1,13 +1,7 @@
-import { useLazyQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 import { motion } from "framer-motion";
-
-import { GET_USERS } from "../../graphql/queries/user.query";
-
 import {
   FaTableList,
   FaUserGroup,
@@ -21,6 +15,7 @@ import {
   useFetchCards,
 } from "../../graphql/hooks/useCard";
 import { useGetUsers } from "../../graphql/hooks/useUser";
+import MapComponent from "../hooks/MapComponent";
 
 function AssignCard() {
   const cards = useSelector((state) => state.cards.cardsData || []);
@@ -35,8 +30,6 @@ function AssignCard() {
 
   const { returnedCardInput } = useCardReturn();
   const { designateCardInput } = useDesignateCard();
-
-  const [mapCenter, setMapCenter] = useState([0, 0]);
   const [selectedCard, setSelectedCard] = useState([]);
 
   const { fetchUsers, users } = useGetUsers();
@@ -46,39 +39,6 @@ function AssignCard() {
     fetchUsers();
     fetchCards();
   }, [fetchUsers, fetchCards]);
-
-  useEffect(() => {
-    if (cards.length > 0) {
-      const gpsCoordinates = cards.flatMap((card) =>
-        card.street.map((address) => address.gps.split(", ").map(Number))
-      );
-
-      if (gpsCoordinates.length > 0) {
-        const avgLat = Number(
-          (
-            gpsCoordinates.reduce((sum, [lat]) => sum + lat, 0) /
-            gpsCoordinates.length
-          ).toFixed(7)
-        );
-        const avgLng = Number(
-          (
-            gpsCoordinates.reduce((sum, [, lng]) => sum + lng, 0) /
-            gpsCoordinates.length
-          ).toFixed(7)
-        );
-
-        setMapCenter([avgLat, avgLng]);
-      }
-    }
-  }, [cards]);
-
-  function ChangeView({ center }) {
-    const map = useMap();
-    useEffect(() => {
-      map.setView(center, 14, { animate: true });
-    }, [center, map]);
-    return null;
-  }
 
   useEffect(() => {
     const newCardAssigned = [];
@@ -114,33 +74,6 @@ function AssignCard() {
     [addresses] // Apenas recalcula se `addresses` mudar
   );
 
-  const getCustomIcon = useCallback(
-    (cardId, number) => {
-      return new L.DivIcon({
-        className: "custom-marker",
-        html: `
-      <div style="position: relative; display: flex; align-items: center; justify-content: center">
-      <svg
-      fill="${cardColors[cardId]}"
-      xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="25px"
-            height="42px"
-          >
-            <path  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
-          </svg>
-          <span style="position: absolute; top: 10%; transform: translateY(-50%); font-size: 20px; font-weight: bold; color: black; text-align: center;">
-            ${number}
-          </span>
-        </d>
-      `,
-        iconSize: [30, 42],
-        iconAnchor: [15, 42],
-      });
-    },
-    [cardColors]
-  );
-
   const handleSelectCard = useCallback(
     (cardId, number, startDate, usersAssigned) => {
       setSelectedCard((prev) =>
@@ -167,7 +100,6 @@ function AssignCard() {
     setModalOpen(false);
     setSelectedCard([]);
   };
-
   const handleReturnCard = async () => {
     await returnedCardInput({
       variables: {
@@ -182,57 +114,8 @@ function AssignCard() {
     setSelectedCard([]);
   };
 
-  const displayedMarkers = useMemo(() => {
-    return cards.flatMap((card) =>
-      card.street.map((address) => {
-        const location = addressMap.get(address.id);
-        if (!location?.gps) return null;
-        const [lat, lng] = location.gps.split(", ").map(Number);
-
-        return (
-          <Marker
-            key={`${card.id}-${address.id}`}
-            position={[lat, lng]}
-            icon={getCustomIcon(card.id, card.number)}
-            eventHandlers={{
-              click: () =>
-                handleSelectCard(card.id, card.number, card.startDate),
-            }}
-          >
-            <Popup>
-              <div>
-                <p>
-                  Tarjeta:{" "}
-                  <span style={{ color: cardColors[card.id] }}>
-                    {card.number}
-                  </span>
-                </p>
-                <p>
-                  Dirección:{" "}
-                  <strong>
-                    {location.street}, {location.number}
-                  </strong>
-                </p>
-                <p>Barrio: {location.city}</p>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })
-    );
-  }, [cards, addressMap, cardColors, handleSelectCard, getCustomIcon]);
-
   useEffect(() => {
     if (cards.length && addresses.length) {
-      const firstCard = cards[0];
-      if (firstCard?.street.length > 0) {
-        const firstAddress = addressMap.get(firstCard.street[0]);
-        if (firstAddress?.gps) {
-          const [lat, lng] = firstAddress.gps.split(", ").map(Number);
-          setMapCenter([lat, lng]);
-        }
-      }
-
       const getCardColor = (cardId) => {
         if (selectedCard.length === 0) {
           return "#ef4444"; // Vermelho padrão
@@ -279,20 +162,16 @@ function AssignCard() {
           </div>
         )}
         <div className="flex-grow h-full z-0 -mx-5">
-          <MapContainer
-            center={mapCenter}
-            zoom={14}
-            className="h-64 w-full z-0"
-          >
-            {displayedMarkers}
-            <ChangeView center={mapCenter} />
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-          </MapContainer>
+          <MapComponent
+            mode="cards"
+            addresses={addresses}
+            handleSelectCard={handleSelectCard}
+            cardColors={cardColors}
+            cards={cards}
+            setCardColors={setCardColors}
+            selectedCard={selectedCard}
+          />
         </div>
-
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -314,7 +193,6 @@ function AssignCard() {
                 <SelectCardComponent
                   cardItem={cardNotAssigned}
                   handleSelectCard={handleSelectCard}
-                  // addresses={addresses}
                   users={users}
                   selectedCard={selectedCard}
                   cardColors={cardColors}
@@ -337,7 +215,6 @@ function AssignCard() {
               <SelectCardComponent
                 cardItem={cardAssigned}
                 handleSelectCard={handleSelectCard}
-                // addresses={addresses}
                 users={users}
                 cardColors={cardColors}
                 selectedCard={selectedCard}
