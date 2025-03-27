@@ -1,81 +1,74 @@
-import { useMutation, useQuery } from "@apollo/client";
 import { useSelector } from "react-redux";
-import { GET_USERS } from "../graphql/queries/user.query";
-import { useState } from "react";
-import { UPDATE_USER } from "../graphql/mutation/user.mutation";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
+import { useGetUsers, useUpdateUser } from "../graphql/hooks/useUser";
 
 function AdminUsers() {
-  const user = useSelector((state) => state.user.userData); // Usuário logado
-  const { group } = user;
-  const { data: usersData, loading, error } = useQuery(GET_USERS);
-  const [updateUserInput] = useMutation(UPDATE_USER, {
-    onCompleted: (data) => {
-      toast.success(data.userMutation.message);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+  const user = useSelector((state) => state.user.userData);
+  const { group, isAdmin } = user;
 
-  const [selectedUser, setSelectedUser] = useState(null); // Usuário selecionado
-  const [newName, setNewName] = useState(""); // Novo nome para o usuário em caso de duplicação
-  const [seeNewName, setSeeNewName] = useState(""); // Novo nome para o usuário em caso de duplicação
-  const [isNameDuplicate, setIsNameDuplicate] = useState(false); // Verifica se o nome está duplicado
+  const { fetchUsers, users } = useGetUsers();
+  const { updateUserInput } = useUpdateUser();
 
-  if (loading) return <p>Carregando usuários...</p>;
-  if (error) return <p>Erro ao carregar usuários: {error.message}</p>;
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newName, setNewName] = useState("");
+  const [isNameDuplicate, setIsNameDuplicate] = useState(false);
+  const [isSSMap, setIsSSMap] = useState({});
 
-  const users = usersData?.getUsers || [];
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const groupedUsers = users.filter((u) => u.group === group);
   const ungroupedUsers = users.filter((u) => u.group !== group);
 
-  // Verifica se o nome do usuário já existe no grupo
   const checkDuplicateName = (name) =>
-    groupedUsers.some((user) => user.name.toLowerCase() === name.toLowerCase());
+    groupedUsers.some((u) => u.name.toLowerCase() === name.toLowerCase());
 
-  // Função para atualizar o grupo de um usuário
   const handleGroupChange = async (userId, action) => {
     try {
       const user = users.find((u) => u.id === userId);
+      const newGroup = action === "add" ? group : "0";
 
-      // Verifica duplicação de nome ao adicionar
       if (action === "add" && checkDuplicateName(user.name)) {
-        if (newName == !user.name) {
-          setIsNameDuplicate(true);
-          setSeeNewName(user.name); // Define o nome atual no campo de edição
-          return;
-        }
+        setIsNameDuplicate(true);
+        setSelectedUser(user);
+        return;
       }
 
       await updateUserInput({
         variables: {
-          action: "addGroup",
-          updateUserInput: {
-            userMutationId: userId,
-            newName: newName,
+          updateUserId: user.id,
+          user: {
+            name: user.name,
+            group: newGroup,
+            isSS: isSSMap[user.id] || false,
           },
         },
       });
-
+      fetchUsers();
       setSelectedUser(null);
     } catch (error) {
       console.error("Erro ao atualizar o grupo:", error.message);
     }
   };
 
-  // Confirmar a adição do usuário com um nome atualizado
   const confirmAddWithNewName = async () => {
+    if (!newName.trim() || checkDuplicateName(newName)) return;
     try {
-      if (checkDuplicateName(newName) || !newName.trim()) {
-        return;
-      } // Impede se o nome ainda estiver duplicado
-
-      setSelectedUser({
-        ...selectedUser,
-        name: newName,
+      await updateUserInput({
+        variables: {
+          updateUserId: selectedUser.id,
+          user: {
+            name: newName,
+            group,
+            isSS: isSSMap[selectedUser.id] || false,
+          },
+        },
       });
+      fetchUsers();
+      setSelectedUser(null);
       setIsNameDuplicate(false);
+      setNewName("");
     } catch (error) {
       console.error("Erro ao confirmar adição com novo nome:", error.message);
     }
@@ -83,52 +76,18 @@ function AdminUsers() {
 
   return (
     <div className="text-start text-lg w-full">
-      <div className="space-y-5 px-4 pt-3 mb-2">
-        <h1 className="text-4xl font-medium">Administrar usuarios</h1>
-        <p>En esta página, puede agregar o eliminar usuarios del grupo.</p>
-      </div>
-      <hr />
-      <div className="px-4 mt-2">
-        <h2 className="text-2xl font-semibold mb-4">
-          Agregar usuario al grupo
-        </h2>
+      <h1 className="text-4xl font-medium px-4 pt-3 mb-2">
+        Administrar usuários
+      </h1>
+      <div className="px-4 mt-2 w-full">
+        <hr />
+        <h2 className="text-2xl  m-4">Agregar usuario al grupo</h2>
         {ungroupedUsers.length > 0 ? (
-          <ul className="space-y-4 mb-8">
+          <ul className="px-4 space-y-4">
             {ungroupedUsers.map((user) => (
               <li
                 key={user.id}
                 className="flex justify-between items-center bg-secondary p-4 rounded-lg shadow-md"
-              >
-                <div className="flex flex-col gap-2">
-                  <span className="text-sm text-yellow-300">
-                    User code: {user.codUser}
-                  </span>
-                  <span className="font-medium text-gray-400">{user.name}</span>
-                </div>
-                <button
-                  className="bg-red-500 text-white px-3 py-1 rounded-lg"
-                  onClick={() => setSelectedUser(user)}
-                >
-                  Selecionar
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">
-            No hay usuarios fuera del grupo para mostrar.
-          </p>
-        )}
-
-        <h2 className="text-2xl font-semibold mb-4">
-          Usuarios del grupo: {groupedUsers.length}
-        </h2>
-        {groupedUsers.length > 0 ? (
-          <ul className="space-y-4">
-            {groupedUsers.map((user) => (
-              <li
-                key={user.id}
-                className="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-md"
               >
                 <img
                   src={user.profilePicture}
@@ -136,112 +95,81 @@ function AdminUsers() {
                   alt={user.name}
                 />
                 <div className="flex flex-col gap-2 w-full ml-4">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-yellow-300">
                     User code: {user.codUser}
                   </span>
-                  <span className="font-medium text-secondary">
-                    {user.name}
-                  </span>
+                  <span className="font-medium text-gray-400">{user.name}</span>
+                  {isAdmin && (
+                    <div className="mt-2 text-gray-500">
+                      <label className="text-sm font-medium">isSS</label>
+                      <input
+                        type="radio"
+                        name={`isSS-${user.id}`}
+                        checked={isSSMap[user.id] === true}
+                        onChange={() =>
+                          setIsSSMap({ ...isSSMap, [user.id]: true })
+                        }
+                        className="ml-2"
+                      />{" "}
+                      Sim
+                      <input
+                        type="radio"
+                        name={`isSS-${user.id}`}
+                        checked={isSSMap[user.id] === false}
+                        onChange={() =>
+                          setIsSSMap({ ...isSSMap, [user.id]: false })
+                        }
+                        className="ml-2"
+                      />{" "}
+                      Não
+                    </div>
+                  )}
                 </div>
                 <button
-                  className="bg-red-500 text-white px-3 py-1 rounded-lg"
-                  onClick={() => setSelectedUser(user)}
+                  onClick={() => handleGroupChange(user.id, "add")}
+                  className="bg-yellow-400 text-black px-3 py-1 rounded-lg"
                 >
-                  Selecionar
+                  Adicionar
                 </button>
               </li>
             ))}
           </ul>
         ) : (
           <p className="text-gray-500">
-            No hay usuarios en el grupo para mostrar.
+            Não há usuários disponíveis para adicionar.
           </p>
         )}
+        <hr className="mt-5" />
+        <h2 className="text-2xl  px-4 m-4">
+          Usuarios del grupo: {groupedUsers.length}
+        </h2>
+        <ul className="px-4 space-y-4">
+          {groupedUsers.map((user) => (
+            <li
+              key={user.id}
+              className="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-md"
+            >
+              <img
+                src={user.profilePicture}
+                className="w-12 h-12 object-cover rounded-full"
+                alt={user.name}
+              />
+              <div className="flex flex-col gap-2 w-full ml-4">
+                <span className="text-sm text-gray-600">
+                  User code: {user.codUser}
+                </span>
+                <span className="font-medium text-secondary">{user.name}</span>
+              </div>
+              <button
+                onClick={() => handleGroupChange(user.id, "remove")}
+                className="bg-red-500 text-white px-3 py-1 rounded-lg"
+              >
+                Remover
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
-
-      {/* Modal para adicionar/remover usuário do grupo */}
-      {selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-md">
-            {isNameDuplicate ? (
-              <>
-                <h3 className="text-xl font-medium mb-4">Nombre duplicado</h3>
-                <p className="mb-4">
-                  Hay un usuario en el grupo con el nombre{" "}
-                  <strong>{selectedUser.name}</strong>. Por favor, introduzca un
-                  nuevo nombre o apellido.
-                </p>
-                <input
-                  className="w-full p-2 border border-gray-300 rounded-lg mb-4"
-                  value={seeNewName}
-                  onChange={(e) => {
-                    setNewName(e.target.value);
-                    setSeeNewName(e.target.value);
-                  }}
-                />
-                <div className="flex justify-end space-x-4">
-                  <button
-                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg"
-                    onClick={() => {
-                      setSelectedUser(null);
-                      setIsNameDuplicate(false);
-                      setNewName("");
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className={`bg-secondary text-white px-4 py-2 rounded-lg ${
-                      checkDuplicateName(newName) &&
-                      "opacity-50 cursor-not-allowed"
-                    }`}
-                    onClick={confirmAddWithNewName}
-                    disabled={checkDuplicateName(newName) || !newName.trim()}
-                  >
-                    Confirmar
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="text-xl font-medium mb-4">
-                  {selectedUser.group === group
-                    ? "Remover do grupo"
-                    : "Adicionar ao grupo"}
-                </h3>
-                <p className="mb-4">
-                  Deseja{" "}
-                  {selectedUser.group === group ? "remover" : "adicionar"}{" "}
-                  <strong>{selectedUser.name}</strong> ao grupo?
-                </p>
-                <div className="flex justify-end space-x-4">
-                  <button
-                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg"
-                    onClick={() => setSelectedUser(null)}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className={`px-4 py-2 rounded-lg ${
-                      selectedUser.group === group
-                        ? "bg-red-500 text-white"
-                        : "bg-secondary text-white"
-                    }`}
-                    onClick={() =>
-                      handleGroupChange(
-                        selectedUser.id,
-                        selectedUser.group === group ? "remove" : "add"
-                      )
-                    }
-                  >
-                    {selectedUser.group === group ? "Remover" : "Adicionar"}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

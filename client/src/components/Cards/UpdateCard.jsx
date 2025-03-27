@@ -1,200 +1,258 @@
-import React from "react";
+import { useSelector } from "react-redux";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import "leaflet/dist/leaflet.css";
+import { motion } from "framer-motion";
+
+import SelectCardComponent from "./../hooks/SelectCardComponent";
+import {
+  useCardReturn,
+  useDesignateCard,
+  useFetchCards,
+} from "../../graphql/hooks/useCard";
+import { useGetUsers } from "../../graphql/hooks/useUser";
+import ComponentMaps from "../hooks/ComponentMaps";
 
 function UpdateCard() {
-  return <div>UpdateCard</div>;
+  const cards = useSelector((state) => state.cards.cardsData || []);
+  const addresses = useSelector((state) => state.addresses.addressesData || []);
+  // const [usersNotAssigned, setUsersNotAssigned] = useState([]);
+  // const [usersAssigned, setUsersAssigned] = useState([]);
+  const [cardAssigned, setCardAssigned] = useState([]);
+  const [cardNotAssigned, setCardNotAssigned] = useState([]);
+  const [cardColors, setCardColors] = useState({});
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const { returnedCardInput } = useCardReturn();
+  const { designateCardInput } = useDesignateCard();
+  const [selectedCard, setSelectedCard] = useState([]);
+
+  const { fetchUsers, users } = useGetUsers();
+  const { fetchCards } = useFetchCards();
+
+  useEffect(() => {
+    fetchUsers();
+    fetchCards();
+  }, [fetchUsers, fetchCards]);
+
+  useEffect(() => {
+    const newCardAssigned = [];
+    const newCardNotAssigned = [];
+    const newUsersAssigned = [];
+    // const newUsersNotAssigned = [];
+
+    // Separar os cards com base na startDate
+    cards.forEach((card) => {
+      if (card.startDate !== null) {
+        newCardAssigned.push(card);
+
+        // Filtrar usuários atribuídos aos cards com startDate não nulo
+        card.usersAssigned.forEach((userAssigned) => {
+          const user = users.find((user) => user.id === userAssigned.userId);
+          if (user) {
+            newUsersAssigned.push(user);
+          }
+        });
+      } else {
+        newCardNotAssigned.push(card);
+      }
+    });
+
+    setCardAssigned(newCardAssigned);
+    setCardNotAssigned(newCardNotAssigned);
+    // setUsersAssigned(newUsersAssigned);
+    // setUsersNotAssigned(newUsersNotAssigned);
+  }, [cards, users]);
+
+  const addressMap = useMemo(
+    () => new Map(addresses.map((a) => [a.id, a])),
+    [addresses] // Apenas recalcula se `addresses` mudar
+  );
+
+  const handleSelectCard = useCallback(
+    (cardId, number, startDate, usersAssigned) => {
+      setSelectedCard((prev) =>
+        prev.some((card) => card.id === cardId)
+          ? prev.filter((card) => card.id !== cardId)
+          : [...prev, { id: cardId, number, startDate, usersAssigned }]
+      );
+    },
+    []
+  );
+
+  const handleSendCard = async () => {
+    if (!selectedUser) return alert("Selecione um usuário!");
+
+    await designateCardInput({
+      variables: {
+        assignCardInput: {
+          cardIds: selectedCard.map((card) => card.id),
+          userId: selectedUser.id,
+        },
+      },
+    });
+
+    setModalOpen(false);
+    setSelectedCard([]);
+  };
+  const handleReturnCard = async () => {
+    await returnedCardInput({
+      variables: {
+        returnCardInput: {
+          cardId: selectedCard[0].id,
+          userId: selectedCard[0].usersAssigned,
+        },
+      },
+    });
+
+    setModalOpen(false);
+    setSelectedCard([]);
+  };
+
+  useEffect(() => {
+    if (cards.length && addresses.length) {
+      const getCardColor = (cardId) => {
+        if (selectedCard.length === 0) {
+          return "#ef4444"; // Vermelho padrão
+        }
+        return selectedCard.some((card) => card.id === cardId)
+          ? "#005cc8" // Azul para selecionados
+          : "#ef4444"; // Vermelho para não selecionados
+      };
+
+      const colors = cards.reduce((acc, card) => {
+        acc[card.id] = getCardColor(card.id);
+        return acc;
+      }, {});
+
+      setCardColors(colors);
+    }
+  }, [cards, addressMap, selectedCard, addresses]);
+
+  return (
+    <div className="min-h-screen bg-details p-3 md:p-10 flex flex-col justify-center  mb-[40px]">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl"
+      >
+        <h1 className="text-3xl font-medium text-gray-700 mb-4">
+          Modificar Tarjetas
+        </h1>
+
+        <p>Elige una tarjeta para modificar</p>
+        <div className="flex-grow h-full z-0 -mx-5">
+          <ComponentMaps
+            mode="cards"
+            addresses={addresses}
+            handleSelectCard={handleSelectCard}
+            cardColors={cardColors}
+            cards={cards}
+            setCardColors={setCardColors}
+            selectedCard={selectedCard}
+          />
+        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex flex-col md:flex-row my-3 w-full">
+            <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
+              <h3 className="text-xl font-semibold">Tarjetas no asignadas</h3>
+              {/* <p>Tarjetas selecionadas: {selectedCard?.length}</p>
+              <button
+                onClick={() => setModalOpen(true)}
+                disabled={selectedCard.length === 0}
+                className="bg-gradient-to-b from-stone-800 to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary  disabled:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                asignar tarjetas
+              </button> */}
+
+              {cardNotAssigned.length > 0 && (
+                <SelectCardComponent
+                  cardItem={cardNotAssigned}
+                  handleSelectCard={handleSelectCard}
+                  users={users}
+                  selectedCard={selectedCard}
+                  cardColors={cardColors}
+                />
+              )}
+            </div>
+            <div className="border-t border-t-stone-800 flex flex-col gap-4 md:w-2/3 md:overflow-y-auto max-h-full mt-5">
+              <h3 className="text-xl font-semibold mt-3">Tarjetas en uso.</h3>
+
+              {/* <button
+                onClick={() => handleReturnCard()}
+                disabled={
+                  !selectedCard[0]?.usersAssigned?.length ||
+                  selectedCard.length !== 1
+                }
+                className="bg-gradient-to-b from-red-600 to-red-700 text-white px-4 py-2 rounded hover:from-red-400 hover:red-500  disabled:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                retornar tarjetas
+              </button> */}
+              <SelectCardComponent
+                cardItem={cardAssigned}
+                handleSelectCard={handleSelectCard}
+                users={users}
+                cardColors={cardColors}
+                selectedCard={selectedCard}
+              />
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {isModalOpen && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-lg min-w-80">
+            <h2 className="text-xl font-bold mb-4">Detalhes do Cartão</h2>
+            <div className="max-h-60 overflow-y-auto border rounded p-3 mb-4">
+              {selectedCard.length > 0 ? (
+                selectedCard.map((card) => (
+                  <p key={card.id} className="text-lg font-medium">
+                    Tarjeta: {card.number}
+                  </p>
+                ))
+              ) : (
+                <p>Nenhum cartão selecionado.</p>
+              )}
+            </div>
+            <select
+              onChange={(e) =>
+                setSelectedUser(users.find((u) => u.id === e.target.value))
+              }
+              className="mt-4 w-full border rounded p-2"
+            >
+              <option value="">Selecione um usuário</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={() => setModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded"
+                onClick={handleSendCard}
+                disabled={selectedCard.length === 0}
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default UpdateCard;
-
-// import { useState, useEffect } from "react";
-// import { useSelector } from "react-redux";
-// import { motion } from "framer-motion";
-// import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-// import "leaflet/dist/leaflet.css";
-// import L from "leaflet";
-// import { useMutation } from "@apollo/client";
-// import { toast } from "react-toastify";
-// import { useNavigate, useParams } from "react-router-dom";
-// import { UPDATE_CARD } from "../../graphql/mutation/cards.mutation";
-// import Loading from "../../context/Loading";
-
-// // Ícones personalizados para os marcadores
-// const greenIcon = new L.Icon({
-//   iconUrl: "pinMapGreen.svg",
-//   iconSize: [25, 41],
-//   iconAnchor: [12, 41],
-// });
-
-// const blueIcon = new L.Icon({
-//   iconUrl: "pinMap.svg",
-//   iconSize: [25, 41],
-//   iconAnchor: [12, 41],
-// });
-
-// function UpdateCard() {
-//   const { id } = useParams(); // Obtém o ID do cartão da URL
-//   const cards = useSelector((state) => state.cards.cardsData?.card || []);
-//   const addresses = useSelector((state) => state.addresses.addressesData);
-//   const cardToUpdate = cards.find((card) => card.id === id);
-//   const [selectedAddresses, setSelectedAddresses] = useState(
-//     cardToUpdate?.street || []
-//   );
-//   const [loading, setLoading] = useState(false);
-//   const navigate = useNavigate();
-
-//   const [updateCard] = useMutation(UPDATE_CARD, {
-//     onCompleted: (data) => {
-//       toast.success(data.cardMutation.message);
-//       setLoading(false);
-//       navigate("/cards?tab=asignar");
-//     },
-//     onError: (error) => {
-//       toast.error(`Error al actualizar la tarjeta: ${error.message}`);
-//       setLoading(false);
-//     },
-//   });
-
-//   const handleUpdateCard = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       await updateCard({
-//         variables: {
-//           id,
-//           updatedCard: {
-//             street: selectedAddresses,
-//           },
-//         },
-//       });
-//     } catch (error) {
-//       console.error("Error al actualizar la tarjeta: ", error.message);
-//       setLoading(false);
-//     }
-//   };
-
-//   const toggleSelectAddress = (addressId) => {
-//     setSelectedAddresses((prevSelected) =>
-//       prevSelected.includes(addressId)
-//         ? prevSelected.filter((id) => id !== addressId)
-//         : [...prevSelected, addressId]
-//     );
-//   };
-
-//   const getIcon = (addressId) =>
-//     selectedAddresses.includes(addressId) ? greenIcon : blueIcon;
-
-//   if (loading) {
-//     return <Loading text="Actualizando tarjeta..." />;
-//   }
-
-//   if (!cardToUpdate) {
-//     return (
-//       <div className="min-h-screen flex justify-center items-center">
-//         <p>Tarjeta no encontrada.</p>
-//       </div>
-//     );
-//   }
-
-//   const availableAddresses = Object.values(addresses);
-
-//   return (
-//     <div className="min-h-screen bg-details p-3 md:p-10 flex justify-center">
-//       <motion.div
-//         className="bg-white shadow-lg rounded-lg p-8 w-full max-w-3xl"
-//         initial={{ opacity: 0, x: -50 }}
-//         animate={{ opacity: 1, x: 0 }}
-//         exit={{ opacity: 0, x: 50 }}
-//         transition={{ duration: 0.3 }}
-//       >
-//         <h1 className="text-3xl font-medium text-gray-700 mb-6">
-//           Actualizar Tarjeta
-//         </h1>
-//         <form onSubmit={handleUpdateCard}>
-//           <div className="flex flex-col md:flex-row my-3 h-full w-full bg-white">
-//             <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
-//               <h3 className="text-xl font-semibold">
-//                 Seleccione las direcciones
-//               </h3>
-//               <div className="overflow-y-auto border p-4 rounded max-h-[30vh] bg-primary">
-//                 {availableAddresses.map((address) => (
-//                   <div
-//                     key={address.id}
-//                     className="flex items-center text-sm lg:text-lg justify-between border-b py-2"
-//                   >
-//                     <div>
-//                       <p>
-//                         <strong>{address.street}</strong>, {address.number}
-//                       </p>
-//                       <p>
-//                         {address.neighborhood}, {address.city}
-//                       </p>
-//                     </div>
-//                     <input
-//                       type="checkbox"
-//                       checked={selectedAddresses.includes(address.id)}
-//                       onChange={() => toggleSelectAddress(address.id)}
-//                       className="w-5 h-5"
-//                     />
-//                   </div>
-//                 ))}
-//               </div>
-//               <button
-//                 type="submit"
-//                 className="mb-5 px-6 py-2 border border-secondary hover:bg-secondary hover:text-primary transition-colors text-sm lg:text-lg disabled:border-gray-300 disabled:text-gray-300 disabled:cursor-not-allowed disabled:hover:bg-primary"
-//                 disabled={selectedAddresses.length === 0}
-//               >
-//                 Actualizar Tarjeta
-//               </button>
-//             </div>
-
-//             <div className="md:ml-3 lg:flex-grow md:relative w-full h-full">
-//               <MapContainer
-//                 center={
-//                   selectedAddresses.length
-//                     ? addresses[selectedAddresses[0]].gps
-//                         .split(", ")
-//                         .map(Number)
-//                     : [0, 0]
-//                 }
-//                 zoom={14}
-//                 className="h-full w-full min-h-[400px] max-h-[100%] z-0 object-cover"
-//               >
-//                 <TileLayer
-//                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-//                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-//                 />
-//                 {availableAddresses.map((address) => {
-//                   const [lat, lng] = address.gps.split(", ").map(Number);
-//                   return (
-//                     <Marker
-//                       key={address.id}
-//                       position={[lat, lng]}
-//                       icon={getIcon(address.id)}
-//                       eventHandlers={{
-//                         click: () => toggleSelectAddress(address.id),
-//                       }}
-//                     >
-//                       <Popup>
-//                         <div className="text-sm">
-//                           <p>
-//                             <strong>{address.street}</strong>, {address.number}
-//                           </p>
-//                           <p>
-//                             {address.neighborhood}, {address.city}
-//                           </p>
-//                         </div>
-//                       </Popup>
-//                     </Marker>
-//                   );
-//                 })}
-//               </MapContainer>
-//             </div>
-//           </div>
-//         </form>
-//       </motion.div>
-//     </div>
-//   );
-// }
-
-// export default UpdateCard;
