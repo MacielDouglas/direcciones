@@ -10,7 +10,7 @@ import {
   MdOutlineApartment,
 } from "react-icons/md";
 import { useNewCard } from "../../graphql/hooks/useCard";
-import MapComponent from "../hooks/MapComponent";
+import ComponentMaps from "../hooks/ComponentMaps";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -183,7 +183,7 @@ function NewCard() {
               Crear tarjeta
             </button>
           </div>
-          <MapComponent
+          <ComponentMaps
             mode="addresses"
             addresses={displayedAddresses}
             selectedAddresses={selectedAddresses}

@@ -10,7 +10,7 @@ import {
   useFetchCards,
 } from "../../graphql/hooks/useCard";
 import { useGetUsers } from "../../graphql/hooks/useUser";
-import MapComponent from "./../hooks/MapComponent";
+import ComponentMaps from "../hooks/ComponentMaps";
 
 function UpdateCard() {
   const cards = useSelector((state) => state.cards.cardsData || []);
@@ -143,7 +143,7 @@ function UpdateCard() {
 
         <p>Elige una tarjeta para modificar</p>
         <div className="flex-grow h-full z-0 -mx-5">
-          <MapComponent
+          <ComponentMaps
             mode="cards"
             addresses={addresses}
             handleSelectCard={handleSelectCard}
