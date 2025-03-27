@@ -192,12 +192,18 @@ const userResolver = {
     updateUser: async (_, { id, user }, { req }) => {
       const decodedToken = verifyAuthorization(req);
 
-      if (!decodedToken || decodedToken.userId !== id) {
+      if (!decodedToken || !decodedToken.isSS) {
         throw new Error("Você não tem permissão para alterar esse usuário.");
       }
 
       try {
         const userToUpdate = await existing(id, "user");
+        if (userToUpdate.isAdmin) {
+          throw new Error("Você não pode alterar um usuário administrador.");
+        }
+        if (decodedToken.userId === userToUpdate.id && user.group === "0") {
+          throw new Error("Você não pode alterar suas próprias informações.");
+        }
         const userUpdate = { ...user };
 
         if (user.name) {

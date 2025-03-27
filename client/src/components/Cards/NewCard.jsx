@@ -9,8 +9,8 @@ import {
   MdOutlineStorefront,
   MdOutlineApartment,
 } from "react-icons/md";
-import MapComponent from "../hooks/MapComponent";
 import { useNewCard } from "../../graphql/hooks/useCard";
+import MapComponent from "../hooks/MapComponent";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);

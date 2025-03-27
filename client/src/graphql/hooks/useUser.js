@@ -42,7 +42,7 @@ export function useLogout() {
 export function useUpdateUser() {
   const [updateUserInput] = useMutation(UPDATE_USER, {
     onCompleted: (data) => {
-      toast.success(data.userMutation.message);
+      toast.success(data.updateUser.message);
     },
     onError: (error) => {
       toast.error(error.message);
