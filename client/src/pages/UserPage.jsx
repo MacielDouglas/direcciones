@@ -21,10 +21,10 @@ function UserPage() {
           className="w-24 h-42 object-cover rounded-full self-center"
           alt={user.name}
         />
-        <h1 className="text-5xl font-light tracking-wide">
+        <h1 className="text-5xl font-light tracking-wide text-center">
           ¡Hola, <span className="font-medium">{name}</span>!
         </h1>
-        <div className="text-lg text-gray-600 w-full text-start">
+        <div className="text-lg text-gray-600 w-full text-center">
           <p>
             Usted tiene <strong>{myCardsData.length}</strong>{" "}
             {myCardsData.length > 1 ? "tarjetas asignadas" : "tarjeta asignada"}

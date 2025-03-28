@@ -89,12 +89,12 @@ function OAuth() {
       {loading ? (
         <div className="flex items-center">
           <FaSpinner className="animate-spin mr-2" />
-          Iniciando sessão...
+          Iniciando sesión...
         </div>
       ) : (
         <>
           <FaGoogle className="mr-2" />
-          Iniciar sessão com Google
+          Iniciar sesión con Google
         </>
       )}
     </motion.button>

@@ -95,9 +95,9 @@ export default function Home() {
         transition={{ duration: 0.7, ease: "easeOut" }}
       >
         <h1 className="text-4xl font-light tracking-wide mb-6">
-          Bem-vindo, <span className="font-medium">{name}</span>.
+          Bienvenido, <span className="font-medium">{name}</span>.
         </h1>
-        <p className="text-lg text-gray-600">Escolha uma opção para começar:</p>
+        <p className="text-lg text-gray-600">Elija una opción para comenzar:</p>
       </motion.div>
 
       <motion.nav

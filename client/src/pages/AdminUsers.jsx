@@ -170,6 +170,38 @@ function AdminUsers() {
           ))}
         </ul>
       </div>
+
+      {isNameDuplicate && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-xl font-medium mb-4">Nome duplicado</h3>
+            <p className="mb-4">
+              O nome "{selectedUser.name}" já existe no grupo. Insira um novo
+              nome:
+            </p>
+            <input
+              className="w-full p-2 border rounded-lg mb-4"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setIsNameDuplicate(false)}
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmAddWithNewName}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                disabled={!newName.trim() || checkDuplicateName(newName)}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

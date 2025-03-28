@@ -200,9 +200,10 @@ function Card() {
       {selectedAddress && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center w-full h-full p-4 sm:p-6">
           <div className="relative bg-white rounded-lg shadow-lg max-w-lg w-full p-2 sm:p-8">
+            {/* Botão de fechar centralizado no topo */}
             <button
               onClick={() => setSelectedAddress(null)}
-              className="absolute -top-5 right-44 bg-secondary text-2xl text-slate-300 p-2 rounded-full border border-red-800"
+              className="absolute top-3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-secondary text-2xl text-slate-300 p-2 rounded-full border border-red-800"
             >
               <RiCloseLargeFill />
             </button>

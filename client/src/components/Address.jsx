@@ -150,7 +150,7 @@ function Address({ id }) {
         }`}
       >
         <h2 className="text-xl font-medium text-center mb-4">
-          Informações da Direção
+          Información de la dirección
         </h2>
         {photo && (
           <img
@@ -164,7 +164,7 @@ function Address({ id }) {
             confirmed ? "text-green-600" : "text-red-600"
           }`}
         >
-          {confirmed ? "Direção confirmada" : "Necessita confirmar"}
+          {confirmed ? "Dirección confirmada" : "Necesita confirmación"}
         </p>
         <div className="flex flex-col items-center space-y-3 text-sm">
           <div className="flex justify-between items-center w-full">
@@ -194,7 +194,7 @@ function Address({ id }) {
             onClick={openMap}
             className="bg-blue-500 text-white px-3 py-1 rounded-md mt-2"
           >
-            Ver no Mapa
+            ver en el mapa
           </button>
         </div>
         {complement && <p className="mt-2 text-center">{complement}</p>}
@@ -203,7 +203,7 @@ function Address({ id }) {
           className="w-full bg-black text-white py-2 rounded-md mt-3"
           onClick={handleEdit}
         >
-          Editar Direção
+          Editar dirección
         </button>
       </div>
       <div className="w-full h-72 rounded-md overflow-hidden ">
@@ -221,7 +221,7 @@ function Address({ id }) {
               position={[userLocation.lat, userLocation.lng]}
               icon={personIcon}
             >
-              <Popup>Você está aqui!</Popup>
+              <Popup>¡Usted está aquí!</Popup>
             </Marker>
           )}
           {userLocation && (
