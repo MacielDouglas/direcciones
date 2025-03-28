@@ -69,7 +69,7 @@ const cardResolver = {
 
     updateCard: async (_, { updateCardInput }, { req }) => {
       try {
-        const { id, street } = updateCardInput;
+        const { id, street = [] } = updateCardInput;
         validateObjectId(id);
 
         const decodedToken = verifyAuthorization(req);
@@ -78,37 +78,23 @@ const cardResolver = {
         const card = await findCardById(id);
         if (!card) throw new Error("Cartão não encontrado.");
 
-        let updatedStreet = [...card.street]; // Mantém os valores existentes
+        if (!Array.isArray(street))
+          throw new Error("Lista de endereços inválida.");
 
-        if (street && Array.isArray(street)) {
-          for (const streetId of street) {
-            validateObjectId(streetId);
-
-            // Remove o ID do campo street se já estiver no cartão
-            if (updatedStreet.includes(streetId)) {
-              updatedStreet = updatedStreet.filter((sId) => sId !== streetId);
-            } else {
-              // Verifica se o ID está em outro cartão, ignorando o próprio
-              const existingCard = await Card.findOne({
-                street: streetId,
-                _id: { $ne: id },
-              });
-              if (existingCard) {
-                throw new Error(
-                  `O endereço ${streetId} já está vinculado a outro cartão.`
-                );
-              }
-              // Se não está em outro cartão, adiciona
-              updatedStreet.push(streetId);
-            }
+        for (const streetId of street) {
+          validateObjectId(streetId);
+          const existingCard = await Card.findOne({
+            street: streetId,
+            _id: { $ne: id },
+          });
+          if (existingCard) {
+            throw new Error(
+              `O endereço ${streetId} já está vinculado a outro cartão.`
+            );
           }
         }
 
-        // Remove duplicatas de street
-        updatedStreet = [...new Set(updatedStreet)];
-
-        // Se a lista de `street` estiver vazia, deletar o cartão
-        if (updatedStreet.length === 0) {
+        if (street.length === 0) {
           await Card.findByIdAndDelete(id);
           return {
             message: "Cartão deletado, pois não há mais endereços associados.",
@@ -117,10 +103,9 @@ const cardResolver = {
           };
         }
 
-        // Atualiza o cartão com a nova lista de endereços
         const updatedCard = await Card.findByIdAndUpdate(
           id,
-          { street: updatedStreet },
+          { street },
           { new: true }
         );
 
@@ -136,7 +121,6 @@ const cardResolver = {
         };
       }
     },
-
     deleteCard: async (_, { id }, { req }) => {
       try {
         validateObjectId(id);

@@ -88,8 +88,8 @@ const FormUploadImage = ({ onUploadComplete }) => {
     setIsUploading(true);
     try {
       const storage = getStorage(app);
-      // const storageRef = ref(storage, `direcciones/${image.name}`);
-      const storageRef = ref(storage, `standard/${image.name}`);
+      const storageRef = ref(storage, `direcciones/${image.name}`);
+      // const storageRef = ref(storage, `standard/${image.name}`);
       const metadata = {
         contentType: "image/webp", // Forçar o tipo da imagem
       };

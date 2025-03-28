@@ -1,8 +1,10 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
 import {
+  DELETE_CARD,
   NEW_CARD,
   RETURN_CARD,
   SENDING_CARD,
+  UPDATE_CARD,
 } from "../mutation/cards.mutation";
 import { toast } from "react-toastify";
 
@@ -15,6 +17,7 @@ export function useFetchCards() {
     fetchPolicy: "network-only",
     onCompleted: (data) => {
       setCards(data.card);
+      console.log(data.card);
     },
     onError: (err) => {
       toast.error(`Error al cargar tarjetas: ${err.message}`);
@@ -65,4 +68,32 @@ export function useDesignateCard() {
   });
 
   return { designateCardInput };
+}
+
+export function useDeleteCard() {
+  const [deleteCardInput, { error: deleteCardError }] = useMutation(
+    DELETE_CARD,
+    {
+      onCompleted: async (data) => {
+        toast.success(data.deleteCard.message);
+      },
+      onError: (error) =>
+        toast.error(`Erro al deletar tarjeta: ${error.message}`),
+    }
+  );
+
+  return { deleteCardInput, deleteCardError };
+}
+
+export function useUpdateCard() {
+  const [updateCardInput] = useMutation(UPDATE_CARD, {
+    onCompleted: async (data) => {
+      console.log(data);
+      toast.success(data.updateCard.message);
+    },
+    onError: (error) =>
+      toast.error(`Erro al modificar tarjeta: ${error.message}`),
+  });
+
+  return { updateCardInput };
 }

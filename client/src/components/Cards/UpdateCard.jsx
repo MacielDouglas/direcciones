@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 
 import SelectCardComponent from "./../hooks/SelectCardComponent";
 import {
-  useCardReturn,
-  useDesignateCard,
+  useDeleteCard,
   useFetchCards,
+  useUpdateCard,
 } from "../../graphql/hooks/useCard";
 import { useGetUsers } from "../../graphql/hooks/useUser";
 import ComponentMaps from "../hooks/ComponentMaps";
@@ -15,25 +15,23 @@ import ComponentMaps from "../hooks/ComponentMaps";
 function UpdateCard() {
   const cards = useSelector((state) => state.cards.cardsData || []);
   const addresses = useSelector((state) => state.addresses.addressesData || []);
-  // const [usersNotAssigned, setUsersNotAssigned] = useState([]);
-  // const [usersAssigned, setUsersAssigned] = useState([]);
   const [cardAssigned, setCardAssigned] = useState([]);
   const [cardNotAssigned, setCardNotAssigned] = useState([]);
   const [cardColors, setCardColors] = useState({});
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setModalOpen] = useState(null);
 
-  const { returnedCardInput } = useCardReturn();
-  const { designateCardInput } = useDesignateCard();
+  const [selectedStreets, setSelectedStreets] = useState([]);
   const [selectedCard, setSelectedCard] = useState([]);
 
+  const { deleteCardInput } = useDeleteCard();
+  const { updateCardInput } = useUpdateCard();
   const { fetchUsers, users } = useGetUsers();
   const { fetchCards } = useFetchCards();
 
   useEffect(() => {
     fetchUsers();
     fetchCards();
-  }, [fetchUsers, fetchCards]);
+  }, [fetchUsers, fetchCards, updateCardInput]);
 
   useEffect(() => {
     const newCardAssigned = [];
@@ -60,14 +58,57 @@ function UpdateCard() {
 
     setCardAssigned(newCardAssigned);
     setCardNotAssigned(newCardNotAssigned);
-    // setUsersAssigned(newUsersAssigned);
-    // setUsersNotAssigned(newUsersNotAssigned);
   }, [cards, users]);
 
   const addressMap = useMemo(
     () => new Map(addresses.map((a) => [a.id, a])),
     [addresses] // Apenas recalcula se `addresses` mudar
   );
+
+  // Função para remover as ruas selecionadas do card
+  const handleRemoveStreets = async () => {
+    if (selectedCard.length === 0 || selectedStreets.length === 0) return;
+
+    try {
+      await updateCardInput({
+        variables: {
+          updateCardInput: {
+            id: selectedCard[0].id,
+            street: selectedStreets,
+          },
+          // action: "REMOVE", // Ou a ação que seu backend espera
+        },
+      });
+
+      // Atualiza a lista de cards após a modificação
+      fetchCards();
+      setSelectedStreets([]);
+      setModalOpen(false);
+      setSelectedCard([]);
+    } catch (error) {
+      console.error("Error removing streets:", error);
+    }
+  };
+
+  // Função para obter todas as ruas disponíveis (não atribuídas a nenhum card)
+  const getAvailableStreets = useMemo(() => {
+    // Primeiro, coletamos todas as ruas que estão em cards
+    const streetsInCards = new Set();
+    cards.forEach((card) => {
+      card.street?.forEach((st) => streetsInCards.add(st.id));
+    });
+
+    // Depois filtramos as addresses que não estão em nenhum card
+    return addresses.filter((address) => !streetsInCards.has(address.id));
+  }, [cards, addresses]);
+
+  const handleStreetSelection = (streetId) => {
+    setSelectedStreets((prev) =>
+      prev.includes(streetId)
+        ? prev.filter((id) => id !== streetId)
+        : [...prev, streetId]
+    );
+  };
 
   const handleSelectCard = useCallback(
     (cardId, number, startDate, usersAssigned) => {
@@ -80,33 +121,18 @@ function UpdateCard() {
     []
   );
 
-  const handleSendCard = async () => {
-    if (!selectedUser) return alert("Selecione um usuário!");
+  const handleDeleteCard = async () => {
+    setModalOpen(true);
 
-    await designateCardInput({
+    deleteCardInput({
       variables: {
-        assignCardInput: {
-          cardIds: selectedCard.map((card) => card.id),
-          userId: selectedUser.id,
-        },
+        deleteCardId: selectedCard[0].id,
       },
     });
 
-    setModalOpen(false);
+    fetchCards();
     setSelectedCard([]);
-  };
-  const handleReturnCard = async () => {
-    await returnedCardInput({
-      variables: {
-        returnCardInput: {
-          cardId: selectedCard[0].id,
-          userId: selectedCard[0].usersAssigned,
-        },
-      },
-    });
-
     setModalOpen(false);
-    setSelectedCard([]);
   };
 
   useEffect(() => {
@@ -159,17 +185,25 @@ function UpdateCard() {
           transition={{ duration: 0.5 }}
         >
           <div className="flex flex-col md:flex-row my-3 w-full">
+            <div className="w-full flex items-center justify-content-between gap-10 p-3">
+              <button
+                className="p-2 w-full bg-blue-500 disabled:bg-blue-200 rounded-md text-white"
+                disabled={selectedCard.length !== 1}
+                onClick={() => setModalOpen("modificar")}
+              >
+                Modificar Tarjeta
+              </button>
+              <button
+                className="p-2 w-full bg-red-500 disabled:bg-red-200 rounded-md text-white"
+                disabled={selectedCard.length !== 1}
+                onClick={() => setModalOpen("deletar")}
+              >
+                Deletar Tarjeta
+              </button>
+            </div>
+
             <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
               <h3 className="text-xl font-semibold">Tarjetas no asignadas</h3>
-              {/* <p>Tarjetas selecionadas: {selectedCard?.length}</p>
-              <button
-                onClick={() => setModalOpen(true)}
-                disabled={selectedCard.length === 0}
-                className="bg-gradient-to-b from-stone-800 to-secondary text-white px-4 py-2 rounded hover:from-black hover:to-secondary  disabled:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                asignar tarjetas
-              </button> */}
-
               {cardNotAssigned.length > 0 && (
                 <SelectCardComponent
                   cardItem={cardNotAssigned}
@@ -182,17 +216,6 @@ function UpdateCard() {
             </div>
             <div className="border-t border-t-stone-800 flex flex-col gap-4 md:w-2/3 md:overflow-y-auto max-h-full mt-5">
               <h3 className="text-xl font-semibold mt-3">Tarjetas en uso.</h3>
-
-              {/* <button
-                onClick={() => handleReturnCard()}
-                disabled={
-                  !selectedCard[0]?.usersAssigned?.length ||
-                  selectedCard.length !== 1
-                }
-                className="bg-gradient-to-b from-red-600 to-red-700 text-white px-4 py-2 rounded hover:from-red-400 hover:red-500  disabled:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                retornar tarjetas
-              </button> */}
               <SelectCardComponent
                 cardItem={cardAssigned}
                 handleSelectCard={handleSelectCard}
@@ -207,47 +230,122 @@ function UpdateCard() {
 
       {isModalOpen && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 max-w-lg min-w-80">
-            <h2 className="text-xl font-bold mb-4">Detalhes do Cartão</h2>
-            <div className="max-h-60 overflow-y-auto border rounded p-3 mb-4">
-              {selectedCard.length > 0 ? (
-                selectedCard.map((card) => (
-                  <p key={card.id} className="text-lg font-medium">
-                    Tarjeta: {card.number}
-                  </p>
-                ))
-              ) : (
-                <p>Nenhum cartão selecionado.</p>
-              )}
-            </div>
-            <select
-              onChange={(e) =>
-                setSelectedUser(users.find((u) => u.id === e.target.value))
-              }
-              className="mt-4 w-full border rounded p-2"
-            >
-              <option value="">Selecione um usuário</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-            <div className="mt-6 flex justify-end gap-4">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={() => setModalOpen(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="bg-green-500 text-white px-4 py-2 rounded"
-                onClick={handleSendCard}
-                disabled={selectedCard.length === 0}
-              >
-                Enviar
-              </button>
-            </div>
+          <div className="bg-white rounded-lg p-6 max-w-lg min-w-80 max-h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">
+              ¿Estás seguro que deseas{" "}
+              <span className="uppercase">{isModalOpen}</span> esta tarjeta?
+            </h2>
+
+            {isModalOpen === "deletar" ? (
+              <>
+                <div className="max-h-60 overflow-y-auto border rounded p-3 mb-4">
+                  {selectedCard.map((card) => (
+                    <div key={card.id}>
+                      <p className="text-lg font-medium">
+                        Tarjeta: {card.number}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-center gap-4">
+                  <button
+                    className="bg-secondary text-white px-4 py-2 rounded"
+                    onClick={() => setModalOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    onClick={handleDeleteCard}
+                  >
+                    Deletar
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-medium mb-2">
+                  Direcciones en esta tarjeta que deseas eliminar
+                </h3>
+                <div className="max-h-48 overflow-y-auto border rounded p-3 mb-4">
+                  {cards
+                    .filter((card) => card.id === selectedCard[0].id)
+                    .map((street) => street.street)[0]
+                    .map((st) => (
+                      <div key={st.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedStreets.includes(st.id)}
+                          onChange={() => handleStreetSelection(st.id)}
+                        />
+                        <p>
+                          calle: {st.street}, {st.number} - {st.neighborhood} -{" "}
+                          {st.city}
+                        </p>
+                      </div>
+                    ))}
+                  {selectedCard[0]?.street?.map((st) => (
+                    <div key={st.id} className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedStreets.includes(st.id)}
+                        onChange={() => handleStreetSelection(st.id)}
+                      />
+                      <p>
+                        calle: {st.street}, {st.number} - {st.neighborhood} -{" "}
+                        {st.city}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <h3 className="text-lg font-medium mb-2">
+                  Direcciones disponibles para añadir:{" "}
+                  {getAvailableStreets.length}
+                </h3>
+                <div className="max-h-48 overflow-y-auto border rounded p-3 mb-4">
+                  {getAvailableStreets.length > 0 ? (
+                    getAvailableStreets.map((address) => (
+                      <div
+                        key={address.id}
+                        className="flex items-center gap-2 mb-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedStreets.includes(address.id)}
+                          onChange={() => handleStreetSelection(address.id)}
+                        />
+                        <p>
+                          {address.street}, {address.number} -{" "}
+                          {address.neighborhood} - {address.city}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No hay direcciones disponibles</p>
+                  )}
+                </div>
+
+                <div className="mt-6 flex justify-center gap-4">
+                  <button
+                    className="bg-secondary text-white px-4 py-2 rounded"
+                    onClick={() => {
+                      setModalOpen(false);
+                      setSelectedStreets([]);
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={handleRemoveStreets}
+                    disabled={selectedStreets.length === 0}
+                  >
+                    Actualizar Tarjeta
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
