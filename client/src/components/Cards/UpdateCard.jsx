@@ -156,7 +156,7 @@ function UpdateCard() {
   }, [cards, addressMap, selectedCard, addresses]);
 
   return (
-    <div className="min-h-screen bg-details p-3 md:p-10 flex flex-col justify-center  mb-[40px]">
+    <div className="min-h-screen bg-details p-3 md:p-10 flex flex-col justify-center  mb-[40px] w-full items-center">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -184,25 +184,25 @@ function UpdateCard() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col md:flex-row my-3 w-full">
+          <div className="flex flex-col my-3 max-w-[800px]">
             <div className="w-full flex items-center justify-content-between gap-10 p-3">
               <button
                 className="p-2 w-full bg-blue-500 disabled:bg-blue-200 rounded-md text-white"
                 disabled={selectedCard.length !== 1}
                 onClick={() => setModalOpen("modificar")}
               >
-                Modificar Tarjeta
+                Modificar
               </button>
               <button
                 className="p-2 w-full bg-red-500 disabled:bg-red-200 rounded-md text-white"
                 disabled={selectedCard.length !== 1}
                 onClick={() => setModalOpen("deletar")}
               >
-                Deletar Tarjeta
+                Deletar
               </button>
             </div>
 
-            <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
+            <div className="border-t border-stone-50 flex flex-col gap-4  border-r  max-h-full ">
               <h3 className="text-xl font-semibold">Tarjetas no asignadas</h3>
               {cardNotAssigned.length > 0 && (
                 <SelectCardComponent

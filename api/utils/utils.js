@@ -124,16 +124,31 @@ export const findCardById = async (id) => {
 export const findNextNumber = async () => {
   const existingNumbers = await Card.find().distinct("number").exec();
 
-  if (existingNumbers.length === 0) return 1;
+  if (!existingNumbers.length) return 1;
 
-  const uniqueNumbers = existingNumbers.map(Number).sort((a, b) => a - b);
-  for (let i = 0; i < uniqueNumbers.length - 1; i++) {
-    if (uniqueNumbers[i + 1] !== uniqueNumbers[i] + 1)
-      return uniqueNumbers[i] + 1;
+  const uniqueNumbers = new Set(existingNumbers.map(Number));
+  const totalCards = uniqueNumbers.size;
+
+  for (let i = 1; i <= totalCards; i++) {
+    if (!uniqueNumbers.has(i)) return i;
   }
 
-  return uniqueNumbers[uniqueNumbers.length - 1] + 1;
+  return totalCards + 1;
 };
+
+// export const findNextNumber = async () => {
+//   const existingNumbers = await Card.find().distinct("number").exec();
+
+//   if (existingNumbers.length === 0) return 1;
+
+//   const uniqueNumbers = existingNumbers.map(Number).sort((a, b) => a - b);
+//   for (let i = 0; i < uniqueNumbers.length - 1; i++) {
+//     if (uniqueNumbers[i + 1] !== uniqueNumbers[i] + 1)
+//       return uniqueNumbers[i] + 1;
+//   }
+
+//   return uniqueNumbers[uniqueNumbers.length - 1] + 1;
+// };
 
 // ======= Funções Auxiliares =======
 

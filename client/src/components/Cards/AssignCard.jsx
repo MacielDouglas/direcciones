@@ -177,8 +177,8 @@ function AssignCard() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col md:flex-row my-3 w-full">
-            <div className="border-t border-stone-50 flex flex-col gap-4 md:w-2/3 border-r md:overflow-y-auto max-h-full">
+          <div className="flex flex-col my-3 w-full">
+            <div className="border-t border-stone-50 flex flex-col gap-4  border-r  max-h-full">
               <h3 className="text-xl font-semibold">Tarjetas disponibles</h3>
               <p>Tarjetas selecionadas: {selectedCard?.length}</p>
               <button
@@ -199,7 +199,7 @@ function AssignCard() {
                 />
               )}
             </div>
-            <div className="border-t border-t-stone-800 flex flex-col gap-4 md:w-2/3 md:overflow-y-auto max-h-full mt-5">
+            <div className="border-t border-t-stone-800 flex flex-col gap-4  max-h-full mt-5">
               <h3 className="text-xl font-semibold mt-3">Tarjetas en uso.</h3>
 
               <button
