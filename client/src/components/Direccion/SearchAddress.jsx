@@ -6,6 +6,7 @@ import {
   MdOutlineStorefront,
   MdOutlineApartment,
 } from "react-icons/md";
+import { FaRoute } from "react-icons/fa6";
 import SearchModal from "./SearchModal";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -73,7 +74,7 @@ function SearchAddress() {
       <div className="flex items-center justify-center my-6 bg-details ">
         <button
           onClick={openSearchModal}
-          className="w-full max-w-xs bg-secondary text-white font-semibold py-3 px-6 shadow-md hover:bg-sky-700 transition-colors"
+          className="w-full max-w-xs rounded-md bg-secondary text-white font-semibold py-3 px-6 shadow-md hover:bg-sky-700 transition-colors"
         >
           Pesquisar direcciones
         </button>
@@ -104,8 +105,10 @@ function SearchAddress() {
               return (
                 <li
                   key={index}
-                  className={`border-b p-5 border-gray-200 flex justify-center flex-col ${
-                    !address.confirmed ? "bg-red-100" : "bg-primary"
+                  className={`border-b p-5 border-gray-200 flex justify-center flex-col bg-gradient-to-b  rounded-lg ${
+                    !address.confirmed
+                      ? "from-red-100 to-red-200"
+                      : "from-gray-100 to-gray-300"
                   }`}
                 >
                   <Link
@@ -138,16 +141,19 @@ function SearchAddress() {
                         }`}
                       >
                         {address.confirmed
-                          ? "Confirmado"
+                          ? "confirmado"
                           : "necesita confirmar"}
                       </p>
                     </div>
 
-                    <p className="col-span-1 justify-self-end text-sm w-full">
-                      {distance >= 1000
-                        ? `${(distance / 1000).toFixed(2)}km`
-                        : `${distance}m`}
-                    </p>
+                    <div className="flex flex-col justify-center gap-3 items-center text-3xl">
+                      <FaRoute />
+                      <p className="col-span-1 justify-self-end text-sm w-full">
+                        {distance >= 1000
+                          ? `${(distance / 1000).toFixed(2)}km`
+                          : `${distance}m`}
+                      </p>
+                    </div>
                   </Link>
                 </li>
               );

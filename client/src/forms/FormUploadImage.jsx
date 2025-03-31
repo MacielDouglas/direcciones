@@ -141,7 +141,7 @@ const FormUploadImage = ({ onUploadComplete }) => {
             : "bg-gray-400 cursor-not-allowed"
         }`}
       >
-        {isUploading ? "Enviando..." : "Enviar imagen"}
+        {isUploading ? "Enviando..." : "Subir imagen"}
       </button>
     </div>
   );

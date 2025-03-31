@@ -17,7 +17,6 @@ export function useFetchCards() {
     fetchPolicy: "network-only",
     onCompleted: (data) => {
       setCards(data.card);
-      console.log(data.card);
     },
     onError: (err) => {
       toast.error(`Error al cargar tarjetas: ${err.message}`);

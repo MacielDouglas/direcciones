@@ -342,7 +342,7 @@ function UpdateAddress({ id }) {
               ? "Esperando imagen..."
               : loading
               ? "Enviando alteraciones..."
-              : "Enviar"}
+              : "Actualizar dirección"}
             {/* {isUploading ? "Esperando imagen..." : "Enviar alterações"} */}
           </button>
         </form>

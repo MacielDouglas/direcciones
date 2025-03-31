@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 function DireccionSidebar() {
   const location = useLocation();
@@ -15,14 +15,14 @@ function DireccionSidebar() {
       </div>
       <div className="flex text-center  ">
         {/* Botão Nueva Dirección */}
-        <Link
+        <NavLink
           to="/address?tab=new-address"
           className={`p-4 w-full  ${
             currentTab === "new-address" ? "bg-details" : "bg-primary"
           }`}
         >
           Nueva Dirección
-        </Link>
+        </NavLink>
 
         {/* Botão Buscar Dirección */}
         <Link

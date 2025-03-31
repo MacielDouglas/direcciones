@@ -292,7 +292,7 @@ function NewAddress() {
                 : "bg-blue-500 hover:bg-blue-600 transition-colors"
             }`}
           >
-            {isUploading ? "Esperando imagen..." : "Enviar"}
+            {isUploading ? "Esperando imagen..." : "Crear dirección"}
           </button>
         </form>
       </div>
