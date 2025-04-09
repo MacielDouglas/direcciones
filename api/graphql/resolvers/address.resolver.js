@@ -79,6 +79,7 @@ const addressResolvers = {
           ...newAddressInput,
           group: decodedToken.group, // Define o grupo do usuário
           userId: decodedToken.userId,
+          active: true,
         });
 
         const savedAddress = await newAddress.save();

@@ -143,6 +143,7 @@ const cardResolver = {
     assignCard: async (_, { assignCardInput }, { req }) => {
       try {
         const decodedToken = verifyAuthorization(req);
+
         if (
           !decodedToken ||
           (!decodedToken.isSS &&

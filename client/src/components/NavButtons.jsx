@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
 import {
-  FaRegUser,
-  FaRegRectangleList,
-  FaRegMap,
-  FaUsers,
-} from "react-icons/fa6";
-import { IoHomeOutline } from "react-icons/io5";
+  BsPerson,
+  BsPeople,
+  BsMap,
+  BsCardList,
+  BsHouseDoor,
+  BsArrowLeftRight,
+} from "react-icons/bs";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSelector } from "react-redux";
@@ -14,15 +15,16 @@ function NavButtons() {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
   const user = useSelector((state) => state?.user);
-  const isSS = user?.userData?.isSS;
+  const { isSS, isSCards } = user?.userData || {};
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const scrollDiff = currentScrollY - lastScrollY;
       const threshold = window.innerHeight * 0.2;
-      const topThreshold = window.innerHeight * 0.5; // 30% do topo
+      const topThreshold = window.innerHeight * 0.5;
 
       if (scrollDiff > 0 && currentScrollY > threshold) {
         setIsVisible(false);
@@ -37,18 +39,42 @@ function NavButtons() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  const menuItems = useMemo(
-    () => [
-      { to: "/", icon: <IoHomeOutline />, label: "Home" },
-      { to: "/cards", icon: <FaRegRectangleList />, label: "Tarjetas" },
-      { to: "/address", icon: <FaRegMap />, label: "Dirección" },
-      { to: "/user", icon: <FaRegUser />, label: "Usuario" },
-      ...(isSS
-        ? [{ to: "/adminUsers", icon: <FaUsers />, label: "Admin" }]
+  const menuItems = useMemo(() => {
+    const baseItems = [
+      { to: "/", icon: <BsHouseDoor />, label: "Home" },
+      { to: "/cards", icon: <BsCardList />, label: "Tarjetas" },
+      ...(isSCards
+        ? [
+            {
+              to: "/cards?tab=asignar",
+              icon: <BsArrowLeftRight />,
+              label: "Asignar",
+            },
+          ]
         : []),
-    ],
-    [isSS]
-  );
+      { to: "/address", icon: <BsMap />, label: "Dirección" },
+      { to: "/user", icon: <BsPerson />, label: "Usuario" },
+      ...(isSS
+        ? [{ to: "/adminUsers", icon: <BsPeople />, label: "Admin" }]
+        : []),
+    ];
+
+    return baseItems;
+  }, [isSS, isSCards]);
+
+  const isItemActive = (to, label) => {
+    const { pathname, search } = location;
+
+    if (label === "Asignar") {
+      return pathname === "/cards" && search.includes("tab=asignar");
+    }
+
+    if (label === "Tarjetas") {
+      return pathname === "/cards" && !search.includes("tab=asignar");
+    }
+
+    return pathname === to;
+  };
 
   return (
     <motion.nav
@@ -60,7 +86,7 @@ function NavButtons() {
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {menuItems.map(({ to, icon, label }) => {
-        const isActive = location.pathname === to;
+        const isActive = isItemActive(to, label);
 
         return (
           <Link
@@ -78,7 +104,6 @@ function NavButtons() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               />
             )}
-
             <motion.div
               className={`text-2xl flex items-center flex-col ${
                 isActive ? "text-yellow-300" : "text-gray-500"

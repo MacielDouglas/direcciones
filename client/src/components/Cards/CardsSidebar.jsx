@@ -3,12 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
-  IoAddOutline,
-  IoPencilOutline,
-  IoPersonAddOutline,
-  IoHomeOutline,
-} from "react-icons/io5";
-import { FaRegRectangleList } from "react-icons/fa6";
+  BsArrowRepeat,
+  BsArrowLeftRight,
+  BsCardList,
+  BsHouseDoor,
+  BsCardChecklist,
+} from "react-icons/bs";
 
 const menuVariants = {
   hidden: { translateY: 100 },
@@ -37,19 +37,23 @@ function CardsSidebar() {
   }, [lastScrollY, threshold]);
 
   const menuOptions = [
-    { to: "/", icon: <IoHomeOutline />, label: "Home" },
-    { to: "/cards?tab=cards", icon: <FaRegRectangleList />, label: "Tarjetas" },
+    { to: "/", icon: <BsHouseDoor />, label: "Home" },
+    { to: "/cards?tab=cards", icon: <BsCardList />, label: "Tarjetas" },
     ...(isSS
       ? [
-          { to: "/cards?tab=crear", icon: <IoAddOutline />, label: "Crear" },
+          {
+            to: "/cards?tab=crear",
+            icon: <BsCardChecklist />,
+            label: "Crear",
+          },
           {
             to: "/cards?tab=modificar",
-            icon: <IoPencilOutline />,
+            icon: <BsArrowRepeat />,
             label: "Modificar",
           },
           {
             to: "/cards?tab=asignar",
-            icon: <IoPersonAddOutline />,
+            icon: <BsArrowLeftRight />,
             label: "Asignar",
           },
         ]
@@ -58,7 +62,7 @@ function CardsSidebar() {
 
   return (
     <motion.nav
-      className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20 z-50 lowercase"
+      className="fixed bottom-0 left-0 h-[70px] w-full bg-secondary text-primary py-4 px-6 flex justify-between md:justify-center md:gap-20 z-50"
       initial={{ translateY: 0 }}
       animate={{ translateY: isVisible ? 0 : 100 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}

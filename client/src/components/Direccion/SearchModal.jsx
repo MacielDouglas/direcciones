@@ -102,7 +102,9 @@ function SearchModal({ isOpen, onClose }) {
                     >
                       <Link
                         to={`/address?tab=/address/${address.id}`}
-                        className="w-full"
+                        className={`"w-full ${
+                          !address.active && "text-red-500"
+                        }`}
                       >
                         <div className="flex items-center gap-4">
                           <span className="text-3xl">
@@ -122,19 +124,28 @@ function SearchModal({ isOpen, onClose }) {
                             <p className="text-lg font-semibold">
                               {address.street}, {address.number}
                             </p>
-                            <p className="text-sm text-gray-600">
+                            <p
+                              className={`text-sm ${
+                                !address.active && "text-red-500"
+                              }`}
+                            >
+                              {/* <p className="text-sm text-gray-600"> */}
                               {address.city}, {address.neighborhood}
                             </p>
                             <p
                               className={`text-sm ${
-                                address.confirmed
+                                !address.active
+                                  ? "text-red-500 font-semibold"
+                                  : address.confirmed
                                   ? "text-green-600"
-                                  : "text-orange-500 font-semibold"
+                                  : "text-red-600 font-semibold"
                               }`}
                             >
-                              {address.confirmed
-                                ? "Confirmado"
-                                : "Necesita confirmar"}
+                              {!address.active
+                                ? "Dirección inactiva"
+                                : address.confirmed
+                                ? "Dirección confirmada"
+                                : "Necesita confirmación"}
                             </p>
                           </div>
                         </div>

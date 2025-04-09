@@ -18,6 +18,7 @@ export const NEW_ADDRESS = gql`
         confirmed
         visited
         photo
+        active
       }
     }
   }
@@ -41,6 +42,7 @@ export const UPDATE_ADDRESS = gql`
         confirmed
         visited
         photo
+        active
       }
     }
   }

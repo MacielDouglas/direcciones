@@ -17,6 +17,8 @@ export const GET_USERS = gql`
       profilePicture
       group
       codUser
+      isSS
+      isSCards
     }
   }
 `;

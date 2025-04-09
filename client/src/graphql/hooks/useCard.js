@@ -87,7 +87,6 @@ export function useDeleteCard() {
 export function useUpdateCard() {
   const [updateCardInput] = useMutation(UPDATE_CARD, {
     onCompleted: async (data) => {
-      console.log(data);
       toast.success(data.updateCard.message);
     },
     onError: (error) =>

@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -15,6 +15,10 @@ import {
 import { FaRoute } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { calculateDistance } from "../constants/direccion";
+import { useMutation } from "@apollo/client";
+import { UPDATE_ADDRESS } from "../graphql/mutation/address.mutation";
+import { toast } from "react-toastify";
+import { setAddresses } from "../store/addressesSlice";
 
 const createCustomIcon = (iconUrl) =>
   new L.Icon({
@@ -71,10 +75,39 @@ function Routing({ userLocation, destination }) {
 }
 
 function Address({ id }) {
-  const addresses = useSelector((state) => state.addresses.addressesData);
-  const address = addresses.find((address) => address.id === id);
+  const dispatch = useDispatch();
+  const addresses = useSelector((state) => state.addresses);
+  const address = addresses.addressesData.find((address) => address.id === id);
   const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [updateAddress, { loading }] = useMutation(UPDATE_ADDRESS, {
+    onCompleted: (data) => {
+      const updateAdd = data?.updateAddress?.address;
+
+      if (!updateAdd) {
+        toast.error("A resposta da API não retornou um endereço válido.");
+        return;
+      }
+
+      toast.success("Endereço atualizado com sucesso!");
+
+      dispatch(
+        setAddresses({
+          addresses: addresses.addressesData.map((addr) =>
+            addr.id === updateAdd.id ? updateAdd : addr
+          ),
+        })
+      );
+      setIsModalOpen(false);
+      navigate(`/address?tab=/address/${updateAdd.id}`);
+    },
+
+    onError: (error) => {
+      toast.error(`Erro ao atualizar endereço: ${error.message}`);
+    },
+  });
 
   const {
     street,
@@ -86,6 +119,7 @@ function Address({ id }) {
     complement,
     confirmed,
     photo,
+    active,
   } = address;
   const [latitude, longitude] = useMemo(
     () => gps.split(", ").map(parseFloat),
@@ -142,11 +176,31 @@ function Address({ id }) {
 
   const handleEdit = () => navigate(`/address?tab=update-address&id=${id}`);
 
+  const handleCancelAddress = async () => {
+    const { __typename, createdAt, ...addressy } = address;
+    const updateAdd = {
+      ...addressy,
+      active: !address.active, // alterna true <-> false
+    };
+
+    await updateAddress({
+      variables: {
+        input: updateAdd,
+      },
+    });
+
+    setIsModalOpen(false);
+  };
+
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
+    <div
+      className={`w-full max-w-md mx-auto p-4 shadow-lg rounded-lg ${
+        !active ? "bg-slate-400" : "bg-white"
+      }`}
+    >
       <div
         className={`p-5 rounded-md mb-4 ${
-          confirmed ? "bg-primary" : "bg-red-100"
+          !active ? "bg-gray-500" : confirmed ? "bg-gray-100" : "bg-red-100"
         }`}
       >
         <h2 className="text-xl font-medium text-center mb-4">
@@ -161,10 +215,18 @@ function Address({ id }) {
         )}
         <p
           className={`text-center font-bold ${
-            confirmed ? "text-green-600" : "text-red-600"
+            !active
+              ? "text-secondary"
+              : confirmed
+              ? "text-green-600"
+              : "text-red-600"
           }`}
         >
-          {confirmed ? "Dirección confirmada" : "Necesita confirmación"}
+          {!active
+            ? "Dirección inactiva"
+            : confirmed
+            ? "Dirección confirmada"
+            : "Necesita confirmación"}
         </p>
         <div className="flex flex-col items-center space-y-3 text-sm">
           <div className="flex justify-between items-center w-full">
@@ -205,6 +267,14 @@ function Address({ id }) {
         >
           Editar dirección
         </button>
+        <button
+          className={`w-full text-white py-2 rounded-md mt-3 ${
+            !active ? "bg-green-500" : "bg-red-500"
+          }`}
+          onClick={() => setIsModalOpen(true)}
+        >
+          {!active ? "Activar dirección" : "Desactivar dirección"}
+        </button>
       </div>
       <div className="w-full h-72 rounded-md overflow-hidden ">
         <MapContainer
@@ -232,6 +302,31 @@ function Address({ id }) {
           )}
         </MapContainer>
       </div>
+      {isModalOpen && (
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center z-20">
+          <div className="bg-white rounded-lg p-6 max-w-lg min-w-80 max-h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">
+              ¿Estás seguro que deseas {active ? "DESACTIVAR" : "ACTIVAR"} esta
+              dirección?
+            </h2>
+
+            <div className="mt-6 flex justify-center gap-4">
+              <button
+                className="bg-secondary text-white px-4 py-2 rounded"
+                onClick={() => setIsModalOpen(false)}
+              >
+                No, cancelar
+              </button>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded"
+                onClick={handleCancelAddress}
+              >
+                Sí, confirmo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

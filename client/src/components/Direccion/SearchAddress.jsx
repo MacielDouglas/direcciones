@@ -106,15 +106,18 @@ function SearchAddress() {
                 <li
                   key={index}
                   className={`border-b p-5 border-gray-200 flex justify-center flex-col bg-gradient-to-b  rounded-lg ${
-                    !address.confirmed
+                    !address.active
+                      ? "bg-gray-500"
+                      : !address.confirmed
                       ? "from-red-100 to-red-200"
                       : "from-gray-100 to-gray-300"
                   }`}
                 >
                   <Link
                     to={`/address?tab=/address/${address.id}`}
-                    className="grid grid-cols-7 w-full "
+                    className="grid grid-cols-7 w-full"
                   >
+                    {/* <p>{address.active}</p> */}
                     <p className="text-3xl col-span-1 w-10">
                       {(address.type === "house" && <MdHouse />) ||
                         (address.type === "department" && (
@@ -129,20 +132,28 @@ function SearchAddress() {
                         <p className="text-gray-800 font-semibold text-lg ">
                           {address.street}, {address.number}.
                         </p>
-                        <p className="text-gray-500 text-sm">
+                        <p
+                          className={`text-sm ${
+                            !address.active ? "text-secondary" : "text-gray-500"
+                          }`}
+                        >
                           {address.city}, {address.neighborhood},
                         </p>
                       </div>
                       <p
-                        className={`${
-                          address.confirmed
-                            ? ""
-                            : "font-semibold text-orange-500"
+                        className={`font-semibold ${
+                          !address.active
+                            ? "text-secondary"
+                            : address.confirmed
+                            ? "text-green-600"
+                            : "text-red-600"
                         }`}
                       >
-                        {address.confirmed
-                          ? "confirmado"
-                          : "necesita confirmar"}
+                        {!address.active
+                          ? "Dirección inactiva"
+                          : address.confirmed
+                          ? "Dirección confirmada"
+                          : "Necesita confirmación"}
                       </p>
                     </div>
 

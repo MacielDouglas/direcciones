@@ -13,6 +13,7 @@ export const LOGIN_GOOGLE = gql`
         profilePicture
         isAdmin
         isSS
+        isSCards
       }
     }
   }

@@ -41,6 +41,8 @@ type UserSummary {
     group: String
     codUser: Int
     profilePicture: String
+    isSS: Boolean!
+    isSCards: Boolean!
 }
 
 type Query {

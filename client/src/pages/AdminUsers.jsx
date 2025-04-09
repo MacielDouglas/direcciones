@@ -4,7 +4,7 @@ import { useGetUsers, useUpdateUser } from "../graphql/hooks/useUser";
 
 function AdminUsers() {
   const user = useSelector((state) => state.user.userData);
-  const { group, isAdmin } = user;
+  const { group, isAdmin, isSS } = user;
 
   const { fetchUsers, users } = useGetUsers();
   const { updateUserInput } = useUpdateUser();
@@ -17,6 +17,8 @@ function AdminUsers() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  console.log(users);
 
   const groupedUsers = users.filter((u) => u.group === group);
   const ungroupedUsers = users.filter((u) => u.group !== group);
@@ -49,6 +51,26 @@ function AdminUsers() {
       setSelectedUser(null);
     } catch (error) {
       console.error("Erro ao atualizar o grupo:", error.message);
+    }
+  };
+
+  const handleSiervoChange = async (userId) => {
+    try {
+      const user = users.find((u) => u.id === userId);
+
+      await updateUserInput({
+        variables: {
+          updateUserId: user.id,
+          user: {
+            name: user.name,
+            isSCards: !user.isSCards || false,
+          },
+        },
+      });
+      fetchUsers();
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Erro al asignar siervo:", error.message);
     }
   };
 
@@ -145,27 +167,56 @@ function AdminUsers() {
         </h2>
         <ul className="px-4 space-y-4">
           {groupedUsers.map((user) => (
+            // ${
+            //   user.isSS ? "text-slate-200" : "text-gray-600"
+            // }
             <li
               key={user.id}
-              className="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-md"
+              className={`flex justify-between items-center  p-4 rounded-lg shadow-md ${
+                user.isSS
+                  ? "bg-stone-800 text-slate-200"
+                  : user.isSCards
+                  ? "bg-stone-300"
+                  : "bg-gray-100 text-gray-600"
+              }`}
             >
-              <img
-                src={user.profilePicture}
-                className="w-12 h-12 object-cover rounded-full"
-                alt={user.name}
-              />
+              <div className="flex items-center flex-col w-20   gap-1 ">
+                <img
+                  src={user.profilePicture}
+                  className="w-12 h-12 object-cover rounded-full"
+                  alt={user.name}
+                />
+                {user.isSS && (
+                  <span className="font-light lowercase  text-sm ">Admin</span>
+                )}
+                {user.isSCards && (
+                  <span className="font-light lowercase text-sm px-2 rounded-md">
+                    siervo
+                  </span>
+                )}
+              </div>
               <div className="flex flex-col gap-2 w-full ml-4">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm font-light">
                   User code: {user.codUser}
                 </span>
-                <span className="font-medium text-secondary">{user.name}</span>
+                <span className="font-bold">{user.name}</span>
               </div>
-              <button
-                onClick={() => handleGroupChange(user.id, "remove")}
-                className="bg-red-500 text-white px-3 py-1 rounded-lg"
-              >
-                Remover
-              </button>
+              <div className="flex gap-2 flex-col">
+                {!user.isSS && (
+                  <button
+                    onClick={() => handleSiervoChange(user.id)}
+                    className="bg-secondary text-white px-3 py-1 rounded-md text-sm"
+                  >
+                    {user.isSCards ? "del serv" : "add sv"}
+                  </button>
+                )}
+                <button
+                  onClick={() => handleGroupChange(user.id, "remove")}
+                  className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+                >
+                  remover
+                </button>
+              </div>
             </li>
           ))}
         </ul>

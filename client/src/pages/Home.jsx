@@ -3,11 +3,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  FaRegUser,
-  FaRegRectangleList,
-  FaRegMap,
-  FaUsers,
-} from "react-icons/fa6";
+  BsPerson,
+  BsPeople,
+  BsMap,
+  BsCardList,
+  BsArrowLeftRight,
+} from "react-icons/bs";
+
 import { createSelector } from "@reduxjs/toolkit";
 
 import menuOptions from "../constants/menu";
@@ -25,10 +27,11 @@ const selectCardsData = createSelector(
 );
 
 const iconsMap = {
-  Tarjetas: FaRegRectangleList,
-  Dirección: FaRegMap,
-  Admin: FaUsers,
-  Perfil: FaRegUser,
+  Tarjetas: BsCardList,
+  Dirección: BsMap,
+  Admin: BsPeople,
+  Perfil: BsPerson,
+  Assignar: BsArrowLeftRight,
 };
 
 import PropTypes from "prop-types";
@@ -63,7 +66,7 @@ export default function Home() {
   const userData = useSelector(selectUserData);
   const cardsData = useSelector(selectCardsData);
 
-  const { name = "Usuário", isSS, id: userId } = userData || {};
+  const { name = "Usuário", isSS, id: userId, isSCards } = userData || {};
 
   // Filtra os cartões pertencentes ao usuário logado
   const userCards = useMemo(() => {
@@ -118,7 +121,15 @@ export default function Home() {
           <MenuItem
             to="/adminUsers"
             label="Admin"
-            IconComponent={FaUsers}
+            IconComponent={BsPeople}
+            index={Object.keys(menuOptions).length}
+          />
+        )}
+        {isSCards && (
+          <MenuItem
+            to="/cards?tab=asignar"
+            label="Assignar Tarjetas"
+            IconComponent={BsArrowLeftRight}
             index={Object.keys(menuOptions).length}
           />
         )}

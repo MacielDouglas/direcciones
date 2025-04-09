@@ -14,6 +14,7 @@ export const createToken = (user) => {
       name: user.name,
       isSS: user.isSS,
       group: user.group,
+      isSCards: user.isSCards,
     },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
@@ -57,6 +58,7 @@ export const sanitizeUser = (user) => {
     myTotalCards,
     comments,
     codUser,
+    isSCards,
   } = user;
   return {
     id: _id,
@@ -69,6 +71,7 @@ export const sanitizeUser = (user) => {
     myTotalCards,
     comments,
     codUser,
+    isSCards,
   };
 };
 

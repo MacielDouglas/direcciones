@@ -21,7 +21,7 @@ function Cards() {
   const navigate = useNavigate();
 
   const { fetchCards } = useFetchCards();
-  const isSS = user.userData.isSS;
+  const { isSS, isSCards } = user?.userData || {};
 
   useEffect(() => {
     fetchCards();
@@ -64,9 +64,9 @@ function Cards() {
       <ScrollToTop />
       {isSS && <div>{<CardsSidebar />}</div>}
       {tab === "cards" && <Card />}
-      {tab === "crear" && <NewCard />}
-      {tab === "modificar" && <UpdateCard />}
-      {isSS && tab === "asignar" && <AssignCard />}
+      {isSS && tab === "crear" && <NewCard />}
+      {isSS && tab === "modificar" && <UpdateCard />}
+      {tab === "asignar" && <AssignCard />}
     </div>
   );
 }
