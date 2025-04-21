@@ -19,6 +19,7 @@ import { useMutation } from "@apollo/client";
 import { UPDATE_ADDRESS } from "../graphql/mutation/address.mutation";
 import { toast } from "react-toastify";
 import { setAddresses } from "../store/addressesSlice";
+import ImageWithModal from "./hooks/ImageWithModal";
 
 const createCustomIcon = (iconUrl) =>
   new L.Icon({
@@ -206,13 +207,7 @@ function Address({ id }) {
         <h2 className="text-xl font-medium text-center mb-4">
           Información de la dirección
         </h2>
-        {photo && (
-          <img
-            src={photo}
-            className="w-full h-48 object-cover rounded-md mb-3"
-            alt={street}
-          />
-        )}
+        {photo && <ImageWithModal photo={photo} street={street} />}
         <p
           className={`text-center font-bold ${
             !active

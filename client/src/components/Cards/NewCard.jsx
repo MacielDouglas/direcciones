@@ -11,6 +11,7 @@ import {
 } from "react-icons/md";
 import { useNewCard } from "../../graphql/hooks/useCard";
 import ComponentMaps from "../hooks/ComponentMaps";
+import ImageWithModal from "../hooks/ImageWithModal";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -140,10 +141,11 @@ function NewCard() {
                     className="flex items-center text-sm lg:text-lg justify-between border-b py-2"
                   >
                     <div className="w-full flex items-center gap-3">
-                      <img
-                        src={address.photo}
-                        className="object-cover w-24"
-                        alt={`Foto de la calle: ${address.street}, ${address.number}`}
+                      <ImageWithModal
+                        photo={address.photo}
+                        street={address.street}
+                        wid="w-24"
+                        hei="h-20"
                       />
                       <div>
                         <span className="text-lg">

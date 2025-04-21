@@ -10,6 +10,7 @@ import {
   gpsRegex,
   imagesAddresses,
   initialFormState,
+  normalizeGPS,
 } from "../../constants/direccion.js";
 import { setAddresses } from "../../store/addressesSlice";
 
@@ -55,7 +56,7 @@ function NewAddress() {
       formData.number.trim() &&
       formData.neighborhood.trim() &&
       formData.city.trim() &&
-      gpsRegex.test(formData.gps.trim());
+      handleGPSCheck(formData.gps.trim());
 
     setIsButtonDisabled(!isValid);
   }, [formData]);
@@ -66,13 +67,22 @@ function NewAddress() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleGPSCheck = (gpsValue) => {
+    const normalized = normalizeGPS(gpsValue);
+    setFormData((prev) => ({ ...prev, gps: normalized }));
+    return gpsRegex.test(normalized);
+  };
+
   const handleGetCurrentGps = () => {
     setIsFetchingGps(true);
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        const normalized = normalizeGPS(
+          `${coords.latitude}, ${coords.longitude}`
+        );
         setFormData((prev) => ({
           ...prev,
-          gps: `${coords.latitude}, ${coords.longitude}`,
+          gps: normalized,
         }));
         setIsFetchingGps(false);
       },
@@ -107,8 +117,14 @@ function NewAddress() {
     if (!formData.neighborhood.trim())
       errors.neighborhood = "El barrio es obligatorio...";
     if (!formData.city.trim()) errors.city = "La ciudad es obligatoria...";
-    if (!gpsRegex.test(formData.gps.trim()))
+
+    const normalizedGPS = normalizeGPS(formData.gps.trim());
+    if (!gpsRegex.test(normalizedGPS)) {
       errors.gps = "Coordenadas no válidas";
+      // Atualiza o campo com a tentativa de normalização
+      setFormData((prev) => ({ ...prev, gps: normalizedGPS }));
+    }
+
     return errors;
   };
 
@@ -181,8 +197,11 @@ function NewAddress() {
             label="GPS (Lat, Long) *"
             name="gps"
             value={formData.gps}
-            onChange={handleChange}
-            placeholder={`Ej: -8.508111, -35.008334`}
+            onChange={(e) => {
+              const normalized = normalizeGPS(e.target.value);
+              setFormData((prev) => ({ ...prev, gps: normalized }));
+            }}
+            placeholder={`Ej: -8.508111, -35.008334 o 8°30'24.3"S 35°00'10.9"W`}
           />
           <button
             type="button"

@@ -118,7 +118,7 @@ function SearchAddress() {
                     className="grid grid-cols-7 w-full"
                   >
                     {/* <p>{address.active}</p> */}
-                    <p className="text-3xl col-span-1 w-10">
+                    <p className="text-3xl col-span-1 w-10 flex items-center">
                       {(address.type === "house" && <MdHouse />) ||
                         (address.type === "department" && (
                           <MdOutlineApartment />
@@ -139,6 +139,7 @@ function SearchAddress() {
                         >
                           {address.city}, {address.neighborhood},
                         </p>
+                        <p className="text-sm truncate">{address.complement}</p>
                       </div>
                       <p
                         className={`font-semibold ${
