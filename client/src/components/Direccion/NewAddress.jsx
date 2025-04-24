@@ -61,6 +61,8 @@ function NewAddress() {
     setIsButtonDisabled(!isValid);
   }, [formData]);
 
+  console.log(!formData.street.trim());
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "complement" && value.length > 250) return;
@@ -127,6 +129,8 @@ function NewAddress() {
 
     return errors;
   };
+
+  // console.log(validateForm());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
