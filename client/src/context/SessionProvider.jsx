@@ -56,7 +56,7 @@ const SessionProvider = ({ text }) => {
           </span>
         </p>
       ) : (
-        <p>Sessão expirada</p>
+        <p>La sesión expiró</p>
       )}
     </div>
   );

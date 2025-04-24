@@ -84,7 +84,7 @@ export default function Header() {
               disabled={isLoggingOut}
             >
               <RiLogoutBoxRLine size={24} />
-              {isLoggingOut ? "Saindo..." : "Sair"}
+              {isLoggingOut ? "Saliendo..." : "Salir"}
             </button>
           </motion.nav>
         )}

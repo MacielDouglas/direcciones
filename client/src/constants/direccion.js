@@ -12,12 +12,6 @@ const initialFormState = {
   visited: false,
 };
 
-// const gpsRegex =
-//   /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d+)?|180(\.0+)?)$/;
-// Adicione estas funções no seu arquivo constants/direccion.js
-const gpsRegex =
-  /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d+)?|180(\.0+)?)$/;
-
 // Funções de conversão
 const convertDMS = (dms) => {
   const parts = dms.split(/[°'"]+/).map((part) => part.trim());
@@ -39,46 +33,74 @@ const convertDMS = (dms) => {
   return decimal;
 };
 
+const gpsRegex =
+  /^[-+]?([1-8]?\d(\.\d{1,})?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d{1,})?|180(\.0+)?)$/;
+
+const dmsToDecimal = (deg, min, sec) => {
+  return deg + min / 60 + sec / 3600;
+};
+
 const normalizeGPS = (gpsString) => {
   try {
-    // Remove parênteses se existirem
+    if (!gpsString || typeof gpsString !== "string") return gpsString;
+
+    // Remove parênteses e espaços desnecessários
     let cleaned = gpsString.replace(/[()]/g, "").trim();
 
-    // Verifica se já está no formato correto
-    if (gpsRegex.test(cleaned)) {
-      return cleaned;
+    // Corrige casos como "-8.52528-35.01042"
+    cleaned = cleaned.replace(/(-?\d+\.\d+)(?=-?\d)/g, "$1,");
+    // cleaned = cleaned.replace(/,(?!\s)/g, ", ");
+
+    // Evita processar enquanto o número está incompleto
+    const parts = cleaned.split(/[,;\s]+/).filter((p) => p.trim() !== "");
+    if (
+      parts.length !== 2 ||
+      parts.some((p) => /^-?\d+\.\d*$/.test(p)) // número ainda incompleto (ex: -35.)
+    ) {
+      return gpsString;
     }
 
-    // Formato DMS (graus, minutos, segundos): 8°30'24.3"S 35°00'10.9"W
+    // Verifica se já está no formato decimal correto
+    if (gpsRegex.test(cleaned)) {
+      const [lat, lon] = cleaned.split(/\s*,\s*/).map((n) => parseFloat(n));
+      return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+    }
+
+    // Tenta parsear formato DMS (graus, minutos, segundos)
     const dmsMatch = cleaned.match(
-      /([NS]?)\s*([\d.]+)[°ºd]?\s*([\d.]+)?['′]?\s*([\d.]+)?["″]?\s*([NS]?)[,;\s]+\s*([EW]?)\s*([\d.]+)[°ºd]?\s*([\d.]+)?['′]?\s*([\d.]+)?["″]?\s*([EW]?)/i
+      /([NS])?\s*(\d{1,3})[°ºd]?\s*(\d{1,3})['′]?\s*(\d{1,3}(?:\.\d+)?)[\"″]?\s*([NS])?[,;\s-]*([EW])?\s*(\d{1,3})[°ºd]?\s*(\d{1,3})['′]?\s*(\d{1,3}(?:\.\d+)?)[\"″]?\s*([EW])?/i
     );
 
     if (dmsMatch) {
-      const latParts = dmsMatch.slice(1, 5).filter(Boolean);
-      const lonParts = dmsMatch.slice(6, 10).filter(Boolean);
+      const latDir = dmsMatch[1] || dmsMatch[5];
+      const latDeg = parseFloat(dmsMatch[2]);
+      const latMin = parseFloat(dmsMatch[3]);
+      const latSec = parseFloat(dmsMatch[4]);
 
-      const latDMS = latParts.join("");
-      const lonDMS = lonParts.join("");
+      const lonDir = dmsMatch[6] || dmsMatch[10];
+      const lonDeg = parseFloat(dmsMatch[7]);
+      const lonMin = parseFloat(dmsMatch[8]);
+      const lonSec = parseFloat(dmsMatch[9]);
 
-      const lat = convertDMS(latDMS);
-      const lon = convertDMS(lonDMS);
+      let lat = dmsToDecimal(latDeg, latMin, latSec);
+      let lon = dmsToDecimal(lonDeg, lonMin, lonSec);
 
-      return `${lat}, ${lon}`;
+      if (latDir?.toUpperCase() === "S") lat *= -1;
+      if (lonDir?.toUpperCase() === "W") lon *= -1;
+
+      return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
     }
 
-    // Formato com vírgula ou espaço como separador
-    const parts = cleaned.split(/[,;\s]+/).filter((part) => part.trim() !== "");
+    // Último fallback: separe e tente forçar o parse
     if (parts.length === 2) {
       const lat = parseFloat(parts[0]);
       const lon = parseFloat(parts[1]);
 
       if (!isNaN(lat) && !isNaN(lon)) {
-        return `${lat}, ${lon}`;
+        return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
       }
     }
 
-    // Se não conseguir converter, retorna o original para validação falhar
     return gpsString;
   } catch (error) {
     console.error("Error normalizing GPS:", error);
