@@ -94,19 +94,19 @@ export const validateUserCredentials = async (email, password) => {
 export const verifyAuthorization = (req) => {
   const authorizationHeader = req.headers.cookie;
   if (!authorizationHeader)
-    throw new Error("Token de autorização não fornecido.");
+    throw new Error("Token de autorización no proporcionado.");
 
   const token = authorizationHeader.split("access_token=")[1];
 
-  if (!token) throw new Error("Acesso negado. Token inválido ou ausente.");
+  if (!token) throw new Error("Acceso denegado. Token inválido o faltante.");
 
   try {
     return jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     const errorMessage =
       error.name === "TokenExpiredError"
-        ? "Sessão expirada. Faça login novamente."
-        : "Acesso negado. Token inválido.";
+        ? "Sesión expirada. Por favor, vuelva a iniciar sesión."
+        : "Acceso denegado. Token no válido.";
     throw new Error(errorMessage);
   }
 };
@@ -120,7 +120,7 @@ export const validateObjectId = (id) => {
 export const findCardById = async (id) => {
   validateObjectId(id);
   const card = await Card.findById(id).lean();
-  if (!card) throw new Error("Cartão não encontrado.");
+  if (!card) throw new Error("Tarjeta no encontrada.");
   return { ...card, id: card._id.toString() };
 };
 
