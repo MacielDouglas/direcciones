@@ -129,8 +129,10 @@ function Card() {
                   <li
                     key={address.id}
                     className={`border p-5 border-gray-300 flex justify-center flex-col bg-gradient-to-b rounded-lg shadow-md ${
-                      !address.confirmed
-                        ? "from-red-100 to-red-200"
+                      !address.active
+                        ? "from-red-200 to-red-300 text-red-700"
+                        : !address.confirmed
+                        ? "from-orange-100 to-orange-200"
                         : "from-white to-gray-200"
                     }`}
                   >
@@ -159,12 +161,21 @@ function Card() {
                       <div className="mt-5 w-full">
                         <div className="w-full justify-between flex gap-5  ">
                           <div>
-                            <p className="text-gray-800 font-semibold text-lg ">
+                            <p
+                              className={`text-gray-800 font-semibold text-lg ${
+                                !address.active && "text-red-700"
+                              }`}
+                            >
                               {address.street}, {address.number}.
                             </p>
                             <p className="text-gray-500 text-sm">
                               {address.city}, {address.neighborhood},
                             </p>
+                            {!address.active && (
+                              <p className="text-sm font-bold">
+                                DIRECCIÓN DESACTIVADA
+                              </p>
+                            )}
                             {address.complement && (
                               <p className="text-sm -mx-2 rounded-md bg-primary p-2 mt-2">
                                 {address.complement}
@@ -181,7 +192,7 @@ function Card() {
                           </div>
                         </div>
                         {!address.confirmed && (
-                          <p className="text-center font-bold text-orange-600 text-sm mt-2">
+                          <p className="text-center font-bold text-orange-700 text-sm mt-2">
                             necesita confirmar
                           </p>
                         )}

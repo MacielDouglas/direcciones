@@ -132,20 +132,23 @@ function SearchModal({ isOpen, onClose }) {
                               {/* <p className="text-sm text-gray-600"> */}
                               {address.city}, {address.neighborhood}
                             </p>
+                            <p className="text-sm truncate">
+                              {address.complement}
+                            </p>
                             <p
                               className={`text-sm ${
                                 !address.active
                                   ? "text-red-500 font-semibold"
                                   : address.confirmed
-                                  ? "text-green-600"
-                                  : "text-red-600 font-semibold"
+                                  ? "text-blue-600"
+                                  : "text-orange-600 font-semibold"
                               }`}
                             >
                               {!address.active
                                 ? "Dirección inactiva"
                                 : address.confirmed
                                 ? "Dirección confirmada"
-                                : "Necesita confirmación"}
+                                : "NECESITA CONFIRMACIÓN"}
                             </p>
                           </div>
                         </div>

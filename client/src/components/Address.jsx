@@ -195,13 +195,13 @@ function Address({ id }) {
 
   return (
     <div
-      className={`w-full max-w-md mx-auto p-4 shadow-lg rounded-lg ${
-        !active ? "bg-slate-400" : "bg-white"
+      className={`w-full max-w-md pt-4  mx-auto shadow-lg rounded-lg ${
+        !active ? "bg-red-100 text-red-800" : "bg-white"
       }`}
     >
       <div
-        className={`p-5 rounded-md mb-4 ${
-          !active ? "bg-gray-500" : confirmed ? "bg-gray-100" : "bg-red-100"
+        className={`p-5 m-4  rounded-md mb-4 ${
+          !active ? "bg-red-300" : confirmed ? "bg-gray-100" : "bg-orange-200"
         }`}
       >
         <h2 className="text-xl font-medium text-center mb-4">
@@ -213,15 +213,15 @@ function Address({ id }) {
             !active
               ? "text-secondary"
               : confirmed
-              ? "text-green-600"
-              : "text-red-600"
+              ? "text-blue-600"
+              : "text-orange-800"
           }`}
         >
           {!active
-            ? "Dirección inactiva"
+            ? "DIRECCIÓN DESACTIVADA"
             : confirmed
             ? "Dirección confirmada"
-            : "Necesita confirmación"}
+            : "NECESITA CONFIRMACIÓN"}
         </p>
         <div className="flex flex-col items-center space-y-3 text-sm">
           <div className="flex justify-between items-center w-full">
@@ -271,7 +271,7 @@ function Address({ id }) {
           {!active ? "Activar dirección" : "Desactivar dirección"}
         </button>
       </div>
-      <div className="w-full h-72 rounded-md overflow-hidden ">
+      <div className="w-full h-72 pb-10 overflow-hidden ">
         <MapContainer
           center={[latitude, longitude]}
           zoom={15}

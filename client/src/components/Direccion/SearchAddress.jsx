@@ -70,7 +70,7 @@ function SearchAddress() {
   };
 
   return (
-    <div className="min-h-screen bg-details py-5 px-6  flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-details py-5 px-2  flex flex-col items-center justify-center">
       <div className="flex items-center justify-center my-6 bg-details ">
         <button
           onClick={openSearchModal}
@@ -107,10 +107,10 @@ function SearchAddress() {
                   key={index}
                   className={`border-b p-5 border-gray-200 flex justify-center flex-col bg-gradient-to-b  rounded-lg ${
                     !address.active
-                      ? "bg-gray-500"
+                      ? "from-red-100 to-red-200 text-red-700"
                       : !address.confirmed
-                      ? "from-red-100 to-red-200"
-                      : "from-gray-100 to-gray-300"
+                      ? "from-orange-100 to-orange-200 text-orange-950"
+                      : "from-gray-100 to-gray-300 "
                   }`}
                 >
                   <Link
@@ -129,14 +129,10 @@ function SearchAddress() {
                     </p>
                     <div className="col-span-5 w-full  flex flex-col gap-5">
                       <div>
-                        <p className="text-gray-800 font-semibold text-lg ">
+                        <p className="font-semibold text-lg ">
                           {address.street}, {address.number}.
                         </p>
-                        <p
-                          className={`text-sm ${
-                            !address.active ? "text-secondary" : "text-gray-500"
-                          }`}
-                        >
+                        <p>
                           {address.city}, {address.neighborhood},
                         </p>
                         <p className="text-sm truncate">{address.complement}</p>
@@ -144,10 +140,10 @@ function SearchAddress() {
                       <p
                         className={`font-semibold ${
                           !address.active
-                            ? "text-secondary"
+                            ? "text-red-500"
                             : address.confirmed
-                            ? "text-green-600"
-                            : "text-red-600"
+                            ? "text-blue-600"
+                            : "text-orange-900"
                         }`}
                       >
                         {!address.active
