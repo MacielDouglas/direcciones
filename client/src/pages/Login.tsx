@@ -8,8 +8,8 @@ const Login = () => {
       className="h-screen bg-cover bg-center flex flex-col justify-center items-center font-inter"
       style={{ backgroundImage: `url('./ciudad_2.svg')` }}
     >
-      <div className="w-full h-full flex items-center justify-center ">
-        <div className="bg-slate-100 dark:bg-slate-900 shadow-lg rounded-lg p-10 max-w-md h-[600px] w-full m-4 sm:m-0 flex flex-col justify-evenly">
+      <div className="w-full h-full flex items-center justify-center bg-black/60">
+        <div className="bg-gradient-to-b border border-slate-950/50 dark:border-white/20 from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950 shadow-lg rounded-lg p-10 max-w-md h-[600px] w-full m-4 sm:m-0 flex flex-col justify-evenly">
           <h1 className="text-3xl font-bold mb-6">
             {" "}
             Bienvenido a{" "}

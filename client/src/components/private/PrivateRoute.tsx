@@ -1,23 +1,30 @@
-import {
-  selectAuthUser,
-  selectIsAuthenticated,
-} from "@/store/slices/authSlice";
-import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useMemo } from "react";
+import {
+  selectGroup,
+  userIsAuthenticated,
+} from "@/store/selectors/userSelectors";
 
-function PrivateRoute() {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const { group = "0" } = useSelector(selectAuthUser) || {};
+const PrivateRoute = () => {
+  const group = useSelector(selectGroup);
+  const isAuthenticated = useSelector(userIsAuthenticated);
 
-  console.log("Goupe: ", group);
+  const redirectPath = useMemo(() => {
+    if (!isAuthenticated) return "/login";
+    if (group === "0") return "/token";
+    return null;
+  }, [isAuthenticated, group]);
 
-  return !isAuthenticated ? (
-    <Navigate to="/login" />
-  ) : group === "0" ? (
-    <Navigate to="/token" />
+  return redirectPath ? (
+    <Navigate
+      to={redirectPath}
+      replace
+      aria-label="Redirecionando usuário não autorizado"
+    />
   ) : (
     <Outlet />
   );
-}
+};
 
 export default PrivateRoute;

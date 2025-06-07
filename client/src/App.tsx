@@ -7,23 +7,47 @@ import Home from "./pages/Home";
 import MenuBottom from "./components/layout/MenuBottom";
 import TokenPage from "./pages/TokenPage";
 import PrivateRoute from "./components/private/PrivateRoute";
-// import MenuBottom from "./components/layout/MenuBottom";
+import { useSelector } from "react-redux";
+
+import PublicOnlyRoute from "./components/private/PublicOnlyRoute";
+import UserPage from "./pages/UserPage";
+import { Toaster } from "./components/ui/sonner";
+import { selectGroup } from "./store/selectors/userSelectors";
+import Direcciones from "./pages/Direcciones";
 
 function App() {
+  const group = useSelector(selectGroup);
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          className: "text-lg",
+        }}
+      />
       <Router>
-        <Header />
+        {group && group !== "0" && <Header />}
 
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/login" element={<Login />} />
+          </Route>
+
           <Route element={<PrivateRoute />}>
-            <Route path="/token" element={<TokenPage />} />
             <Route path="/" element={<Home />} />
+            <Route path="/address" element={<Direcciones />} />
+            <Route path="/token" element={<TokenPage />} />
+            <Route path="/user" element={<UserPage />} />
           </Route>
         </Routes>
-        <MenuBottom />
-        <Footer />
+
+        {group && group !== "0" && (
+          <>
+            <MenuBottom />
+            <Footer />
+          </>
+        )}
       </Router>
     </ThemeProvider>
   );

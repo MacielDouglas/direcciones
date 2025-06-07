@@ -1,7 +1,8 @@
-import React from "react";
+import { userIsAuthenticated } from "@/store/selectors/userSelectors";
+import { useSelector } from "react-redux";
 
 const Footer = () => {
-  const isAuthenticated = false; // Replace with actual authentication logic
+  const isAuthenticated = useSelector(userIsAuthenticated);
   return (
     <footer className="w-full bg-slate-100 dark:bg-slate-800/20">
       <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8 lg:pt-24">

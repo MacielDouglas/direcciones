@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
 import {
   UserRound,
   MapPinned,
@@ -10,8 +9,9 @@ import {
   House,
 } from "lucide-react";
 import { menuOptions, menuSs } from "@/constants/menus";
-import { selectAuthUser } from "@/store/slices/authSlice";
 import { useDebounce } from "@/hooks/useDebonce";
+import { useSelector } from "react-redux";
+import { selectUserData } from "@/store/selectors/userSelectors";
 
 const iconsMap: Record<string, React.ComponentType<{ size?: number }>> = {
   Tarjetas: Dock,
@@ -53,7 +53,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
 const MenuBottom: React.FC = () => {
   const location = useLocation();
   const { pathname, search } = location;
-  const { isSS = false } = useSelector(selectAuthUser) || {};
+  const { isSS = false } = useSelector(selectUserData) || {};
   const [visible, setVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -102,7 +102,7 @@ const MenuBottom: React.FC = () => {
       dark:from-slate-800/95 dark:to-slate-950/95 shadow-lg border-t 
       border-slate-300 dark:border-slate-700
       transition-transform duration-300 ease-in-out
-      ${visible ? "translate-y-0" : "translate-y-full"}`}
+      ${visible ? "translate-y-0" : "translate-y-full"} `}
     >
       <nav className="max-w-2xl mx-auto flex justify-between px-2 py-1">
         <MenuItem
