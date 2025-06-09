@@ -44,7 +44,11 @@ const GoogleAuth = () => {
       console.error(error);
     }
   };
-  return <button onClick={handleLoginGoogle}>LOGIN Google</button>;
+  return (
+    <button onClick={handleLoginGoogle}>
+      {loading ? " Carregando" : "Login com google"}
+    </button>
+  );
 };
 
 export default GoogleAuth;
