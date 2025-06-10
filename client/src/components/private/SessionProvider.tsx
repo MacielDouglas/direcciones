@@ -6,7 +6,11 @@ import { clearUser } from "../../store/userSlice";
 const EXPIRATION_SECONDS = 3600; // 1 hora
 const WARNING_THRESHOLD = 600; // 10 minutos
 
-const SessionProvider = () => {
+interface SessionProviderProps {
+  size: string;
+}
+
+const SessionProvider = ({ size }: SessionProviderProps) => {
   const dispatch = useDispatch();
   const timeExpiry = useSelector(userSessionExpiry); // timestamp do login (ms)
   const [secondsLeft, setSecondsLeft] = useState(EXPIRATION_SECONDS);
@@ -42,8 +46,8 @@ const SessionProvider = () => {
   return (
     <div>
       <p
-        className={`flex items-center gap-2 font-semibold text-sm ${
-          isWarning ? "text-red-600" : "text-slate-600 dark:text-slate-300"
+        className={`flex items-center gap-2 font-semibold ${size} ${
+          isWarning && "text-red-600 "
         } `}
       >
         {formatTime(secondsLeft)}

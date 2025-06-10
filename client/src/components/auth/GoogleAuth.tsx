@@ -44,11 +44,12 @@ const GoogleAuth = () => {
       console.error(error);
     }
   };
+  console.log(loading);
   return (
     <button
       type={"button"}
       onClick={handleLoginGoogle}
-      className="bg-destaque-primary p-4 rounded-lg text-xl w-full cursor-pointer disabled:bg-orange-300"
+      className="bg-destaque-primary p-4 rounded-lg text-xl w-full cursor-pointer disabled:cursor-not-allowed disabled:bg-orange-300"
       disabled={loading}
     >
       {!loading ? (
@@ -58,8 +59,8 @@ const GoogleAuth = () => {
           Carregando{" "}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="2em"
-            height="2em"
+            width="1.5em"
+            height="1.5em"
             viewBox="0 0 24 24"
           >
             <rect width="2.8" height="12" x="1" y="6" fill="currentColor">
