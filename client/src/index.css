@@ -1,4 +1,5 @@
 @import "tailwindcss";
+<<<<<<< HEAD
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -12,3 +13,10 @@
   --color-tertiary-drk: #1a1a1a;
   --color-tertiary-lgt: #cccccc;
 }
+=======
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+>>>>>>> 9e791c53fd2f35d01515d84226868c7d2d04ecaa

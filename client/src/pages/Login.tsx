@@ -8,8 +8,13 @@ const Login = () => {
       className="h-screen bg-cover bg-center flex flex-col justify-center items-center font-inter"
       style={{ backgroundImage: `url('./ciudad_2.svg')` }}
     >
+<<<<<<< HEAD
       <div className="w-full h-full flex items-center justify-center bg-neutral-800/60 dark:bg-transparent">
         <div className="bg-white dark:bg-primary-drk shadow-lg rounded-lg p-10 max-w-md h-[600px] w-full m-4 sm:m-0 flex flex-col justify-evenly">
+=======
+      <div className="w-full h-full flex items-center justify-center bg-black/60">
+        <div className="bg-gradient-to-b from-stone-100 to-stone-300 dark:from-slate-900 dark:to-slate-950 shadow-lg rounded-lg p-10 max-w-md h-[600px] w-full m-4 sm:m-0 flex flex-col justify-evenly">
+>>>>>>> 9e791c53fd2f35d01515d84226868c7d2d04ecaa
           <h1 className="text-3xl font-bold mb-6">
             {" "}
             Bienvenido a{" "}
@@ -79,7 +84,18 @@ const Login = () => {
             </svg>
           </div>
 
+<<<<<<< HEAD
           <p className="mb-6 text-lg text-stone-500">
+=======
+          <p
+            className="mb-6 text-lg text-stone-500"
+            // initial={prefersReducedMotion ? false : { opacity: 0 }}
+            // animate={prefersReducedMotion ? false : { opacity: 1 }}
+            // transition={
+            //   prefersReducedMotion ? {} : { delay: 0.4, duration: 0.6 }
+            // }
+          >
+>>>>>>> 9e791c53fd2f35d01515d84226868c7d2d04ecaa
             Para comenzar, inicie sesión con su cuenta{" "}
             <span className="text-red-500 font-semibold">Google</span>.
           </p>

@@ -7,6 +7,9 @@ import { client } from "./apollo/client.ts";
 import { Provider } from "react-redux";
 import { persistor, store } from "./store/index";
 import { PersistGate } from "redux-persist/integration/react";
+import { getSavedTheme, setTheme } from "./utils/theme.ts";
+
+setTheme(getSavedTheme());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
