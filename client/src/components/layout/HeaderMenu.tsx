@@ -78,8 +78,8 @@ const HeaderMenu = () => {
   }, []);
 
   const handleLogout = useCallback(() => {
-    if (!loading) logoutUser();
-  }, [logoutUser, loading]);
+    logoutUser();
+  }, [logoutUser]);
 
   const combinedMenu = useMemo(() => {
     const base = Object.entries(menuOptions);

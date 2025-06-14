@@ -95,6 +95,9 @@ const addressSchema = new Schema(
       // default: false,
       // message: "O campo 'visited' deve ser 'yes', 'no' ou vazio.",
     },
+    customName: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

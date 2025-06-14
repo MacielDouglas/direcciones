@@ -34,6 +34,7 @@ const GoogleAuth = () => {
 
       const userData = data.loginWithGoogle.user;
       dispatch(setUser({ user: userData }));
+
       // toast("Login com sucesso!!!");
 
       navigate("/");
@@ -44,7 +45,7 @@ const GoogleAuth = () => {
       console.error(error);
     }
   };
-  console.log(loading);
+
   return (
     <button
       type={"button"}

@@ -4,6 +4,7 @@ import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
 import expireReducer from "redux-persist-expire";
 import userReducer from "./userSlice";
+import addressReducer from "./addressSlice";
 
 // Expiração automática do estado do usuário após 1h
 const expireUser = expireReducer("user", {
@@ -15,16 +16,29 @@ const expireUser = expireReducer("user", {
   },
   autoExpire: true,
 });
-
+const expireAddress = expireReducer("addresses", {
+  expireSeconds: 3600, // 1 hora
+  expiredState: {
+    addressesData: [],
+    sessionExpiry: null,
+  },
+  autoExpire: true,
+});
 // Configuração de persistência para o user reducer
 const userPersistConfig = {
   key: "user",
   storage,
   transforms: [expireUser],
 };
+const addressPersistConfig = {
+  key: "addresses",
+  storage,
+  transforms: [expireAddress],
+};
 
 const rootReducer = combineReducers({
   user: persistReducer(userPersistConfig, userReducer),
+  addresses: persistReducer(addressPersistConfig, addressReducer),
   // Outros reducers podem ser adicionados aqui
 });
 

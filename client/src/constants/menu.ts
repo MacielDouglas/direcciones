@@ -1,15 +1,16 @@
 // MenuOptions
 export const menuOptions = {
-  tarjetas: {
-    label: "Tarjetas",
-    path: "/cards",
-    info: "Acesse las tarjetas asignadas",
-  },
   direcciones: {
     label: "Dirección",
     path: "/address",
     info: "Puede enviar una nueva dirreción o corfirmar si ya existe esta dirección.",
   },
+  tarjetas: {
+    label: "Tarjetas",
+    path: "/cards",
+    info: "Acesse las tarjetas asignadas",
+  },
+
   user: {
     label: "Perfil",
     path: "/user",

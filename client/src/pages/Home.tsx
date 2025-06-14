@@ -1,5 +1,3 @@
-import { useSelector } from "react-redux";
-import { selectUserData } from "../store/selectors/userSelectors";
 import { menuOptions, menuSs } from "../constants/menu";
 import { Link } from "react-router-dom";
 import {
@@ -9,6 +7,10 @@ import {
   Dock,
   SendHorizontal,
 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectIsSS, selectUserName } from "../store/selectors/userSelectors";
+import { useFetchAddresses } from "../graphql/hooks/useAddress";
+import { useEffect } from "react";
 
 const iconsMap: Record<
   string,
@@ -42,8 +44,20 @@ const MenuItem = ({ to, label, IconComponent, isSS }: MenuItemProps) => (
     </Link>
   </div>
 );
+
 const Home = () => {
-  const { name = "", isSS = false } = useSelector(selectUserData) || {};
+  const isSS = useSelector(selectIsSS);
+  const name = useSelector(selectUserName);
+  const { fetchAddresses } = useFetchAddresses();
+
+  // const addresses = useSelector(selectAllAddresses);
+
+  // console.log(addresses);
+
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
+
   return (
     <div className="w-full mb-20 h-full">
       <div className="flex flex-col justify-between items-center max-w-7xl mx-auto">
