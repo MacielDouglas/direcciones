@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { motion } from "framer-motion";
@@ -11,8 +11,10 @@ import {
 } from "../../graphql/hooks/useCard";
 import { useGetUsers } from "../../graphql/hooks/useUser";
 import ComponentMaps from "../hooks/ComponentMaps";
+import { setCards } from "../../store/cardsSlice";
 
 function UpdateCard() {
+  const dispatch = useDispatch();
   const cards = useSelector((state) => state.cards.cardsData || []);
   const addresses = useSelector((state) => state.addresses.addressesData || []);
   const [cardAssigned, setCardAssigned] = useState([]);
@@ -81,7 +83,9 @@ function UpdateCard() {
       });
 
       // Atualiza a lista de cards após a modificação
-      fetchCards();
+      const promises = [fetchCards()];
+      const [cardsData] = await Promise.all(promises);
+      dispatch(setCards({ cards: cardsData.data.card }));
       setSelectedStreets([]);
       setModalOpen(false);
       setSelectedCard([]);
@@ -130,7 +134,11 @@ function UpdateCard() {
       },
     });
 
-    fetchCards();
+    // fetchCards();
+    const promises = [fetchCards()];
+
+    const [cardsData] = await Promise.all(promises);
+    dispatch(setCards({ cards: cardsData.data.card }));
     setSelectedCard([]);
     setModalOpen(false);
   };

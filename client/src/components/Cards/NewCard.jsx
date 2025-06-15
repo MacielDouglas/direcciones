@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import Loading from "../../context/Loading";
 import {
@@ -9,9 +9,10 @@ import {
   MdOutlineStorefront,
   MdOutlineApartment,
 } from "react-icons/md";
-import { useNewCard } from "../../graphql/hooks/useCard";
+import { useFetchCards, useNewCard } from "../../graphql/hooks/useCard";
 import ComponentMaps from "../hooks/ComponentMaps";
 import ImageWithModal from "../hooks/ImageWithModal";
+import { setCards } from "../../store/cardsSlice";
 
 function NewCard() {
   const addresses = useSelector((state) => state.addresses.addressesData);
@@ -19,6 +20,9 @@ function NewCard() {
   const [selectedAddresses, setSelectedAddresses] = useState([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const dispatch = useDispatch();
+  const { fetchCards } = useFetchCards();
 
   const { newCard } = useNewCard();
 
@@ -56,6 +60,12 @@ function NewCard() {
             },
           },
         });
+
+        await fetchCards();
+        const promises = [fetchCards()];
+
+        const [cardsData] = await Promise.all(promises);
+        dispatch(setCards({ cards: cardsData.data.card }));
       } catch (error) {
         console.error("Error al crear una nueva tarjeta: ", error.message);
         setTimeout(() => setLoading(false), 2000);
