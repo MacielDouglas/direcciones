@@ -129,22 +129,27 @@ const imagesAddresses = {
     "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FHotel.webp?alt=media&token=ed3d7e91-1a81-41d4-b2d2-e8dbc7519b3e",
 };
 
-// const calculateDistance = (lat1, lon1, lat2, lon2) => {
-//   const toRad = (value) => (value * Math.PI) / 180;
-//   const R = 6371000; // Raio da Terra em metros
-//   const dLat = toRad(lat2 - lat1);
-//   const dLon = toRad(lon2 - lon1);
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const R = 6371000; // Raio da Terra em metros
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
 
-//   const a =
-//     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-//     Math.cos(toRad(lat1)) *
-//       Math.cos(toRad(lat2)) *
-//       Math.sin(dLon / 2) *
-//       Math.sin(dLon / 2);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
-//   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//   return R * c; // Distância em metros
-// };
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distância em metros
+};
 
 // const formatDate = (dateString) => {
 //   const date = new Date(dateString);
@@ -160,6 +165,6 @@ export {
   // normalizeGPS,
   typeAddress,
   imagesAddresses,
-  // calculateDistance,
+  calculateDistance,
   // formatDate,
 };

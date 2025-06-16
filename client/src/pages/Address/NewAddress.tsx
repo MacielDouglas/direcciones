@@ -140,8 +140,6 @@ const NewAddress = () => {
     const photoUrl =
       formData.photo || imagesAddresses[formData.type as AddressType];
 
-    console.log("Endereço para cadastro", formData);
-
     try {
       await newAddress({
         variables: {

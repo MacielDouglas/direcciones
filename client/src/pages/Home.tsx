@@ -17,7 +17,7 @@ const iconsMap: Record<
   React.ComponentType<{ size?: number | string }>
 > = {
   Tarjetas: Dock,
-  Dirección: MapPinned,
+  Direcciones: MapPinned,
   Usuarios: UsersRound,
   Perfil: UserRound,
   Asignar: SendHorizontal,
@@ -49,10 +49,6 @@ const Home = () => {
   const isSS = useSelector(selectIsSS);
   const name = useSelector(selectUserName);
   const { fetchAddresses } = useFetchAddresses();
-
-  // const addresses = useSelector(selectAllAddresses);
-
-  // console.log(addresses);
 
   useEffect(() => {
     fetchAddresses();

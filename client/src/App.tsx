@@ -9,7 +9,7 @@ import PublicOnlyRoute from "./components/private/PublicOnlyRoute";
 import PrivateRoute from "./components/private/PrivateRoute";
 import Footer from "./components/layout/Footer";
 import UserPage from "./pages/UserPage";
-import Address from "./pages/Address/Address";
+import Addresses from "./pages/Addresses";
 
 const App = () => {
   const group = useSelector(selectGroup);
@@ -24,7 +24,7 @@ const App = () => {
           </Route>
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
-            <Route path="/address" element={<Address />} />
+            <Route path="/addresses" element={<Addresses />} />
             {/* <Route path="/token" element={<TokenPage />} /> */}
             <Route path="/user" element={<UserPage />} />
           </Route>

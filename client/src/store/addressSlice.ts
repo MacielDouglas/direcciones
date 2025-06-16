@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface Address {
-  _id: string; // correspondente ao ObjectId do Mongo
+  id: string; // correspondente ao ObjectId do Mongo
   street: string;
   number: string;
   city: string;
@@ -46,7 +46,7 @@ const addressSlice = createSlice({
     },
     updateAddress: (state, action: PayloadAction<Address>) => {
       const index = state.addressesData.findIndex(
-        (addr) => addr._id === action.payload._id
+        (addr) => addr.id === action.payload.id
       );
       if (index !== -1) {
         state.addressesData[index] = action.payload;
@@ -54,7 +54,7 @@ const addressSlice = createSlice({
     },
     removeAddress: (state, action: PayloadAction<string>) => {
       state.addressesData = state.addressesData.filter(
-        (addr) => addr._id !== action.payload
+        (addr) => addr.id !== action.payload
       );
     },
   },
