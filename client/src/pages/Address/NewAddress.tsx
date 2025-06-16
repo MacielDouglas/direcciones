@@ -18,7 +18,7 @@ import { ProgressSteps, Step } from "./ui/ProgressSteps";
 import ButtonSteps from "./ui/ButtonSteps";
 import PhotoComponent from "./components/PhotoComponent";
 import InputField from "./ui/InputField";
-import { imagesAddresses } from "../../constants/address";
+import { imagesAddresses, typeAddress } from "../../constants/address";
 import { useMutation } from "@apollo/client";
 import { NEW_ADDRESS } from "../../graphql/mutations/address.mutations";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,7 +28,9 @@ import { selectAllAddresses } from "../../store/selectors/addressSelectors";
 import type { AddressFormData } from "./types/adress.types";
 import type { RootState } from "../../store";
 
-type AddressType = "house" | "department" | "store" | "hotel" | "restaurant";
+// type AddressType = "house" | "department" | "store" | "hotel" | "restaurant";
+
+type AddressType = keyof typeof typeAddress;
 
 interface AddressTypeOption {
   value: AddressType;
@@ -137,6 +139,8 @@ const NewAddress = () => {
 
     const photoUrl =
       formData.photo || imagesAddresses[formData.type as AddressType];
+
+    console.log("Endereço para cadastro", formData);
 
     try {
       await newAddress({

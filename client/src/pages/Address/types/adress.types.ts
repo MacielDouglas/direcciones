@@ -1,3 +1,7 @@
+import type { typeAddress } from "../../../constants/address";
+
+type AddressType = keyof typeof typeAddress;
+
 export interface AddressFormData {
   street: string;
   number: string;
@@ -6,7 +10,7 @@ export interface AddressFormData {
   gps: string;
   complement: string;
   photo: string;
-  type: "house" | "apartment" | "store" | "hotel" | "restaurant" | string;
+  type: AddressType;
   active: boolean;
   confirmed: boolean;
   visited: boolean;

@@ -108,6 +108,14 @@ const gpsRegex =
 //   }
 // };
 
+const typeAddress = {
+  house: "house",
+  department: "department",
+  store: "store",
+  hotel: "hotel",
+  restaurant: "restaurant",
+};
+
 const imagesAddresses = {
   house:
     "https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FHouse.webp?alt=media&token=3681c42d-021a-4384-9708-dadd6b41f23f",
@@ -150,6 +158,7 @@ export {
   gpsRegex,
   // convertDMS,
   // normalizeGPS,
+  typeAddress,
   imagesAddresses,
   // calculateDistance,
   // formatDate,

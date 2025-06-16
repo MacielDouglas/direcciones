@@ -1,6 +1,6 @@
-import { imagesAddresses } from "../../../constants/address";
+import { imagesAddresses, typeAddress } from "../../../constants/address";
 
-type AddressType = keyof typeof imagesAddresses;
+type AddressType = keyof typeof typeAddress;
 
 interface FormData {
   type: AddressType;
