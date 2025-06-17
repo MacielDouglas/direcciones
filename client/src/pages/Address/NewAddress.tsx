@@ -160,8 +160,8 @@ const NewAddress = () => {
   };
 
   return (
-    <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt p-6 rounded-2xl max-w-2xl mx-auto">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt  rounded-2xl max-w-2xl mx-auto md:p-6">
+      <div className="flex items-center gap-4 mb-6 p-6 md:p-0">
         <MapPinPlus
           className="text-[var(--color-destaque-primary)]"
           size={24}
@@ -169,52 +169,55 @@ const NewAddress = () => {
         <h1 className="text-2xl font-semibold">Nueva dirección</h1>
       </div>
 
-      <div className="bg-primary-lgt dark:bg-primary-drk rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-6">
+      <div className="bg-primary-lgt dark:bg-primary-drk  shadow-sm overflow-hidden md:rounded-2xl">
+        <div className="p-1 md:p-6">
           <form className="space-y-4" onSubmit={handleSubmit}>
             {step === 1 && (
               <>
-                <h2 className="text-xl font-semibold mb-4">Tipo de endereço</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                  {addressTypes.map(({ value, label, icon }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => handleSelectType(value)}
-                      className={`flex items-center justify-center gap-2 border rounded-lg p-3 ${
-                        formData.type === value
-                          ? "bg-[var(--color-destaque-second)] text-white dark:bg-[var(--color-tertiary-lgt)] dark:text-black"
-                          : "border-gray-300 text-gray-700 dark:text-gray-300 hover:border-gray-400"
-                      }`}
-                    >
-                      {icon}
-                      {label}
-                    </button>
-                  ))}
+                <div className="p-6 md:p-0">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Tipo de endereço
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                    {addressTypes.map(({ value, label, icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => handleSelectType(value)}
+                        className={`flex items-center justify-center gap-2 border rounded-lg p-3 ${
+                          formData.type === value
+                            ? "bg-[var(--color-destaque-second)] text-white dark:bg-[var(--color-tertiary-lgt)] dark:text-black"
+                            : "border-gray-300 text-gray-700 dark:text-gray-300 hover:border-gray-400"
+                        }`}
+                      >
+                        {icon}
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {["department", "hotel", "store", "restaurant"].includes(
+                    formData.type
+                  ) && (
+                    <InputField
+                      label={
+                        formData.type === "department"
+                          ? "Nombre del condomino *"
+                          : "Nombre del local *"
+                      }
+                      name="customName"
+                      value={formData.customName}
+                      onChange={handleChange}
+                      placeholder={
+                        formData.type === "department"
+                          ? "Ej: Condominio Aguas Claras *"
+                          : "Ej: Posada Sol Nascente *"
+                      }
+                      error={undefined}
+                      maxLength={250}
+                    />
+                  )}
                 </div>
-
-                {["department", "hotel", "store", "restaurant"].includes(
-                  formData.type
-                ) && (
-                  <InputField
-                    label={
-                      formData.type === "department"
-                        ? "Nombre del condomino *"
-                        : "Nombre del local *"
-                    }
-                    name="customName"
-                    value={formData.customName}
-                    onChange={handleChange}
-                    placeholder={
-                      formData.type === "department"
-                        ? "Ej: Condominio Aguas Claras *"
-                        : "Ej: Posada Sol Nascente *"
-                    }
-                    error={undefined}
-                    maxLength={250}
-                  />
-                )}
-
                 <h2 className="text-xl font-semibold mb-4">
                   Informações básicas
                 </h2>

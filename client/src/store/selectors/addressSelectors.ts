@@ -11,7 +11,7 @@ export const selectAllAddresses = createSelector(
 
 export const selectAddressById = (id: string) =>
   createSelector(selectAllAddresses, (addresses: Address[]) =>
-    addresses.find((addr) => addr._id === id)
+    addresses.find((addr) => addr.id === id)
   );
 
 export const selectConfirmedAddresses = createSelector(
