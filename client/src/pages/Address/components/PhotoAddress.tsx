@@ -35,7 +35,7 @@ const PhotoAddress: React.FC<PhotoAddressProps> = ({
             <img
               src={photo}
               alt={`Foto da rua ${street}`}
-              className={`object-cover w-full h-full rounded-xl transition-opacity duration-300 ${wid} ${hei} shadow-sm ${
+              className={`object-cover rounded-xl transition-opacity duration-300 ${wid} ${hei} shadow-sm ${
                 isLoading ? "opacity-0" : "opacity-100"
               }`}
               onLoad={() => setIsLoading(false)}

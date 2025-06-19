@@ -17,6 +17,7 @@ export interface Address {
   visited: boolean;
   createdAt?: string;
   updatedAt?: string;
+  customName?: string; // nome personalizado para o endereço
 }
 
 interface AddressState {

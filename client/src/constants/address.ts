@@ -10,6 +10,7 @@ const initialFormState = {
   active: true,
   confirmed: false,
   visited: false,
+  customName: "",
 };
 
 // Funções de conversão

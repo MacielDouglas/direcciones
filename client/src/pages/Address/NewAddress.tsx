@@ -27,8 +27,7 @@ import CompletedForm from "./components/CompletedForm";
 import { selectAllAddresses } from "../../store/selectors/addressSelectors";
 import type { AddressFormData } from "./types/adress.types";
 import type { RootState } from "../../store";
-
-// type AddressType = "house" | "department" | "store" | "hotel" | "restaurant";
+import { useNavigate } from "react-router-dom";
 
 type AddressType = keyof typeof typeAddress;
 
@@ -53,6 +52,7 @@ const NewAddress = () => {
     selectAllAddresses(state)
   );
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<AddressFormData>({
     street: "",
     number: "",
@@ -85,6 +85,7 @@ const NewAddress = () => {
           addresses: [...addresses, data.createAddress.address],
         })
       );
+      navigate(`/addresses?tab=/address/${data.createAddress.address.id}`);
     },
     onError: (error) =>
       console.error(`Erro ao cadastrar endereço novo ${error.message}`),
