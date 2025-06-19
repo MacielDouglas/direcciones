@@ -17,6 +17,7 @@ const addressTypeDef = `#graphql
     visited: Boolean!
     createdAt: String
     updatedAt: String
+    customName: String
   }
 
   type AddressResponse {
@@ -47,6 +48,7 @@ const addressTypeDef = `#graphql
     active: Boolean
     confirmed: Boolean!
     visited: Boolean!
+    customName: String
   }
 
   input UpdateAddressInput {
