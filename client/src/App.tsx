@@ -10,7 +10,7 @@ import PrivateRoute from "./components/private/PrivateRoute";
 import Footer from "./components/layout/Footer";
 import UserPage from "./pages/UserPage";
 import Addresses from "./pages/Addresses";
-import ScrollToTop from "./context/ScrollTotop";
+import ScrollToTop from "./context/ScrollToTop";
 import { Toaster } from "react-hot-toast";
 
 const App = () => {

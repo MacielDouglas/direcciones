@@ -9,7 +9,6 @@ export function useFetchAddresses() {
   const [fetchAddresses] = useLazyQuery(ADDRESSES, {
     fetchPolicy: "network-only",
     onCompleted: (data) => {
-      console.log("DATA: ", data);
       if (data?.addresses?.addresses) {
         dispatch(setAddresses({ addresses: data.addresses.addresses }));
       }
