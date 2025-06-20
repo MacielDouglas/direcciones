@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { userSessionExpiry } from "../../store/selectors/userSelectors";
+import {
+  userIsAuthenticated,
+  userSessionExpiry,
+} from "../../store/selectors/userSelectors";
 import { clearUser } from "../../store/userSlice";
-
-const EXPIRATION_SECONDS = 3600; // 1 hora
-const WARNING_THRESHOLD = 600; // 10 minutos
+import toast from "react-hot-toast";
 
 interface SessionProviderProps {
   size: string;
@@ -12,46 +13,57 @@ interface SessionProviderProps {
 
 const SessionProvider = ({ size }: SessionProviderProps) => {
   const dispatch = useDispatch();
-  const timeExpiry = useSelector(userSessionExpiry); // timestamp do login (ms)
-  const [secondsLeft, setSecondsLeft] = useState(EXPIRATION_SECONDS);
+  const isAuthenticated = useSelector(userIsAuthenticated);
+  const expiryTimestamp = useSelector(userSessionExpiry); // em ms
+
+  const [timeRemaining, setTimeRemaining] = useState(() =>
+    expiryTimestamp ? expiryTimestamp - Date.now() : 0
+  );
 
   useEffect(() => {
-    if (!timeExpiry) return;
+    if (!isAuthenticated || !expiryTimestamp) return;
 
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - timeExpiry) / 1000);
-      const remaining = EXPIRATION_SECONDS - elapsedSeconds;
+    const intervalId = setInterval(() => {
+      const remaining = expiryTimestamp - Date.now();
+      setTimeRemaining(remaining);
 
       if (remaining <= 0) {
+        clearInterval(intervalId);
         dispatch(clearUser());
-        clearInterval(interval);
-        console.log("Sessão expirada automaticamente.");
-      } else {
-        setSecondsLeft(remaining);
+        toast.error("Logout!!!", {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
+        window.location.reload(); // força logout
       }
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, [dispatch, timeExpiry]);
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, expiryTimestamp, dispatch]);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  if (!isAuthenticated || !expiryTimestamp) return null;
+
+  const formatTime = (ms: number) => {
+    const seconds = Math.max(0, Math.floor(ms / 1000));
+    const min = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const sec = String(seconds % 60).padStart(2, "0");
+    return `${min}:${sec}`;
   };
-
-  const isWarning = secondsLeft <= WARNING_THRESHOLD;
 
   return (
     <div>
-      <p
-        className={`flex items-center gap-2 font-semibold ${size} ${
-          isWarning && "text-red-600 "
-        } `}
-      >
-        {formatTime(secondsLeft)}
-      </p>
+      {timeRemaining > 0 ? (
+        <p className={`flex items-center gap-2 ${size}`}>
+          <span className={timeRemaining < 600000 ? "text-orange-500" : ""}>
+            {formatTime(timeRemaining)}
+          </span>
+        </p>
+      ) : (
+        <p>La sesión expiró</p>
+      )}
     </div>
   );
 };

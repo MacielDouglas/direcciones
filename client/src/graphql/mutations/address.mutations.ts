@@ -44,6 +44,7 @@ export const UPDATE_ADDRESS = gql`
         visited
         photo
         active
+        customName
       }
     }
   }
@@ -56,7 +57,6 @@ export const DELETE_ADDRESS = gql`
       success
       address {
         id
-        street
       }
     }
   }

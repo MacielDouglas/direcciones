@@ -10,6 +10,8 @@ import PrivateRoute from "./components/private/PrivateRoute";
 import Footer from "./components/layout/Footer";
 import UserPage from "./pages/UserPage";
 import Addresses from "./pages/Addresses";
+import ScrollToTop from "./context/ScrollTotop";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const group = useSelector(selectGroup);
@@ -17,6 +19,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <Router>
+        <ScrollToTop />
         {group && group !== "0" && <Header />}
         <Routes>
           <Route element={<PublicOnlyRoute />}>
@@ -29,6 +32,7 @@ const App = () => {
             <Route path="/user" element={<UserPage />} />
           </Route>
         </Routes>
+        <Toaster />
         {group && group !== "0" && <Footer />}
       </Router>
     </ThemeProvider>

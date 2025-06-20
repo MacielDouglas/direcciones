@@ -101,8 +101,6 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
     }
   };
 
-  console.log(formData.gps);
-
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm text-gray-600 font-semibold">

@@ -15,12 +15,14 @@ import {
   LogOut,
   X,
   AlignRight,
+  House,
 } from "lucide-react";
 import { selectIsSS } from "../../store/selectors/userSelectors";
+import toast from "react-hot-toast";
 
 const iconsMap: Record<string, React.ComponentType<Record<string, unknown>>> = {
   Tarjetas: Dock,
-  Dirección: MapPinned,
+  Direcciones: MapPinned,
   Usuarios: UsersRound,
   Perfil: UserRound,
   Asignar: SendHorizontal,
@@ -63,9 +65,15 @@ const HeaderMenu = () => {
     onCompleted: (data) => {
       if (data?.logout?.success) {
         dispatch(clearUser());
-        // toast.success("Sessão encerrada com sucesso!");
+        toast.success("Sessão encerrada com sucesso!", {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
       } else {
-        console.error("Erro ao encerrar a sessão");
+        toast.error("Erro ao encerrar a sessão");
         // toast.error("Erro ao encerrar a sessão.");
       }
     },
@@ -107,9 +115,9 @@ const HeaderMenu = () => {
         >
           <div className="w-full max-w-3xl flex flex-col gap-5">
             <div className="flex items-center gap-4">
-              <h2 className="text-4xl  tracking-widest font-semibold">
+              {/* <h2 className="text-4xl  tracking-widest font-semibold">
                 Menu,{" "}
-              </h2>
+              </h2> */}
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -163,6 +171,19 @@ const HeaderMenu = () => {
               className="w-full"
             >
               <ul className="flex flex-col gap-4 py-8">
+                <li>
+                  <Link
+                    to={"/"}
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      handleMenuToggle();
+                    }}
+                    className="flex items-center gap-4 py-4 text-3xl tracking-wide font-semibold"
+                  >
+                    <House size={28} aria-hidden="true" />
+                    <span>Home</span>
+                  </Link>
+                </li>
                 {combinedMenu.map(([key, item]) => (
                   <MenuItem
                     key={key}

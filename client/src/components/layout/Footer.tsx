@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
 import { userIsAuthenticated } from "../../store/selectors/userSelectors";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const isAuthenticated = useSelector(userIsAuthenticated);
@@ -48,12 +49,32 @@ const Footer = () => {
           {isAuthenticated && (
             <ul className="mt-12 flex flex-wrap justify-center gap-6 md:gap-8 lg:mt-0 lg:justify-end lg:gap-12">
               <li>
-                <a
+                <Link
                   className="text-gray-700 transition hover:text-gray-700/75"
-                  href="#"
+                  to={"/addresses"}
                 >
                   {" "}
-                  About{" "}
+                  Direcciones{" "}
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  className="text-gray-700 transition hover:text-gray-700/75"
+                  to={"/cards"}
+                >
+                  {" "}
+                  Tarjetas{" "}
+                </Link>
+              </li>
+
+              <li>
+                <a
+                  className="text-gray-700 transition hover:text-gray-700/75"
+                  href={"/user"}
+                >
+                  {" "}
+                  Perfil{" "}
                 </a>
               </li>
 
@@ -63,27 +84,7 @@ const Footer = () => {
                   href="#"
                 >
                   {" "}
-                  Services{" "}
-                </a>
-              </li>
-
-              <li>
-                <a
-                  className="text-gray-700 transition hover:text-gray-700/75"
-                  href="#"
-                >
-                  {" "}
-                  Projects{" "}
-                </a>
-              </li>
-
-              <li>
-                <a
-                  className="text-gray-700 transition hover:text-gray-700/75"
-                  href="#"
-                >
-                  {" "}
-                  Blog{" "}
+                  Condiciones de uso{" "}
                 </a>
               </li>
             </ul>

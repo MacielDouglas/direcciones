@@ -20,6 +20,7 @@ export const ADDRESSES = gql`
         active
         group
         createdAt
+        customName
       }
     }
   }
