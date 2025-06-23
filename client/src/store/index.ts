@@ -5,6 +5,8 @@ import { combineReducers } from "redux";
 import expireReducer from "redux-persist-expire";
 import userReducer from "./userSlice";
 import addressReducer from "./addressSlice";
+import cardsReducer from "./cardsSlice";
+import myCardReducer from "./myCardsSlice";
 
 // Expiração automática do estado do usuário após 1h
 const expireUser = expireReducer("user", {
@@ -24,6 +26,22 @@ const expireAddress = expireReducer("addresses", {
   },
   autoExpire: true,
 });
+const expireCards = expireReducer("cards", {
+  expireSeconds: 3600, // 1 hora
+  expiredState: {
+    cardsData: [],
+    sessionExpiry: null,
+  },
+  autoExpire: true,
+});
+const expireMyCard = expireReducer("myCard", {
+  expireSeconds: 3600,
+  expiredState: {
+    myCardData: [],
+    sessionExpiry: null,
+  },
+  autoExpire: true,
+});
 // Configuração de persistência para o user reducer
 const userPersistConfig = {
   key: "user",
@@ -35,10 +53,22 @@ const addressPersistConfig = {
   storage,
   transforms: [expireAddress],
 };
+const cardsPersistConfig = {
+  key: "cards",
+  storage,
+  transforms: [expireCards],
+};
+const myCardPersistConfig = {
+  key: "myCard",
+  storage,
+  transforms: [expireMyCard],
+};
 
 const rootReducer = combineReducers({
   user: persistReducer(userPersistConfig, userReducer),
   addresses: persistReducer(addressPersistConfig, addressReducer),
+  cards: persistReducer(cardsPersistConfig, cardsReducer),
+  myCard: persistReducer(myCardPersistConfig, myCardReducer),
   // Outros reducers podem ser adicionados aqui
 });
 

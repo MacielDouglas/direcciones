@@ -107,6 +107,10 @@ const NewAddress = () => {
     setCharCount(250 - formData.complement.length);
   }, [formData.complement]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
   const nextStep = () => step < 4 && setStep((prev) => (prev + 1) as FormStep);
   const prevStep = () => step > 1 && setStep((prev) => (prev - 1) as FormStep);
 

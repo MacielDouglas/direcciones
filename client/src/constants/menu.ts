@@ -2,7 +2,7 @@
 export const menuOptions = {
   tarjetas: {
     label: "Tarjetas",
-    path: "/cards",
+    path: "/my-cards",
     info: "Acesse las tarjetas asignadas",
   },
   direcciones: {
@@ -27,7 +27,7 @@ export const menuSs = {
   },
   Asignar: {
     label: "Asignar",
-    path: "/cards?tab=asignar",
+    path: "/cards",
     info: "Asignar tarjetas a los usuarios",
   },
 } as const;

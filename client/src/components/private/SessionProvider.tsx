@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   userIsAuthenticated,
@@ -6,6 +6,10 @@ import {
 } from "../../store/selectors/userSelectors";
 import { clearUser } from "../../store/userSlice";
 import toast from "react-hot-toast";
+import { clearCards } from "../../store/cardsSlice";
+import { clearAddresses } from "../../store/addressSlice";
+import { useNavigate } from "react-router-dom";
+import { clearMyCards } from "../../store/myCardsSlice";
 
 interface SessionProviderProps {
   size: string;
@@ -13,36 +17,58 @@ interface SessionProviderProps {
 
 const SessionProvider = ({ size }: SessionProviderProps) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const isAuthenticated = useSelector(userIsAuthenticated);
   const expiryTimestamp = useSelector(userSessionExpiry); // em ms
 
   const [timeRemaining, setTimeRemaining] = useState(() =>
-    expiryTimestamp ? expiryTimestamp - Date.now() : 0
+    expiryTimestamp ? Math.max(0, expiryTimestamp - Date.now()) : 0
   );
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSessionExpiry = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    dispatch(clearUser());
+    dispatch(clearCards());
+    dispatch(clearMyCards());
+    dispatch(clearAddresses());
+    toast.error("Sessão expirada", {
+      style: {
+        borderRadius: "10px",
+        background: "#333",
+        color: "#fff",
+      },
+    });
+    navigate("/login", { replace: true });
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     if (!isAuthenticated || !expiryTimestamp) return;
 
-    const intervalId = setInterval(() => {
+    // Verificação imediata ao montar o componente
+    if (expiryTimestamp <= Date.now()) {
+      handleSessionExpiry();
+      return;
+    }
+
+    intervalRef.current = setInterval(() => {
       const remaining = expiryTimestamp - Date.now();
       setTimeRemaining(remaining);
 
       if (remaining <= 0) {
-        clearInterval(intervalId);
-        dispatch(clearUser());
-        toast.error("Logout!!!", {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-          },
-        });
-        window.location.reload(); // força logout
+        handleSessionExpiry();
       }
     }, 1000);
 
-    return () => clearInterval(intervalId);
-  }, [isAuthenticated, expiryTimestamp, dispatch]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isAuthenticated, expiryTimestamp, handleSessionExpiry]);
 
   if (!isAuthenticated || !expiryTimestamp) return null;
 
@@ -62,7 +88,7 @@ const SessionProvider = ({ size }: SessionProviderProps) => {
           </span>
         </p>
       ) : (
-        <p>La sesión expiró</p>
+        <p>Sessão expirada</p>
       )}
     </div>
   );

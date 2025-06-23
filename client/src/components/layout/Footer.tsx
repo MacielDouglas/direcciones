@@ -8,9 +8,14 @@ const Footer = () => {
     <footer className="w-full bg-second-lgt dark:bg-tertiary-drk">
       <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8 lg:pt-24">
         <div className="absolute end-4 top-4 sm:end-6 sm:top-6 lg:end-8 lg:top-8">
-          <a
-            className="inline-block rounded-full bg-teal-600 p-2 text-white shadow-sm transition hover:bg-teal-500 sm:p-3 lg:p-4"
-            href="#MainContent"
+          <button
+            className="inline-block rounded-full text-primary-drk bg-primary-lgt dark:bg-primary-drk dark:text-primary-lgt p-2 dark:ext-white shadow-sm transition hover:bg-tertiary-lgt dark:hover:bg-second-drk sm:p-3 lg:p-4"
+            onClick={() => {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }}
           >
             <span className="sr-only">Back to top</span>
 
@@ -26,7 +31,7 @@ const Footer = () => {
                 clipRule="evenodd"
               />
             </svg>
-          </a>
+          </button>
         </div>
 
         <div className="lg:flex lg:items-end lg:justify-between">

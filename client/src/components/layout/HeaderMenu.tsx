@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import { selectIsSS } from "../../store/selectors/userSelectors";
 import toast from "react-hot-toast";
+import { clearCards } from "../../store/cardsSlice";
+import { clearAddresses } from "../../store/addressSlice";
+import { clearMyCards } from "../../store/myCardsSlice";
 
 const iconsMap: Record<string, React.ComponentType<Record<string, unknown>>> = {
   Tarjetas: Dock,
@@ -65,6 +68,9 @@ const HeaderMenu = () => {
     onCompleted: (data) => {
       if (data?.logout?.success) {
         dispatch(clearUser());
+        dispatch(clearCards());
+        dispatch(clearMyCards());
+        dispatch(clearAddresses());
         toast.success("Sessão encerrada com sucesso!", {
           style: {
             borderRadius: "10px",

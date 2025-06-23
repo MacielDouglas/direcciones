@@ -12,6 +12,8 @@ import UserPage from "./pages/UserPage";
 import Addresses from "./pages/Addresses";
 import ScrollToTop from "./context/ScrollToTop";
 import { Toaster } from "react-hot-toast";
+import Cards from "./pages/Cards";
+import MyCards from "./pages/MyCards";
 
 const App = () => {
   const group = useSelector(selectGroup);
@@ -28,6 +30,8 @@ const App = () => {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
             <Route path="/addresses" element={<Addresses />} />
+            <Route path="/cards" element={<Cards />} />
+            <Route path="/my-cards" element={<MyCards />} />
             {/* <Route path="/token" element={<TokenPage />} /> */}
             <Route path="/user" element={<UserPage />} />
           </Route>

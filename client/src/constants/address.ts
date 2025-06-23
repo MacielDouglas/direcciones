@@ -152,12 +152,12 @@ const calculateDistance = (
   return R * c; // Distância em metros
 };
 
-// const formatDate = (dateString) => {
-//   const date = new Date(dateString);
-//   return `${String(date.getDate()).padStart(2, "0")}/${String(
-//     date.getMonth() + 1
-//   ).padStart(2, "0")}/${date.getFullYear()}`;
-// };
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `${String(date.getDate()).padStart(2, "0")}/${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}/${date.getFullYear()}`;
+};
 
 export {
   initialFormState,
@@ -167,5 +167,5 @@ export {
   typeAddress,
   imagesAddresses,
   calculateDistance,
-  // formatDate,
+  formatDate,
 };

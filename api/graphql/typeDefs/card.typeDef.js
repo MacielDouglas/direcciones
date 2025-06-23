@@ -35,6 +35,7 @@ type Assigned {
 
 type Query {
     card: [CardResponse]!
+    myCards(id: ID!): [CardResponse]!
 }
 
 type Mutation {
@@ -44,8 +45,6 @@ type Mutation {
     assignCard(assignCardInput: AssignCardInput!): AssignCardMutationResponse
     returnCard(returnCardInput: ReturnCardInput!): CardMutationResponse
 }
-
-
 
  type CardResponse {
     id: ID!

@@ -41,6 +41,49 @@ const cardResolver = {
         throw new Error(`Erro ao buscar cartões: ${error.message}`);
       }
     },
+
+    myCards: async (_, { id }, { req }) => {
+      const decodedToken = verifyAuthorization(req);
+      if (!decodedToken) throw new Error("Você não tem permissão.");
+
+      console.log("chamado");
+
+      try {
+        // Busca apenas os cartões atribuídos ao usuário
+        const cards = await Card.find({
+          usersAssigned: { $elemMatch: { userId: id } },
+        }).lean();
+
+        const myCards = await Promise.all(
+          cards.map(async (card) => {
+            const addresses = await Address.find({
+              _id: { $in: card.street || [] },
+            }).lean();
+
+            const formattedAddresses = addresses.map((address) => ({
+              ...address,
+              id: address._id.toString(), // ✅ Garante que `id` seja uma string válida
+            }));
+
+            return {
+              id: card._id.toString(),
+              number: card.number,
+              startDate: card.startDate,
+              endDate: card.endDate,
+              street: formattedAddresses, // retorna os dados completos dos endereços
+              group: card.group,
+              usersAssigned: card.usersAssigned,
+            };
+          })
+        );
+
+        return myCards;
+      } catch (error) {
+        throw new Error(
+          `Erro ao buscar os cartões do usuário: ${error.message}`
+        );
+      }
+    },
   },
 
   Mutation: {

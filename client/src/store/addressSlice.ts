@@ -18,6 +18,7 @@ export interface Address {
   createdAt?: string;
   updatedAt?: string;
   customName?: string; // nome personalizado para o endereço
+  __typename?: string; // usado pelo GraphQL, opcional
 }
 
 interface AddressState {

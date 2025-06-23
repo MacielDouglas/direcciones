@@ -22,9 +22,11 @@ import { DELETE_ADDRESS } from "../../graphql/mutations/address.mutations";
 import { setAddresses } from "../../store/addressSlice";
 import toast from "react-hot-toast";
 import ScrollToTop from "../../context/ScrollToTop";
+import ButtonEditAddress from "./components/buttons/ButtonEditAddress";
+import DisableAddressButton from "./components/buttons/DisableAddressButton";
 
 type AddressProps = {
-  id: string | null;
+  id: string;
 };
 
 type Location = {
@@ -156,7 +158,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
     setIsModalOpen(false);
   };
 
-  const handleEdit = () => navigate(`/addresses?tab=update-address&id=${id}`);
+  // const handleEdit = () => navigate(`/addresses?tab=update-address&id=${id}`);
 
   const handleDelete = async () => {
     await deleteAddressInput({
@@ -165,7 +167,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
   };
 
   return (
-    <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt rounded-2xl max-w-md mx-auto  space-y-6 p-2">
+    <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt rounded-2xl max-w-md sm:max-w-2xl mx-auto  space-y-6 p-2">
       <ScrollToTop />
       <div className="space-y-3 p-6">
         <div className="flex items-center gap-3">
@@ -182,7 +184,11 @@ const Address: React.FC<AddressProps> = ({ id }) => {
           <h2 className="font-semibold text-xl"> - {customName}</h2>
         )}
       </div>
-      <div className="bg-primary-lgt dark:bg-primary-drk shadow-sm rounded-2xl overflow-hidden">
+      <div
+        className={`bg-primary-lgt dark:bg-primary-drk shadow-sm rounded-2xl overflow-hidden ${
+          !active && "!bg-orange-950 text-primary-lgt"
+        }`}
+      >
         <Map
           mapboxAccessToken={mapboxToken}
           initialViewState={{
@@ -258,18 +264,8 @@ const Address: React.FC<AddressProps> = ({ id }) => {
             Ver en el mapa
           </button>
           <div className="flex gap-5 font-semibold">
-            <button
-              onClick={handleEdit}
-              className="bg-primary-drk dark:bg-primary-lgt text-white dark:text-primary-drk w-full  rounded-lg text-sm shadow-md mt-2 py-3"
-            >
-              Editar la dirección
-            </button>
-            <button
-              onClick={() => [setIsModalOpen(true), setIsDeleteOpen(false)]}
-              className="bg-destaque-primary text-primary-drk w-full py-2 rounded-lg text-sm shadow-md mt-2"
-            >
-              Desactivar esta dirección
-            </button>
+            <ButtonEditAddress id={id} />
+            <DisableAddressButton id={id} setIsDeleteOpen={setIsDeleteOpen} />
           </div>
           {isSS && (
             <button
