@@ -16,3 +16,27 @@ export interface AddressFormData {
   visited: boolean;
   customName: string;
 }
+
+// types/address.types.ts
+export interface Address {
+  id: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  complement?: string;
+  confirmed: boolean;
+  active?: boolean;
+  gps?: string;
+  photo: string;
+  customName?: string;
+  type: "house" | "department" | "store" | "hotel" | "restaurant";
+}
+
+// types/myCard.types.ts
+export interface MyCard {
+  id: string;
+  number: string;
+  startDate: string;
+  street: Address[];
+}

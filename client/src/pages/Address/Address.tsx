@@ -13,8 +13,7 @@ import { selectAllAddresses } from "../../store/selectors/addressSelectors";
 import { calculateDistance } from "../../constants/address";
 import PhotoAddress from "./components/PhotoAddress";
 import AddressSkeleton from "./components/skeletons/AddressSkeleton";
-import Map, { Marker } from "react-map-gl/mapbox";
-import "mapbox-gl/dist/mapbox-gl.css";
+
 import { useNavigate } from "react-router-dom";
 import { selectIsSS } from "../../store/selectors/userSelectors";
 import { useMutation } from "@apollo/client";
@@ -24,6 +23,7 @@ import toast from "react-hot-toast";
 import ScrollToTop from "../../context/ScrollToTop";
 import ButtonEditAddress from "./components/buttons/ButtonEditAddress";
 import DisableAddressButton from "./components/buttons/DisableAddressButton";
+import MapSection from "./components/MapSection";
 
 type AddressProps = {
   id: string;
@@ -75,9 +75,6 @@ const Address: React.FC<AddressProps> = ({ id }) => {
   });
 
   const gps = address?.gps;
-  const mapboxToken = import.meta.env.VITE_FIREBASE_MAP_BOX;
-  // const mapboxStyle = "mapbox://styles/mapbox/standard";
-  const mapboxStyle = import.meta.env.VITE_FIREBASE_MAP_BOX_STYLE;
 
   const [latitude, longitude] = useMemo(() => {
     if (typeof gps === "string") {
@@ -189,23 +186,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
           !active && "!bg-orange-950 text-primary-lgt"
         }`}
       >
-        <Map
-          mapboxAccessToken={mapboxToken}
-          initialViewState={{
-            longitude: Number(gps?.split(", ")[1]),
-            latitude: Number(gps?.split(", ")[0]),
-            zoom: 16,
-          }}
-          style={{ width: "100%", height: 250 }}
-          mapStyle={mapboxStyle}
-        >
-          <Marker
-            longitude={Number(gps?.split(", ")[1])}
-            latitude={Number(gps?.split(", ")[0])}
-            color="black"
-            anchor="bottom"
-          />
-        </Map>
+        <MapSection userCard={false} mapId={[id]} />
 
         <div className="p-4 space-y-6">
           <PhotoAddress hei="h-20" photo={photo} street={street} />

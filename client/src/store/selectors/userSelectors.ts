@@ -5,7 +5,7 @@ export const selectUserState = (state: RootState) => state.user;
 
 export const selectUserId = createSelector(
   selectUserState,
-  (user) => user.userData?.id ?? null
+  (user) => user.userData?.id ?? ""
 );
 
 export const selectUserName = createSelector(

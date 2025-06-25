@@ -1,7 +1,9 @@
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { MY_CARDS } from "../queries/cards.query";
 import { useDispatch } from "react-redux";
 import { setMyCards } from "../../store/myCardsSlice";
+import { RETURN_CARD } from "../mutations/cards.mutation";
+import toast from "react-hot-toast";
 
 export function useFetchMyCards() {
   const dispatch = useDispatch();
@@ -16,4 +18,20 @@ export function useFetchMyCards() {
   });
 
   return { fetchMyCards, loading };
+}
+
+export function useReturnCard(userId: string) {
+  const { fetchMyCards } = useFetchMyCards();
+
+  const [returnCardMutation] = useMutation(RETURN_CARD, {
+    onCompleted: (data) => {
+      toast.success(data.returnCard.message);
+      fetchMyCards({ variables: { myCardsId: userId } });
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  return { returnCardMutation };
 }
