@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import { UPDATE_ADDRESS } from "../../graphql/mutations/address.mutations";
 import { selectAllAddresses } from "../../store/selectors/addressSelectors";
@@ -14,6 +13,7 @@ import GpsComponent from "./components/GpsComponent";
 import PhotoComponent from "./components/PhotoComponent";
 
 import type { imagesAddresses } from "../../constants/address";
+import { useToastMessage } from "../../hooks/useToastMessage";
 
 type AddressType = keyof typeof imagesAddresses;
 interface UpdateAddressProps {
@@ -51,6 +51,7 @@ const UpdateAddress = ({ id }: UpdateAddressProps) => {
   const navigate = useNavigate();
   const addresses = useSelector(selectAllAddresses);
   const hasInitialized = useRef(false);
+  const { showToast } = useToastMessage();
 
   const address = useMemo(
     () => addresses.find((a) => a.id === id) || null,
@@ -70,22 +71,16 @@ const UpdateAddress = ({ id }: UpdateAddressProps) => {
           ),
         })
       );
-      toast.success("¡Dirección modificada exitosamente!", {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+      showToast({
+        message: "¡Dirección modificada exitosamente!",
+        type: "success",
       });
       navigate(`/addresses?tab=/address/${updateAddress.address.id}`);
     },
     onError: (error) => {
-      toast.error(`¡Error al modificar la dirección!, ${error.message}`, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+      showToast({
+        message: `¡Error al modificar la dirección!: ${error.message}`,
+        type: "error",
       });
     },
   });

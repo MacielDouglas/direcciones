@@ -1,26 +1,28 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
+interface Street {
+  id: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  complement?: string;
+  gps?: string;
+  group: string;
+  type: "house" | "department" | "store" | "hotel" | "restaurant";
+  confirmed: boolean;
+  visited: boolean;
+  active: boolean;
+  photo?: string;
+}
+
 export interface Cards {
   id: string; // correspondente ao ObjectId do Mongo
   number: string;
   startDate: string;
   endDate: string;
   group: string;
-  street: {
-    id: string;
-    street: string;
-    number: string;
-    neighborhood: string;
-    city: string;
-    complement?: string;
-    gps?: string;
-    group: string;
-    type: "house" | "department" | "store" | "hotel" | "restaurant";
-    confirmed: boolean;
-    visited: boolean;
-    active: boolean;
-    photo?: string;
-  };
+  street: Street[];
   usersAssigned?: { date: string; userId: string }[];
 }
 

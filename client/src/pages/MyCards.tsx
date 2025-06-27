@@ -74,7 +74,7 @@ const MyCards = () => {
         </section>
       ) : (
         <>
-          <MapSection userCard={true} />
+          <MapSection showUserCards={true} />
 
           <div className="space-y-6 max-w-2xl mx-auto">
             {myCards.map((card) => (
@@ -169,9 +169,12 @@ const MyCards = () => {
             <h2 className="text-xl font-semibold mb-4">
               Detalle de la dirección
             </h2>
-
+            {/* showUserCards={false} multipleAddressIds={mapIds} */}
             <div className="rounded-2xl overflow-hidden space-y-2">
-              <MapSection userCard={false} mapId={[selectedAddress.id]} />
+              <MapSection
+                showUserCards={false}
+                singleAddressId={selectedAddress.id}
+              />
 
               <div className="flex items-center justify-between mt-4">
                 <PhotoAddress

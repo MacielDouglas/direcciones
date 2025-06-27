@@ -19,11 +19,11 @@ import { selectIsSS } from "../../store/selectors/userSelectors";
 import { useMutation } from "@apollo/client";
 import { DELETE_ADDRESS } from "../../graphql/mutations/address.mutations";
 import { setAddresses } from "../../store/addressSlice";
-import toast from "react-hot-toast";
 import ScrollToTop from "../../context/ScrollToTop";
 import ButtonEditAddress from "./components/buttons/ButtonEditAddress";
 import DisableAddressButton from "./components/buttons/DisableAddressButton";
 import MapSection from "./components/MapSection";
+import { useToastMessage } from "../../hooks/useToastMessage";
 
 type AddressProps = {
   id: string;
@@ -43,6 +43,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
     () => addresses.find((a) => a.id === id),
     [addresses, id]
   );
+  const { showToast } = useToastMessage();
 
   const [deleteAddressInput] = useMutation(DELETE_ADDRESS, {
     onCompleted: async (data) => {
@@ -54,22 +55,17 @@ const Address: React.FC<AddressProps> = ({ id }) => {
           ),
         })
       );
-      toast.success("¡Dirección eliminada exitosamente!", {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+      showToast({
+        message: "¡Dirección eliminada exitosamente!",
+        type: "success",
       });
+
       navigate("/addresses");
     },
     onError: (error) => {
-      toast.error(`¡Error al eliminar la dirección!, ${error.message}`, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+      showToast({
+        message: `¡Error al eliminar la dirección!: ${error}`,
+        type: "error",
       });
     },
   });
@@ -186,7 +182,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
           !active && "!bg-orange-950 text-primary-lgt"
         }`}
       >
-        <MapSection userCard={false} mapId={[id]} />
+        <MapSection showUserCards={false} singleAddressId={id} />
 
         <div className="p-4 space-y-6">
           <PhotoAddress hei="h-20" photo={photo} street={street} />

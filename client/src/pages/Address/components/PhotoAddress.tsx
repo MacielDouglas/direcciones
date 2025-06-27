@@ -2,7 +2,7 @@ import { useState } from "react";
 import PhotoAddressSkeleton from "./skeletons/PhotoAddressSkeleton";
 
 interface PhotoAddressProps {
-  photo: string;
+  photo?: string;
   street: string;
   wid?: string;
   hei?: string;
@@ -26,7 +26,7 @@ const PhotoAddress: React.FC<PhotoAddressProps> = ({
       {photo && (
         <button
           onClick={toggleModal}
-          className="block focus:outline-none focus:ring-2 focus:ring-primary rounded-2xl overflow-hidden mb-6"
+          className="block focus:outline-none focus:ring-2 focus:ring-primary rounded-2xl overflow-hidden"
           aria-label={`Ver foto do endereço: ${street}`}
         >
           {isLoading && <PhotoAddressSkeleton />}

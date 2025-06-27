@@ -33,7 +33,7 @@ const CompletedForm = ({
   addressTypes,
 }: CompletedFormProps) => {
   const error = validateForm();
-  console.log(Object.keys(error).length);
+
   return (
     <div className="flex flex-col space-y-4">
       <h2>Por favor, revise informações</h2>

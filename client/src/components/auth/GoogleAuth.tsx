@@ -6,13 +6,14 @@ import { useMutation } from "@apollo/client";
 import { app } from "../../firebase/firebase";
 import { LOGIN_GOOGLE } from "../../graphql/mutations/user.mutations";
 import { setUser } from "../../store/userSlice";
-import toast from "react-hot-toast";
+import { useToastMessage } from "../../hooks/useToastMessage";
 
 const GoogleAuth = () => {
   const auth = useMemo(() => getAuth(app), []);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToastMessage();
 
   const [loginGoogle] = useMutation(LOGIN_GOOGLE);
 
@@ -35,25 +36,13 @@ const GoogleAuth = () => {
 
       const userData = data.loginWithGoogle.user;
       dispatch(setUser({ user: userData }));
-
-      toast.success("Login com sucesso!!!", {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-      });
+      showToast({ message: "¡Inicio de sesión exitoso!", type: "success" });
 
       navigate("/");
       setLoading(false);
     } catch (error) {
-      toast.error(`Erro login, ${error}`, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-      });
+      showToast({ message: `Error sesión: ${error}`, type: "error" });
+
       setLoading(false);
     }
   };

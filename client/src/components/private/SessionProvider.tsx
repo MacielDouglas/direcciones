@@ -5,11 +5,11 @@ import {
   userSessionExpiry,
 } from "../../store/selectors/userSelectors";
 import { clearUser } from "../../store/userSlice";
-import toast from "react-hot-toast";
 import { clearCards } from "../../store/cardsSlice";
 import { clearAddresses } from "../../store/addressSlice";
 import { useNavigate } from "react-router-dom";
 import { clearMyCards } from "../../store/myCardsSlice";
+import { useToastMessage } from "../../hooks/useToastMessage";
 
 interface SessionProviderProps {
   size: string;
@@ -18,6 +18,7 @@ interface SessionProviderProps {
 const SessionProvider = ({ size }: SessionProviderProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { showToast } = useToastMessage();
   const isAuthenticated = useSelector(userIsAuthenticated);
   const expiryTimestamp = useSelector(userSessionExpiry); // em ms
 
@@ -35,15 +36,10 @@ const SessionProvider = ({ size }: SessionProviderProps) => {
     dispatch(clearCards());
     dispatch(clearMyCards());
     dispatch(clearAddresses());
-    toast.error("Sessão expirada", {
-      style: {
-        borderRadius: "10px",
-        background: "#333",
-        color: "#fff",
-      },
-    });
+    showToast({ message: "¡La sesión expiró!", type: "error" });
+
     navigate("/login", { replace: true });
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, showToast]);
 
   useEffect(() => {
     if (!isAuthenticated || !expiryTimestamp) return;

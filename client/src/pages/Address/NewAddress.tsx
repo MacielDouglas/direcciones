@@ -19,15 +19,16 @@ import ButtonSteps from "./ui/ButtonSteps";
 import PhotoComponent from "./components/PhotoComponent";
 import InputField from "./ui/InputField";
 import { imagesAddresses, typeAddress } from "../../constants/address";
-import { useMutation } from "@apollo/client";
-import { NEW_ADDRESS } from "../../graphql/mutations/address.mutations";
-import { useDispatch, useSelector } from "react-redux";
-import { setAddresses } from "../../store/addressSlice";
+// import { useMutation } from "@apollo/client";
+// import { NEW_ADDRESS } from "../../graphql/mutations/address.mutations";
+// import { useDispatch, useSelector } from "react-redux";
+// import { setAddresses } from "../../store/addressSlice";
 import CompletedForm from "./components/CompletedForm";
-import { selectAllAddresses } from "../../store/selectors/addressSelectors";
+// import { selectAllAddresses } from "../../store/selectors/addressSelectors";
 import type { AddressFormData } from "./types/adress.types";
-import type { RootState } from "../../store";
-import { useNavigate } from "react-router-dom";
+// import type { RootState } from "../../store";
+// import { useNavigate } from "react-router-dom";
+import { useNewAddress } from "../../graphql/hooks/useAddress";
 
 type AddressType = keyof typeof typeAddress;
 
@@ -48,11 +49,11 @@ const addressTypes: AddressTypeOption[] = [
 type FormStep = 1 | 2 | 3 | 4;
 
 const NewAddress = () => {
-  const addresses = useSelector((state: RootState) =>
-    selectAllAddresses(state)
-  );
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const addresses = useSelector((state: RootState) =>
+  //   selectAllAddresses(state)
+  // );
+  // const dispatch = useDispatch();
+  // const navigate = useNavigate();
   const [formData, setFormData] = useState<AddressFormData>({
     street: "",
     number: "",
@@ -71,25 +72,26 @@ const NewAddress = () => {
   const [step, setStep] = useState<FormStep>(1);
   const [charCount, setCharCount] = useState(250);
   const [isUploading, setIsUploading] = useState(false);
+  const { newAddress } = useNewAddress();
 
-  const [newAddress] = useMutation(NEW_ADDRESS, {
-    onCompleted: async (data) => {
-      if (!data.createAddress.success) {
-        return console.error(
-          `Erro ao cadastrar novo endereço: ${data.createAddress.message}`
-        );
-      }
+  // const [newAddress] = useMutation(NEW_ADDRESS, {
+  //   onCompleted: async (data) => {
+  //     if (!data.createAddress.success) {
+  //       return console.error(
+  //         `Erro ao cadastrar novo endereço: ${data.createAddress.message}`
+  //       );
+  //     }
 
-      dispatch(
-        setAddresses({
-          addresses: [...addresses, data.createAddress.address],
-        })
-      );
-      navigate(`/addresses?tab=/address/${data.createAddress.address.id}`);
-    },
-    onError: (error) =>
-      console.error(`Erro ao cadastrar endereço novo ${error.message}`),
-  });
+  //     dispatch(
+  //       setAddresses({
+  //         addresses: [...addresses, data.createAddress.address],
+  //       })
+  //     );
+  //     navigate(`/addresses?tab=/address/${data.createAddress.address.id}`);
+  //   },
+  //   onError: (error) =>
+  //     console.error(`Erro ao cadastrar endereço novo ${error.message}`),
+  // });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -375,7 +377,7 @@ const NewAddress = () => {
             )}
 
             {step === 4 && (
-              <>
+              <div className="p-6">
                 <h2 className="text-xl font-semibold mb-6">Revisar e Enviar</h2>
                 <CompletedForm
                   formData={formData}
@@ -393,7 +395,7 @@ const NewAddress = () => {
                       : "Enviar Nueva Dirección"}
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </form>
         </div>

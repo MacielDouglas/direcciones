@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useMutation } from "@apollo/client";
-import toast from "react-hot-toast";
-
 import { selectAllAddresses } from "../../../../store/selectors/addressSelectors";
 import { UPDATE_ADDRESS } from "../../../../graphql/mutations/address.mutations";
 import { setAddresses } from "../../../../store/addressSlice";
 import type { imagesAddresses } from "../../../../constants/address";
 import { selectUserId } from "../../../../store/selectors/userSelectors";
 import { useFetchMyCards } from "../../../../graphql/hooks/useCards";
+import { useToastMessage } from "../../../../hooks/useToastMessage";
 
 type DisableAddressButtonProps = {
   id: string;
@@ -57,6 +56,7 @@ const DisableAddressButton: React.FC<DisableAddressButtonProps> = ({
   const dispatch = useDispatch();
   const addresses = useSelector(selectAllAddresses);
   const userId = useSelector(selectUserId);
+  const { showToast } = useToastMessage();
 
   const address = useMemo(
     () => addresses.find((a) => a.id === id) || null,
@@ -86,21 +86,15 @@ const DisableAddressButton: React.FC<DisableAddressButtonProps> = ({
         })
       );
       if (myCard) fetchMyCards({ variables: { myCardsId: userId } });
-      toast.success("¡Dirección modificada exitosamente!", {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+      showToast({
+        message: "¡Dirección modificada exitosamente!",
+        type: "success",
       });
     },
     onError: (error) => {
-      toast.error(`¡Error al modificar la dirección! ${error.message}`, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
+      showToast({
+        message: `¡Error al modificar la dirección!: ${error.message}`,
+        type: "error",
       });
     },
   });
