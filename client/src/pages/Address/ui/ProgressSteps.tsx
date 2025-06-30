@@ -20,7 +20,7 @@ export const ProgressSteps = ({
         ></div>
       </div>
 
-      <ol className="mt-4 grid grid-cols-4 text-sm font-medium text-[var(--color-destaque-second)] dark:text-[var(--color-tertiary-lgt)]">
+      <ol className="mt-4 flex justify-around text-sm font-medium text-[var(--color-destaque-second)] dark:text-[var(--color-tertiary-lgt)]">
         {children}
       </ol>
     </div>

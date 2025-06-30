@@ -4,12 +4,13 @@ import {
   userIsAuthenticated,
   userSessionExpiry,
 } from "../../store/selectors/userSelectors";
-import { clearUser } from "../../store/userSlice";
+
 import { clearCards } from "../../store/cardsSlice";
 import { clearAddresses } from "../../store/addressSlice";
 import { useNavigate } from "react-router-dom";
 import { clearMyCards } from "../../store/myCardsSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
+import { clearMyUser } from "../../store/userSlice";
 
 interface SessionProviderProps {
   size: string;
@@ -32,7 +33,7 @@ const SessionProvider = ({ size }: SessionProviderProps) => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    dispatch(clearUser());
+    dispatch(clearMyUser());
     dispatch(clearCards());
     dispatch(clearMyCards());
     dispatch(clearAddresses());

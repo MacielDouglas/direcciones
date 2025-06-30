@@ -15,10 +15,15 @@ export const useToastMessage = () => {
       color: "#fff",
     };
 
+    const options = {
+      style,
+      duration: 3000,
+    };
+
     if (type === "success") {
-      toast.success(message, { style });
+      toast.success(message, options);
     } else if (type === "error") {
-      toast.error(message, { style });
+      toast.error(message, options);
     }
   };
 

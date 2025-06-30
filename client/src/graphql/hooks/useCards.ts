@@ -2,9 +2,14 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import { GET_CARDS, MY_CARDS } from "../queries/cards.query";
 import { useDispatch } from "react-redux";
 import { setMyCards } from "../../store/myCardsSlice";
-import { NEW_CARD, RETURN_CARD } from "../mutations/cards.mutation";
+import {
+  NEW_CARD,
+  RETURN_CARD,
+  SENDING_CARD,
+} from "../mutations/cards.mutation";
 import { setCards } from "../../store/cardsSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
+import { useFetchAddresses } from "./useAddress";
 
 export function useFetchCards() {
   const dispatch = useDispatch();
@@ -13,8 +18,6 @@ export function useFetchCards() {
   const [fetchCards] = useLazyQuery(GET_CARDS, {
     fetchPolicy: "network-only",
     onCompleted: (data) => {
-      console.log("Chamado");
-      console.log(data);
       dispatch(setCards({ cards: data.card }));
     },
     onError: (err) => {
@@ -40,16 +43,19 @@ export function useFetchMyCards() {
 
   return { fetchMyCards, loading };
 }
-
 export function useReturnCard(userId: string) {
   const { fetchMyCards } = useFetchMyCards();
   const { showToast } = useToastMessage();
 
   const [returnCardMutation] = useMutation(RETURN_CARD, {
-    onCompleted: (data) => {
-      showToast({ message: data.returnCard.message, type: "success" });
+    onCompleted: async (data) => {
+      // if (userId !== "null") {
+      //   await fetchMyCards({ variables: { myCardsId: userId } });
+      // }
 
-      fetchMyCards({ variables: { myCardsId: userId } });
+      if (data) {
+        showToast({ message: data.returnCard.message, type: "success" });
+      }
     },
     onError: (error) => {
       showToast({
@@ -79,4 +85,25 @@ export function useNewCard() {
     },
   });
   return { newCard };
+}
+
+export function useDesignateCard() {
+  const { showToast } = useToastMessage();
+  const { fetchCards } = useFetchCards();
+  const { fetchAddresses } = useFetchAddresses();
+
+  const [designateCardInput] = useMutation(SENDING_CARD, {
+    onCompleted: async (data) => {
+      showToast({ message: data.assignCard.message, type: "success" });
+      fetchCards();
+      fetchAddresses();
+    },
+    onError: (error) =>
+      showToast({
+        message: `Error al enviar tarjeta:  ${error}`,
+        type: "error",
+      }),
+  });
+
+  return { designateCardInput };
 }

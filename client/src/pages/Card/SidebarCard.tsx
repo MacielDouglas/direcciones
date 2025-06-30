@@ -2,15 +2,15 @@ import { Dock, PencilLine, Send } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const TABS = [
-  { id: "new", label: "Crear Nueva Tarjeta", icon: <Dock /> },
-  { id: "send", label: "Asignar Tarjeta", icon: <Send /> },
-  { id: "update", label: "Editar Tarjeta", icon: <PencilLine /> },
+  { id: "new", label: "Crear", icon: <Dock /> },
+  { id: "send", label: "Asignar ", icon: <Send /> },
+  { id: "update", label: "Editar", icon: <PencilLine /> },
 ];
 
 const SidebarCard = () => {
   const location = useLocation();
   const currentTab =
-    new URLSearchParams(location.search).get("tab") || "new-card";
+    new URLSearchParams(location.search).get("tab") || "send-card";
 
   return (
     <div className="h-full p-4">
@@ -31,7 +31,7 @@ const SidebarCard = () => {
             <NavLink
               key={tab.id}
               to={`/cards?tab=${tab.id}-card`}
-              className={`flex  gap-2 p-3 text-center text-sm font-medium transition-all duration-200 cursor-pointer rounded-full ${
+              className={`flex  gap-2 p-3 text-center text-sm font-medium transition-all duration-200 cursor-pointer rounded-full truncate ${
                 currentTab === tab.id + "-card"
                   ? "bg-primary-drk  text-primary-lgt dark:bg-primary-lgt dark:text-primary-drk items-center justify-center  w-3/5"
                   : "items-center justify-center bg-transparent text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-1/5 "

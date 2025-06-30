@@ -1,6 +1,9 @@
-import React from "react";
+type UpadateCardProps = {
+  id: string;
+};
 
-const UpadateCard = () => {
+const UpadateCard = ({ id }: UpadateCardProps) => {
+  console.log(id);
   return <div>UpadateCard</div>;
 };
 

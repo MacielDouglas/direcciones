@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyQuery } from "@apollo/client";
 import { LOGOUT } from "../../graphql/queries/user.query";
-import { clearUser } from "../../store/userSlice";
 import { menuOptions, menuSs } from "../../constants/menu";
 import SessionProvider from "../private/SessionProvider";
 import {
@@ -22,6 +21,7 @@ import { clearCards } from "../../store/cardsSlice";
 import { clearAddresses } from "../../store/addressSlice";
 import { clearMyCards } from "../../store/myCardsSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
+import { clearMyUser } from "../../store/userSlice";
 
 const iconsMap: Record<string, React.ComponentType<Record<string, unknown>>> = {
   Tarjetas: Dock,
@@ -68,7 +68,7 @@ const HeaderMenu = () => {
   const [logoutUser, { loading }] = useLazyQuery(LOGOUT, {
     onCompleted: (data) => {
       if (data?.logout?.success) {
-        dispatch(clearUser());
+        dispatch(clearMyUser());
         dispatch(clearCards());
         dispatch(clearMyCards());
         dispatch(clearAddresses());

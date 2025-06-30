@@ -31,8 +31,6 @@ export function useNewAddress() {
   const addresses = useSelector(selectAllAddresses);
   const { showToast } = useToastMessage();
 
-  console.log(addresses);
-
   const [newAddress] = useMutation(NEW_ADDRESS, {
     onCompleted: async (data) => {
       if (!data.createAddress.success) {

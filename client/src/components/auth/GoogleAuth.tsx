@@ -5,8 +5,9 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useMutation } from "@apollo/client";
 import { app } from "../../firebase/firebase";
 import { LOGIN_GOOGLE } from "../../graphql/mutations/user.mutations";
-import { setUser } from "../../store/userSlice";
+// import { setMyUser } from "../../store/userSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
+import { setMyUser } from "../../store/userSlice";
 
 const GoogleAuth = () => {
   const auth = useMemo(() => getAuth(app), []);
@@ -35,7 +36,7 @@ const GoogleAuth = () => {
       }
 
       const userData = data.loginWithGoogle.user;
-      dispatch(setUser({ user: userData }));
+      dispatch(setMyUser({ user: userData }));
       showToast({ message: "¡Inicio de sesión exitoso!", type: "success" });
 
       navigate("/");

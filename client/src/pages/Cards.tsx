@@ -15,7 +15,7 @@ const Cards = () => {
   const navigate = useNavigate();
 
   const [tab, setTab] = useState<string>(() => {
-    return new URLSearchParams(location.search).get("tab") || "create-card";
+    return new URLSearchParams(location.search).get("tab") || "send-card";
   });
 
   const [cardId, setCardId] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const Cards = () => {
     const idFromUrl = searchParams.get("id");
 
     if (!tabFromUrl) {
-      navigate("?tab=new-card", { replace: true });
+      navigate("?tab=send-card", { replace: true });
     } else {
       setTab(tabFromUrl);
       setCardId(idFromUrl);
@@ -49,8 +49,8 @@ const Cards = () => {
         <div className="w-full h-full mb-10">
           <SidebarCard />
 
-          {tab === "new-card" && <CreateCard />}
           {tab === "send-card" && <AsignateCard />}
+          {tab === "new-card" && <CreateCard />}
           {tab === "update-card" && <UpadateCard id={cardId} />}
 
           {/* {id && <Address id={id} />} */}

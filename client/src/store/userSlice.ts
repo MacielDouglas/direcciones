@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-// Definição da interface do usuário
 export interface User {
   id: string;
   isAdmin: boolean;
@@ -15,31 +14,28 @@ export interface User {
   isSCards: boolean;
 }
 
-// Interface do estado do slice
 interface UserState {
   userData: User | null;
   isAuthenticated: boolean;
-  sessionExpiry: number | null; // timestamp em milissegundos
+  sessionExpiry: number | null;
 }
 
-// Estado inicial
 const initialState: UserState = {
   userData: null,
   isAuthenticated: false,
   sessionExpiry: null,
 };
 
-// Criação do slice
 const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<{ user: User }>) => {
+    setMyUser: (state, action: PayloadAction<{ user: User }>) => {
       state.userData = action.payload.user;
       state.isAuthenticated = true;
-      state.sessionExpiry = Date.now() + 60 * 60 * 1000; // 1 hora
+      state.sessionExpiry = Date.now() + 60 * 60 * 1000;
     },
-    clearUser: (state) => {
+    clearMyUser: (state) => {
       state.userData = null;
       state.isAuthenticated = false;
       state.sessionExpiry = null;
@@ -47,6 +43,5 @@ const userSlice = createSlice({
   },
 });
 
-// Exportações
-export const { setUser, clearUser } = userSlice.actions;
+export const { setMyUser, clearMyUser } = userSlice.actions;
 export default userSlice.reducer;

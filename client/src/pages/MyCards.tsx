@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import {
@@ -20,6 +20,7 @@ import PhotoAddress from "./Address/components/PhotoAddress";
 import ButtonEditAddress from "./Address/components/buttons/ButtonEditAddress";
 import DisableAddressButton from "./Address/components/buttons/DisableAddressButton";
 import type { Address } from "./Address/types/adress.types";
+import { removeMyCard } from "../store/myCardsSlice";
 
 const addressIcons = {
   house: <Home size={24} />,
@@ -39,6 +40,8 @@ const MyCards = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectCard, setSelectCard] = useState({ cardId: "", cardNumber: "" });
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     if (userId) fetchMyCards({ variables: { myCardsId: userId } });
   }, [userId, fetchMyCards]);
@@ -46,9 +49,11 @@ const MyCards = () => {
   const handleReturnCard = async () => {
     await returnCardMutation({
       variables: {
-        returnCardInput: { cardId: selectCard.cardId, userId },
+        returnCardInput: { cardId: selectCard.cardId, userId: userId },
       },
     });
+    dispatch(removeMyCard(selectCard.cardId));
+    // await fetchMyCards({ variables: { myCardsId: userId } });
     setIsModalOpen(false);
   };
 

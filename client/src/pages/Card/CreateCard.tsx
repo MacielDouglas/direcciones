@@ -64,7 +64,7 @@ const CreateCard = () => {
 
   const handleCreateCard = async () => {
     if (selectedIds.length === 0) return;
-    console.log("Criando cartão com endereços:", selectedIds);
+
     setSelectedIds([]);
     try {
       await newCard({

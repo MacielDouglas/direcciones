@@ -7,6 +7,7 @@ import userReducer from "./userSlice";
 import addressReducer from "./addressSlice";
 import cardsReducer from "./cardsSlice";
 import myCardReducer from "./myCardsSlice";
+import otherUsersReducer from "./otherUsersSlice";
 
 // Expiração automática do estado do usuário após 1h
 const expireUser = expireReducer("user", {
@@ -18,6 +19,16 @@ const expireUser = expireReducer("user", {
   },
   autoExpire: true,
 });
+
+const expireOtherUsers = expireReducer("otherUsers", {
+  expireSeconds: 3600,
+  expiredState: {
+    usersData: [],
+    sessionExpiry: null,
+  },
+  autoExpire: true,
+});
+
 const expireAddress = expireReducer("addresses", {
   expireSeconds: 3600, // 1 hora
   expiredState: {
@@ -48,6 +59,11 @@ const userPersistConfig = {
   storage,
   transforms: [expireUser],
 };
+const otherUsersPersistConfig = {
+  key: "otherUsers",
+  storage,
+  transforms: [expireOtherUsers],
+};
 const addressPersistConfig = {
   key: "addresses",
   storage,
@@ -69,6 +85,7 @@ const rootReducer = combineReducers({
   addresses: persistReducer(addressPersistConfig, addressReducer),
   cards: persistReducer(cardsPersistConfig, cardsReducer),
   myCard: persistReducer(myCardPersistConfig, myCardReducer),
+  otherUsers: persistReducer(otherUsersPersistConfig, otherUsersReducer),
   // Outros reducers podem ser adicionados aqui
 });
 

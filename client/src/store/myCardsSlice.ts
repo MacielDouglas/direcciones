@@ -46,8 +46,14 @@ const myCardsSlice = createSlice({
       state.myCardData = [];
       state.sessionExpiry = null;
     },
+
+    removeMyCard: (state, action: PayloadAction<string>) => {
+      state.myCardData = state.myCardData.filter(
+        (card) => card.id !== action.payload
+      );
+    },
   },
 });
 
-export const { setMyCards, clearMyCards } = myCardsSlice.actions;
+export const { setMyCards, clearMyCards, removeMyCard } = myCardsSlice.actions;
 export default myCardsSlice.reducer;

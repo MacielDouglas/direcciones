@@ -32,7 +32,7 @@ export const GET_CARDS = gql`
 `;
 
 export const MY_CARDS = gql`
-  query MYCARDS($myCardsId: ID!) {
+  query MY_CARDS($myCardsId: ID!) {
     myCards(id: $myCardsId) {
       id
       startDate
