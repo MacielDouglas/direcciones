@@ -34,7 +34,7 @@ const MyCards = () => {
   const userId = useSelector(selectUserId);
   const myCards = useSelector(selectAllMyCard);
   const { fetchMyCards, loading } = useFetchMyCards();
-  const { returnCardMutation } = useReturnCard(userId);
+  const { returnCardMutation } = useReturnCard();
 
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

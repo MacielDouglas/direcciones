@@ -29,7 +29,7 @@ const DesignatedCard = ({
   const [selectedCardUserId, setSelectedCarUserId] = useState<string | null>(
     null
   );
-  const { returnCardMutation } = useReturnCard("null");
+  const { returnCardMutation } = useReturnCard();
   const { fetchCards } = useFetchCards();
 
   const { fetchUsers } = useGetUsers();

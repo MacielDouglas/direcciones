@@ -4,7 +4,10 @@ import Home from "./pages/Home";
 import { ThemeProvider } from "./context/ThemeContext";
 import Header from "./components/layout/Header";
 import { useSelector } from "react-redux";
-import { selectGroup } from "./store/selectors/userSelectors";
+import {
+  selectGroup,
+  userIsAuthenticated,
+} from "./store/selectors/userSelectors";
 import PublicOnlyRoute from "./components/private/PublicOnlyRoute";
 import PrivateRoute from "./components/private/PrivateRoute";
 import Footer from "./components/layout/Footer";
@@ -15,9 +18,11 @@ import { Toaster } from "react-hot-toast";
 import Cards from "./pages/Cards";
 import MyCards from "./pages/MyCards";
 import AdminUsers from "./pages/AdminUsers";
+import TokenPage from "./pages/TokenPage";
 
 const App = () => {
   const group = useSelector(selectGroup);
+  const isAuthenticated = useSelector(userIsAuthenticated);
 
   return (
     <ThemeProvider>
@@ -28,15 +33,17 @@ const App = () => {
           <Route element={<PublicOnlyRoute />}>
             <Route path="/login" element={<Login />} />
           </Route>
+          {isAuthenticated && <Route path="/token" element={<TokenPage />} />}
+
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
             <Route path="/addresses" element={<Addresses />} />
             <Route path="/cards" element={<Cards />} />
             <Route path="/my-cards" element={<MyCards />} />
-            {/* <Route path="/token" element={<TokenPage />} /> */}
             <Route path="/users" element={<AdminUsers />} />
             <Route path="/user" element={<UserPage />} />
           </Route>
+          <Route path="*" element={<Login />} />
         </Routes>
         <Toaster />
         {group && group !== "0" && <Footer />}

@@ -1,10 +1,14 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { GET_USERS } from "../queries/user.query";
+import { GET_USERS, LOGOUT } from "../queries/user.query";
 
 import { useDispatch } from "react-redux";
-import { setUsers } from "../../store/otherUsersSlice";
+import { clearUsers, setUsers } from "../../store/otherUsersSlice";
 import { UPDATE_USER } from "../mutations/user.mutations";
 import { useToastMessage } from "../../hooks/useToastMessage";
+import { clearMyUser } from "../../store/userSlice";
+import { clearCards } from "../../store/cardsSlice";
+import { clearMyCards } from "../../store/myCardsSlice";
+import { clearAddresses } from "../../store/addressSlice";
 
 export function useGetUsers() {
   const dispatch = useDispatch();
@@ -36,4 +40,31 @@ export function useUpdateUser() {
   });
 
   return { updateUserInput };
+}
+
+export function useLogout() {
+  const dispatch = useDispatch();
+  const { showToast } = useToastMessage();
+
+  const [logoutUser, { loading }] = useLazyQuery(LOGOUT, {
+    onCompleted: (data) => {
+      if (data?.logout?.success) {
+        dispatch(clearMyUser());
+        dispatch(clearCards());
+        dispatch(clearMyCards());
+        dispatch(clearAddresses());
+        dispatch(clearUsers());
+        showToast({
+          message: "¡La sesión finalizó exitosamente!",
+          type: "success",
+        });
+      } else {
+        showToast({ message: `Error finalizar sesión`, type: "error" });
+      }
+    },
+    onError: () => console.error("Erro na solicitação de logout."),
+    fetchPolicy: "no-cache",
+  });
+
+  return { logoutUser, loading };
 }

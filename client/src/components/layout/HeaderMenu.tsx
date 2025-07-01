@@ -1,8 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyQuery } from "@apollo/client";
-import { LOGOUT } from "../../graphql/queries/user.query";
+import { useSelector } from "react-redux";
 import { menuOptions, menuSs } from "../../constants/menu";
 import SessionProvider from "../private/SessionProvider";
 import {
@@ -17,12 +15,7 @@ import {
   House,
 } from "lucide-react";
 import { selectIsSS } from "../../store/selectors/userSelectors";
-import { clearCards } from "../../store/cardsSlice";
-import { clearAddresses } from "../../store/addressSlice";
-import { clearMyCards } from "../../store/myCardsSlice";
-import { useToastMessage } from "../../hooks/useToastMessage";
-import { clearMyUser } from "../../store/userSlice";
-import { clearUsers } from "../../store/otherUsersSlice";
+import { useLogout } from "../../graphql/hooks/useUser";
 
 const iconsMap: Record<string, React.ComponentType<Record<string, unknown>>> = {
   Tarjetas: Dock,
@@ -62,29 +55,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
 
 const HeaderMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const dispatch = useDispatch();
+  const { logoutUser, loading } = useLogout();
   const isSS = useSelector(selectIsSS);
-  const { showToast } = useToastMessage();
-
-  const [logoutUser, { loading }] = useLazyQuery(LOGOUT, {
-    onCompleted: (data) => {
-      if (data?.logout?.success) {
-        dispatch(clearMyUser());
-        dispatch(clearCards());
-        dispatch(clearMyCards());
-        dispatch(clearAddresses());
-        dispatch(clearUsers());
-        showToast({
-          message: "¡La sesión finalizó exitosamente!",
-          type: "success",
-        });
-      } else {
-        showToast({ message: `Error finalizar sesión`, type: "error" });
-      }
-    },
-    onError: () => console.error("Erro na solicitação de logout."),
-    fetchPolicy: "no-cache",
-  });
 
   const handleMenuToggle = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
@@ -120,10 +92,6 @@ const HeaderMenu = () => {
         >
           <div className="w-full max-w-3xl flex flex-col gap-5">
             <div className="flex items-center gap-4">
-              {/* <h2 className="text-4xl  tracking-widest font-semibold">
-                Menu,{" "}
-              </h2> */}
-
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="2em"
