@@ -191,8 +191,10 @@ const UpdateAddress = ({ id }: UpdateAddressProps) => {
   if (!id) {
     return (
       <div className="space-y-6 bg-primary-lgt dark:bg-second-drk p-6 rounded-lg max-w-2xl mx-auto text-lg">
-        <h2 className="text-2xl font-semibold">Nenhum endereço selecionado.</h2>
-        <p>Selecione um endereço para editar suas informações.</p>
+        <h2 className="text-2xl font-semibold">
+          No se ha seleccionado ninguna dirección.
+        </h2>
+        <p>Seleccione una dirección para editar su información</p>
       </div>
     );
   }

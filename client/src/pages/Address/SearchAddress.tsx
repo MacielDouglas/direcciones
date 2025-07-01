@@ -79,7 +79,7 @@ const SearchAddress = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);
           }}
-          placeholder="Buscar rua, bairro, complemento..."
+          placeholder="Buscar calle, barrio, complemento..."
           className="w-full  flex-1 px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-[var(--color-destaque-primary)] text-base bg-primary-lgt dark:bg-primary-drk"
         />
         {searchTerm && (
@@ -90,7 +90,7 @@ const SearchAddress = () => {
             }}
             className="text-sm px-4 py-2 rounded-md bg-destaque-second dark:bg-destaque-second hover:bg-gray-300 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition"
           >
-            Limpar
+            Limpiar
           </button>
         )}
       </div>
@@ -151,6 +151,11 @@ const SearchAddress = () => {
                 </div>
 
                 <div className="w-full col-span-3">
+                  {address.customName && (
+                    <h2 className="text-sm text-neutral-500">
+                      {address.customName}
+                    </h2>
+                  )}
                   <p className="font-semibold text-base">
                     {address.street}, {address.number}
                   </p>

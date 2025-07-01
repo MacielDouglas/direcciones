@@ -174,8 +174,8 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
           Dica rápida
         </h3>
         <p className="text-[var(--color-destaque-second)] dark:text-[var(--color-tertiary-lgt)] text-sm mt-1">
-          Você pode obter as coordenadas GPS usando o Google Maps. Basta manter
-          pressionado no local desejado no mapa.
+          Puedes obtener las coordenadas GPS utilizando Google Maps. Simplemente
+          mantenga presionada la ubicación deseada en el mapa.
         </p>
       </div>
     </div>

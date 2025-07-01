@@ -13,101 +13,8 @@ const initialFormState = {
   customName: "",
 };
 
-// Funções de conversão
-// const convertDMS = (dms) => {
-//   const parts = dms.split(/[°'"]+/).map((part) => part.trim());
-//   const directions = dms.match(/[NSEW]/gi) || [];
-
-//   let deg = parseFloat(parts[0]);
-//   const min = parts[1] ? parseFloat(parts[1]) / 60 : 0;
-//   const sec = parts[2] ? parseFloat(parts[2]) / 3600 : 0;
-
-//   let decimal = deg + min + sec;
-
-//   if (directions.length > 0) {
-//     const direction = directions[0].toUpperCase();
-//     if (direction === "S" || direction === "W") {
-//       decimal = -decimal;
-//     }
-//   }
-
-//   return decimal;
-// };
-
 const gpsRegex =
   /^[-+]?([1-8]?\d(\.\d{1,})?|90(\.0+)?),\s*[-+]?((1[0-7]\d|\d{1,2})(\.\d{1,})?|180(\.0+)?)$/;
-
-// const dmsToDecimal = (deg, min, sec) => {
-//   return deg + min / 60 + sec / 3600;
-// };
-
-// const normalizeGPS = (gpsString) => {
-//   try {
-//     if (!gpsString || typeof gpsString !== "string") return gpsString;
-
-//     // Remove parênteses e espaços desnecessários
-//     let cleaned = gpsString.replace(/[()]/g, "").trim();
-
-//     // Corrige casos como "-8.52528-35.01042"
-//     cleaned = cleaned.replace(/(-?\d+\.\d+)(?=-?\d)/g, "$1,");
-//     // cleaned = cleaned.replace(/,(?!\s)/g, ", ");
-
-//     // Evita processar enquanto o número está incompleto
-//     const parts = cleaned.split(/[,;\s]+/).filter((p) => p.trim() !== "");
-//     if (
-//       parts.length !== 2 ||
-//       parts.some((p) => /^-?\d+\.\d*$/.test(p)) // número ainda incompleto (ex: -35.)
-//     ) {
-//       return gpsString;
-//     }
-
-//     // Verifica se já está no formato decimal correto
-//     if (gpsRegex.test(cleaned)) {
-//       const [lat, lon] = cleaned.split(/\s*,\s*/).map((n) => parseFloat(n));
-//       return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-//     }
-
-//     // Tenta parsear formato DMS (graus, minutos, segundos)
-//     const dmsMatch = cleaned.match(
-//       /([NS])?\s*(\d{1,3})[°ºd]?\s*(\d{1,3})['′]?\s*(\d{1,3}(?:\.\d+)?)[\"″]?\s*([NS])?[,;\s-]*([EW])?\s*(\d{1,3})[°ºd]?\s*(\d{1,3})['′]?\s*(\d{1,3}(?:\.\d+)?)[\"″]?\s*([EW])?/i
-//     );
-
-//     if (dmsMatch) {
-//       const latDir = dmsMatch[1] || dmsMatch[5];
-//       const latDeg = parseFloat(dmsMatch[2]);
-//       const latMin = parseFloat(dmsMatch[3]);
-//       const latSec = parseFloat(dmsMatch[4]);
-
-//       const lonDir = dmsMatch[6] || dmsMatch[10];
-//       const lonDeg = parseFloat(dmsMatch[7]);
-//       const lonMin = parseFloat(dmsMatch[8]);
-//       const lonSec = parseFloat(dmsMatch[9]);
-
-//       let lat = dmsToDecimal(latDeg, latMin, latSec);
-//       let lon = dmsToDecimal(lonDeg, lonMin, lonSec);
-
-//       if (latDir?.toUpperCase() === "S") lat *= -1;
-//       if (lonDir?.toUpperCase() === "W") lon *= -1;
-
-//       return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-//     }
-
-//     // Último fallback: separe e tente forçar o parse
-//     if (parts.length === 2) {
-//       const lat = parseFloat(parts[0]);
-//       const lon = parseFloat(parts[1]);
-
-//       if (!isNaN(lat) && !isNaN(lon)) {
-//         return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-//       }
-//     }
-
-//     return gpsString;
-//   } catch (error) {
-//     console.error("Error normalizing GPS:", error);
-//     return gpsString;
-//   }
-// };
 
 const typeAddress = {
   house: "house",
@@ -162,8 +69,6 @@ const formatDate = (dateString: string) => {
 export {
   initialFormState,
   gpsRegex,
-  // convertDMS,
-  // normalizeGPS,
   typeAddress,
   imagesAddresses,
   calculateDistance,

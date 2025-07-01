@@ -1,4 +1,4 @@
-import { Dock, MapPin, RotateCcw } from "lucide-react";
+import { Dock, MapPin, RotateCcw, SquarePen } from "lucide-react";
 import { formatDate } from "../../../constants/address";
 import { useGetUsers } from "../../../graphql/hooks/useUser";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import { Button } from "../../../components/ui/FormElements";
 import { useFetchCards, useReturnCard } from "../../../graphql/hooks/useCards";
 import type { Card } from "../types/card.types";
 import { addressIcons, getNeighborhoodSummary } from "../constants/constants";
+import { useNavigate } from "react-router-dom";
 
 interface DesignatedCardProps {
   designated?: boolean;
@@ -63,6 +64,11 @@ const DesignatedCard = ({
     fetchCards();
   };
 
+  const navigate = useNavigate();
+  const handleEdit = (id: string) =>
+    navigate(`/cards?tab=update-card&id=${id}`);
+  // navigate(`/addresses?tab=update-address&id=${id}`);
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">
@@ -82,6 +88,7 @@ const DesignatedCard = ({
                 : "border-gray-400 text-gray-700 dark:text-neutral-300 hover:border-gray-400"
             }`}
           >
+            {/* {card.id} */}
             <div onClick={() => handleSelect(card.id)}>
               <div className="flex flex-col w-full space-y-2">
                 <div className="w-full flex gap-3 justify-between items-center">
@@ -113,15 +120,16 @@ const DesignatedCard = ({
 
                 <div className="mt-2 space-y-1">
                   {card.street.map((str) => (
-                    <p
-                      key={str.id}
-                      className="text-sm inline-flex items-center gap-2"
-                    >
-                      <span className="text-neutral-500 ">
-                        {str.type !== undefined ? addressIcons[str.type] : null}
-                      </span>
-                      {str.street}, {str.number}
-                    </p>
+                    <div key={str.id} className="w-full">
+                      <p className="text-sm inline-flex items-center gap-2 ">
+                        <span className="text-neutral-500 ">
+                          {str.type !== undefined
+                            ? addressIcons[str.type]
+                            : null}
+                        </span>
+                        {str.street}, {str.number}
+                      </p>
+                    </div>
                   ))}
                   <p className="mt-2 text-sm text-neutral-500">
                     Bairros: {getNeighborhoodSummary(card.street)}
@@ -131,7 +139,7 @@ const DesignatedCard = ({
             </div>
             {designated && isSelected && (
               <Button
-                className="mt-4 w-full bg-neutral-800 text-white hover:bg-orange-600"
+                className="mt-4 w-full bg-orange-500 text-white hover:bg-orange-600 cursor-pointer"
                 onClick={() => {
                   // e.stopPropagation();
                   setShowConfirm(true);
@@ -143,6 +151,14 @@ const DesignatedCard = ({
                 }}
               >
                 <RotateCcw className="mr-2 h-4 w-4" /> Retornar tarjeta
+              </Button>
+            )}
+            {isSelected && (
+              <Button
+                className="mt-4 w-full bg-neutral-800 text-white hover:bg-neutral-600 cursor-pointer"
+                onClick={() => handleEdit(card.id)}
+              >
+                <SquarePen className="mr-2 h-4 w-4" /> Editar tarjeta
               </Button>
             )}
           </div>

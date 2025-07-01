@@ -37,12 +37,13 @@ const Cards = () => {
     }
   }, [location.search, navigate]);
 
-  const getDireccionIdFromTab = (): string | null => {
-    const match = tab.match(/^\/cards\/(.+)/);
-    return match ? match[1] : null;
-  };
+  // const getDireccionIdFromTab = (): string | null => {
+  //   const match = tab.match(/^\/cards\/(.+)/);
+  //   return match ? match[1] : null;
+  // };
 
-  const id = getDireccionIdFromTab();
+  // const id = getDireccionIdFromTab();
+
   return (
     <>
       {isSS ? (
@@ -51,7 +52,7 @@ const Cards = () => {
 
           {tab === "send-card" && <AsignateCard />}
           {tab === "new-card" && <CreateCard />}
-          {tab === "update-card" && <UpadateCard id={cardId} />}
+          {tab === "update-card" && <UpadateCard id={cardId ?? ""} />}
 
           {/* {id && <Address id={id} />} */}
         </div>

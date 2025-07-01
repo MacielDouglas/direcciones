@@ -160,9 +160,9 @@ const Address: React.FC<AddressProps> = ({ id }) => {
   };
 
   return (
-    <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt rounded-2xl max-w-md sm:max-w-2xl mx-auto  space-y-6 p-2">
+    <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt rounded-2xl max-w-md sm:max-w-2xl mx-auto p-2">
       <ScrollToTop />
-      <div className="space-y-3 p-6">
+      <div className="space-y-1 p-6">
         <div className="flex items-center gap-3">
           <MapPinHouse
             className="text-[var(--color-destaque-primary)]"
@@ -205,6 +205,9 @@ const Address: React.FC<AddressProps> = ({ id }) => {
           <div className="space-y-8">
             <div className="flex justify-between items-center text-sm">
               <span>{typeIcons[type]}</span>
+              {address.customName && (
+                <p className="text-lg text-neutral-500">{address.customName}</p>
+              )}
               <div className="flex items-center gap-2">
                 <MapPin size={18} />
                 <span className="font-medium">
