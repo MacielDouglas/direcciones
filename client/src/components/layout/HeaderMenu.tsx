@@ -22,6 +22,7 @@ import { clearAddresses } from "../../store/addressSlice";
 import { clearMyCards } from "../../store/myCardsSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { clearMyUser } from "../../store/userSlice";
+import { clearUsers } from "../../store/otherUsersSlice";
 
 const iconsMap: Record<string, React.ComponentType<Record<string, unknown>>> = {
   Tarjetas: Dock,
@@ -72,6 +73,7 @@ const HeaderMenu = () => {
         dispatch(clearCards());
         dispatch(clearMyCards());
         dispatch(clearAddresses());
+        dispatch(clearUsers());
         showToast({
           message: "¡La sesión finalizó exitosamente!",
           type: "success",

@@ -2,9 +2,9 @@ import { NavLink, useLocation } from "react-router-dom";
 import { LocationEdit, MapPinPlus, Search } from "lucide-react";
 
 const TABS = [
-  { id: "new", label: "Nueva Dirección", icon: <MapPinPlus /> },
+  { id: "new", label: "Nueva", icon: <MapPinPlus /> },
   { id: "search", label: "Pesquisar", icon: <Search /> },
-  { id: "update", label: "Editar Dirección", icon: <LocationEdit /> },
+  { id: "update", label: "Editar", icon: <LocationEdit /> },
 ];
 
 const SidebarAddress = () => {

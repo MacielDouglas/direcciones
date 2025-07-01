@@ -14,6 +14,7 @@ import ScrollToTop from "./context/ScrollToTop";
 import { Toaster } from "react-hot-toast";
 import Cards from "./pages/Cards";
 import MyCards from "./pages/MyCards";
+import AdminUsers from "./pages/AdminUsers";
 
 const App = () => {
   const group = useSelector(selectGroup);
@@ -33,6 +34,7 @@ const App = () => {
             <Route path="/cards" element={<Cards />} />
             <Route path="/my-cards" element={<MyCards />} />
             {/* <Route path="/token" element={<TokenPage />} /> */}
+            <Route path="/users" element={<AdminUsers />} />
             <Route path="/user" element={<UserPage />} />
           </Route>
         </Routes>

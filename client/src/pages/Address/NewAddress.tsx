@@ -179,7 +179,11 @@ const NewAddress = () => {
                       label={
                         formData.type === "department"
                           ? "Nombre del condomino *"
-                          : "Nombre del local *"
+                          : formData.type === "hotel"
+                          ? "Nombre del hotel o posada"
+                          : formData.type === "restaurant"
+                          ? "Nombre del restaurante, cafe, heladería..."
+                          : "Nombre de la tienda, taller o local..."
                       }
                       name="customName"
                       value={formData.customName}
@@ -187,7 +191,11 @@ const NewAddress = () => {
                       placeholder={
                         formData.type === "department"
                           ? "Ej: Condominio Aguas Claras *"
-                          : "Ej: Posada Sol Nascente *"
+                          : formData.type === "hotel"
+                          ? "Ej: Hotel o Posada Buena Vista *"
+                          : formData.type === "restaurant"
+                          ? "Ej: Comida Boa Gourmet"
+                          : "Ej: Loja Compre Bem"
                       }
                       error={undefined}
                       maxLength={250}

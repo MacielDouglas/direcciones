@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { clearMyCards } from "../../store/myCardsSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { clearMyUser } from "../../store/userSlice";
+import { clearUsers } from "../../store/otherUsersSlice";
 
 interface SessionProviderProps {
   size: string;
@@ -37,6 +38,7 @@ const SessionProvider = ({ size }: SessionProviderProps) => {
     dispatch(clearCards());
     dispatch(clearMyCards());
     dispatch(clearAddresses());
+    dispatch(clearUsers());
     showToast({ message: "¡La sesión expiró!", type: "error" });
 
     navigate("/login", { replace: true });
