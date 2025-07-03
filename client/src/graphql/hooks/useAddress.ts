@@ -31,7 +31,7 @@ export function useNewAddress() {
   const addresses = useSelector(selectAllAddresses);
   const { showToast } = useToastMessage();
 
-  const [newAddress] = useMutation(NEW_ADDRESS, {
+  const [newAddress, { loading }] = useMutation(NEW_ADDRESS, {
     onCompleted: async (data) => {
       if (!data.createAddress.success) {
         return console.error(
@@ -54,5 +54,5 @@ export function useNewAddress() {
       console.error(`Erro ao cadastrar endereço novo ${error.message}`),
   });
 
-  return { newAddress };
+  return { newAddress, loading };
 }

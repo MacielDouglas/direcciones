@@ -10,6 +10,7 @@ import { useFetchCards, useReturnCard } from "../../../graphql/hooks/useCards";
 import { addressIcons, getNeighborhoodSummary } from "../constants/constants";
 import { useNavigate } from "react-router-dom";
 import type { Card } from "../../../types/cards.types";
+import ScrollToTop from "../../../context/ScrollToTop";
 
 interface DesignatedCardProps {
   designated?: boolean;
@@ -72,6 +73,7 @@ const DesignatedCard = ({
 
   return (
     <div className="space-y-4">
+      <ScrollToTop />
       <h2 className="text-xl font-semibold">
         {designated ? "Tarjetas asignadas" : "Tarjetas no asignadas"}
       </h2>

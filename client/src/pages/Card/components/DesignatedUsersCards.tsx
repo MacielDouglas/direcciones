@@ -11,6 +11,7 @@ import type { Card } from "../../../types/cards.types";
 // import { Dispatch, SetStateAction } from "react";
 
 import type { Dispatch, SetStateAction } from "react";
+import ScrollToTop from "../../../context/ScrollToTop";
 
 interface DesignatedUsersCardsProps {
   filteredCards: Card[];
@@ -53,6 +54,7 @@ const DesignatedUsersCards = ({
 
   return (
     <div className="w-full space-y-5">
+      <ScrollToTop />
       <h2>Tarjetas selecionadas: {filteredCards.length}</h2>
       {filteredCards.map((card) => {
         return (

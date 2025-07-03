@@ -160,7 +160,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
         <MapSection showUserCards={false} singleAddressId={id} />
 
         <div className="p-4 space-y-6">
-          <PhotoAddress hei="h-20" photo={photo} street={street} />
+          <PhotoAddress hei="h-20" wid="w-20" photo={photo} street={street} />
 
           <p
             className={`text-center font-semibold text-lg ${

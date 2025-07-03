@@ -11,6 +11,7 @@ import {
 import { setCards } from "../../store/cardsSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { useFetchAddresses } from "./useAddress";
+import { useNavigate } from "react-router-dom";
 
 export function useFetchCards() {
   const dispatch = useDispatch();
@@ -106,10 +107,12 @@ export function useDesignateCard() {
 
 export function useUpdateCard() {
   const { showToast } = useToastMessage();
+  const navigate = useNavigate();
 
   const [updateCardInput] = useMutation(UPDATE_CARD, {
     onCompleted: async (data) => {
       showToast({ message: data.updateCard.message, type: "success" });
+      navigate("/cards?tab=send-card");
     },
     onError: (error) =>
       showToast({

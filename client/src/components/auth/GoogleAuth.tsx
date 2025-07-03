@@ -8,6 +8,7 @@ import { LOGIN_GOOGLE } from "../../graphql/mutations/user.mutations";
 // import { setMyUser } from "../../store/userSlice";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { setMyUser } from "../../store/userSlice";
+import LoadingSVG from "../ui/LoadingSVG";
 
 const GoogleAuth = () => {
   const auth = useMemo(() => getAuth(app), []);
@@ -59,8 +60,9 @@ const GoogleAuth = () => {
         "Login com google"
       ) : (
         <div className="flex items-center gap-2 justify-center">
-          Carregando{" "}
-          <svg
+          Carregando
+          <LoadingSVG />
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             width="1.5em"
             height="1.5em"
@@ -158,7 +160,7 @@ const GoogleAuth = () => {
                 values="12;22;12"
               />
             </rect>
-          </svg>
+          </svg> */}
         </div>
       )}
     </button>

@@ -11,6 +11,9 @@ import {
   Store,
   Utensils,
   ChevronLeft,
+  CircleCheck,
+  CircleCheckBig,
+  CircleAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import GpsComponent from "./components/GpsComponent";
@@ -22,6 +25,7 @@ import { imagesAddresses, typeAddress } from "../../constants/address";
 import CompletedForm from "./components/CompletedForm";
 import type { AddressFormData } from "../../types/address.types";
 import { useNewAddress } from "../../graphql/hooks/useAddress";
+import LoadingSVG from "../../components/ui/LoadingSVG";
 
 type AddressType = keyof typeof typeAddress;
 
@@ -60,7 +64,7 @@ const NewAddress = () => {
   const [step, setStep] = useState<FormStep>(1);
   const [charCount, setCharCount] = useState(250);
   const [isUploading, setIsUploading] = useState(false);
-  const { newAddress } = useNewAddress();
+  const { newAddress, loading } = useNewAddress();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -137,12 +141,60 @@ const NewAddress = () => {
 
   return (
     <div className="w-full h-full bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt  rounded-2xl max-w-2xl mx-auto md:p-6">
-      <div className="flex items-center gap-4 mb-6 p-6 md:p-0">
-        <MapPinPlus
-          className="text-[var(--color-destaque-primary)]"
-          size={24}
-        />
-        <h1 className="text-2xl font-semibold">Nueva dirección</h1>
+      <div className="flex flex-col">
+        <div className="flex items-center gap-4 p-6 md:p-0">
+          <MapPinPlus className="text-destaque-primary" size={24} />
+          <h1 className="text-2xl font-semibold">Nueva dirección</h1>
+        </div>
+        <div className="space-y-2 bg-primary-lgt dark:bg-second-drk p-3 mx-2 mb-5 rounded-xl flex flex-col">
+          <p className="text-neutral-500">
+            Para crear una nueva dirección, debes seguir 4 pasos.
+          </p>
+          <p
+            className={`inline-flex items-center gap-2 ${
+              step !== 1 && "text-neutral-500"
+            }`}
+          >
+            {step === 1 ? <CircleCheck /> : <CircleCheckBig />} Información
+            básica
+          </p>
+          <p
+            className={`inline-flex items-center gap-2 ${
+              step !== 2 && "text-neutral-500"
+            }`}
+          >
+            {step === 2 ? (
+              <CircleCheck />
+            ) : step > 2 ? (
+              <CircleCheckBig />
+            ) : (
+              <CircleAlert />
+            )}{" "}
+            Información del GPS
+          </p>
+          <p
+            className={`inline-flex items-center gap-2 ${
+              step !== 3 && "text-neutral-500"
+            }`}
+          >
+            {step === 3 ? (
+              <CircleCheck />
+            ) : step > 3 ? (
+              <CircleCheckBig />
+            ) : (
+              <CircleAlert />
+            )}{" "}
+            Foto del local
+          </p>
+          <p
+            className={`inline-flex items-center gap-2 ${
+              step !== 4 && "text-neutral-500"
+            }`}
+          >
+            {step === 4 ? <CircleCheckBig /> : <CircleAlert />}
+            Revisar informaciones e enviar
+          </p>
+        </div>
       </div>
 
       <div className="bg-primary-lgt dark:bg-primary-drk  shadow-sm overflow-hidden md:rounded-2xl">
@@ -337,20 +389,20 @@ const NewAddress = () => {
             )}
 
             {step === 2 && (
-              <>
+              <div className="p-4">
                 <h2 className="text-xl font-semibold mb-6">Ubicación GPS</h2>
                 <GpsComponent formData={formData} setFormData={setFormData} />
-              </>
+              </div>
             )}
 
             {step === 3 && (
-              <>
+              <div className="p-4">
                 <h2 className="text-xl font-semibold mb-6">Foto do local</h2>
                 <PhotoComponent
                   formData={formData}
                   onUploadComplete={handleUploadComplete}
                 />
-              </>
+              </div>
             )}
 
             {step === 4 && (
@@ -364,12 +416,16 @@ const NewAddress = () => {
                 <div className="flex w-full justify-center pt-5">
                   <button
                     type="submit"
-                    className="p-3 w-full border rounded-full mx-auto cursor-pointer disabled:bg-tertiary-drk disabled:border-tertiary-drk disabled:text-neutral-500 disabled:cursor-not-allowed"
-                    disabled={isUploading || notUpload}
+                    className="p-3 w-full border rounded-full mx-auto cursor-pointer disabled:bg-tertiary-drk disabled:border-tertiary-drk disabled:text-neutral-500 disabled:cursor-not-allowed flex justify-center"
+                    disabled={isUploading || notUpload || loading}
                   >
-                    {notUpload
-                      ? "No se puede enviar"
-                      : "Enviar Nueva Dirección"}
+                    {notUpload ? (
+                      "No se puede enviar"
+                    ) : loading ? (
+                      <LoadingSVG />
+                    ) : (
+                      "Enviar Nueva Dirección"
+                    )}
                   </button>
                 </div>
               </div>
