@@ -211,6 +211,7 @@ const MyCards = () => {
               <div className="flex items-center justify-between mt-4">
                 <PhotoAddress
                   hei="h-20"
+                  wid="w-20"
                   photo={selectedAddress.photo}
                   street={selectedAddress.street}
                 />

@@ -8,6 +8,7 @@ import PhotoAddress from "../Address/components/PhotoAddress";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { useFetchCards, useUpdateCard } from "../../graphql/hooks/useCards";
 import type { AddressData } from "../../types/address.types";
+import ScrollToTop from "../../context/ScrollToTop";
 
 type UpadateCardProps = {
   id: string;
@@ -107,6 +108,7 @@ const UpadateCard = ({ id }: UpadateCardProps) => {
 
   return (
     <div className="w-full min-h-screen bg-second-lgt dark:bg-[var(--color-tertiary-drk)] text-[var(--color-primary-drk)] dark:text-[var(--color-primary-lgt)] max-w-2xl mx-auto rounded-2xl p-2 pb-10">
+      <ScrollToTop />
       <div className="flex flex-col gap-4 p-6">
         <h1 className="text-2xl font-semibold flex items-center gap-2">
           <Dock className="text-[var(--color-destaque-primary)]" size={24} />

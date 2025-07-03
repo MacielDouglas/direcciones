@@ -9,24 +9,33 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
 
-    <!-- SEO -->
+    <title>Direcciones</title>
+
+    <!-- SEO Básico -->
     <meta
       name="description"
       content="Encuentra y gestiona tus direcciones fácilmente."
     />
     <meta name="author" content="Douglas Maciel" />
-    <meta name="theme-color" content="#f7f7f7" />
     <meta name="referrer" content="no-referrer" />
 
-    <!-- Ícones para melhor compatibilidade -->
-    <link rel="icon" type="image/svg+xml" href="/ciudad_2.svg" />
+    <!-- Theme Color para navegadores modernos -->
+    <meta
+      name="theme-color"
+      content="#f7f7f7"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#222222"
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <!-- Favicon e Ícones -->
+    <link rel="icon" href="/ciudad_2.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/ciudad_2.svg" />
 
-    <meta
-      property="og:image"
-      content="https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FCaptura%20de%20tela%202025-03-28%20082232.webp?alt=media&token=7e25b4ac-3657-4bd7-b764-3d0d5aad1264"
-    />
-    <!-- Open Graph (para Facebook, WhatsApp, LinkedIn, etc.) -->
+    <!-- Open Graph (Pré-visualização em WhatsApp, Facebook, Teams, LinkedIn) -->
     <meta property="og:title" content="Direcciones" />
     <meta
       property="og:description"
@@ -34,7 +43,7 @@
     />
     <meta
       property="og:image"
-      content="https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FCaptura%20de%20tela%202025-03-28%20082232.webp?alt=media&token=7e25b4ac-3657-4bd7-b764-3d0d5aad1264"
+      content="https://direcciones.vercel.app/mini_site.webp"
     />
     <meta
       property="og:image:alt"
@@ -54,7 +63,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://firebasestorage.googleapis.com/v0/b/orangeblog-dff3f.appspot.com/o/standard%2FCaptura%20de%20tela%202025-03-28%20082232.webp?alt=media&token=7e25b4ac-3657-4bd7-b764-3d0d5aad1264"
+      content="https://direcciones.vercel.app/mini_site.webp"
     />
     <meta
       name="twitter:image:alt"
@@ -65,13 +74,37 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Fonte Montserrat -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap"
       as="style"
     />
 
-    <title>Direcciones</title>
+    <!-- Fallback dinâmico para theme-color -->
+    <script>
+      (function () {
+        const lightColor = "#f7f7f7";
+        const darkColor = "#222222";
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+
+        if (
+          !window
+            .matchMedia("(prefers-color-scheme: light)")
+            .media.includes("prefers-color-scheme")
+        ) {
+          // Navegador antigo, insere <meta name="theme-color">
+          const meta = document.createElement("meta");
+          meta.name = "theme-color";
+          meta.content = window.matchMedia("(prefers-color-scheme: dark)")
+            .matches
+            ? darkColor
+            : lightColor;
+          document.head.appendChild(meta);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div
@@ -81,20 +114,3 @@
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div
-      id="root"
-      class="bg-primary-lgt dark:bg-primary-drk text-primary-drk dark:text-primary-lgt"
-    ></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html> -->
