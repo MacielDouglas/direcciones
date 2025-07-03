@@ -6,9 +6,10 @@ import { useSelector } from "react-redux";
 import { selectAllUsersOthers } from "../../../store/selectors/ohterUsersSelectors";
 import { Button } from "../../../components/ui/FormElements";
 import { useFetchCards, useReturnCard } from "../../../graphql/hooks/useCards";
-import type { Card } from "../types/card.types";
+// import type { Card } from "../types/card.types";
 import { addressIcons, getNeighborhoodSummary } from "../constants/constants";
 import { useNavigate } from "react-router-dom";
+import type { Card } from "../../../types/cards.types";
 
 interface DesignatedCardProps {
   designated?: boolean;

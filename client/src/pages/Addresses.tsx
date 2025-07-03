@@ -29,7 +29,7 @@ const Addresses = () => {
     }
   }, [location.search, navigate]);
 
-  const getDireccionIdFromTab = (): string | null => {
+  const getDireccionIdFromTab = () => {
     const match = tab.match(/^\/address\/(.+)/);
     return match ? match[1] : null;
   };

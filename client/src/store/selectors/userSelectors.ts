@@ -35,7 +35,7 @@ export const selectGroup = createSelector(
 
 export const selectCodUser = createSelector(
   selectUserState,
-  (user) => user.userData?.codUser ?? ""
+  (user) => user.userData?.codUser ?? 0
 );
 
 export const selectUserData = createSelector(

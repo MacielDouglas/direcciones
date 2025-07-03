@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { User } from "./userSlice";
+import type { User } from "../types/user.types";
 
 interface OtherUsersState {
   usersData: User[];

@@ -200,13 +200,13 @@ const UpdateAddress = ({ id }: UpdateAddressProps) => {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 bg-second-lgt dark:bg-tertiary-drk text-primary-drk dark:text-primary-lgt rounded-2xl">
+    <div className="w-full max-w-2xl mx-auto p-6 bg-primary-lgt dark:bg-primary-drk text-primary-drk dark:text-primary-lgt rounded-2xl">
       <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2">
         <MapPinCheck
           className="text-[var(--color-destaque-primary)]"
           size={24}
         />
-        Atualizar endereço
+        Actualizar dirección
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -236,11 +236,28 @@ const UpdateAddress = ({ id }: UpdateAddressProps) => {
           formData.type
         ) && (
           <InputField
-            label="Nome do local"
+            label={
+              formData.type === "department"
+                ? "Nombre del condomino *"
+                : formData.type === "hotel"
+                ? "Nombre del hotel o posada"
+                : formData.type === "restaurant"
+                ? "Nombre del restaurante, cafe, heladería..."
+                : "Nombre de la tienda, taller o local..."
+            }
             name="customName"
             value={formData.customName}
             onChange={handleChange}
-            placeholder="Ej: Condominio Aguas Claras"
+            placeholder={
+              formData.type === "department"
+                ? "Ej: Condominio Aguas Claras *"
+                : formData.type === "hotel"
+                ? "Ej: Hotel o Posada Buena Vista *"
+                : formData.type === "restaurant"
+                ? "Ej: Comida Boa Gourmet"
+                : "Ej: Loja Compre Bem"
+            }
+            error={undefined}
             maxLength={250}
           />
         )}

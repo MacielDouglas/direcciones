@@ -250,7 +250,6 @@ const addressResolvers = {
     },
 
     deleteAddress: async (_, { id }, { req }) => {
-      console.log("Deleting address with ID:");
       try {
         const decodedToken = verifyAuthorization(req);
         if (!decodedToken) {

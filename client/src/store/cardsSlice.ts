@@ -1,33 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-interface Street {
-  id: string;
-  street: string;
-  number: string;
-  neighborhood: string;
-  city: string;
-  complement?: string;
-  gps?: string;
-  group: string;
-  type: "house" | "department" | "store" | "hotel" | "restaurant";
-  confirmed: boolean;
-  visited: boolean;
-  active: boolean;
-  photo?: string;
-}
-
-export interface Cards {
-  id: string; // correspondente ao ObjectId do Mongo
-  number: string;
-  startDate: string;
-  endDate: string;
-  group: string;
-  street: Street[];
-  usersAssigned?: { date: string; userId: string }[];
-}
+import type { Card } from "../types/cards.types";
 
 interface CardsState {
-  cardsData: Cards[];
+  cardsData: Card[];
   sessionExpiry: number | null;
 }
 
@@ -40,7 +15,7 @@ const cardSlice = createSlice({
   name: "cards",
   initialState,
   reducers: {
-    setCards: (state, action: PayloadAction<{ cards: Cards[] }>) => {
+    setCards: (state, action: PayloadAction<{ cards: Card[] }>) => {
       state.cardsData = action.payload.cards;
       state.sessionExpiry = Date.now() + 60 * 60 * 1000;
     },
@@ -48,10 +23,10 @@ const cardSlice = createSlice({
       state.cardsData = [];
       state.sessionExpiry = null;
     },
-    addCards: (state, action: PayloadAction<Cards>) => {
+    addCards: (state, action: PayloadAction<Card>) => {
       state.cardsData.push(action.payload);
     },
-    updateCards: (state, action: PayloadAction<Cards>) => {
+    updateCards: (state, action: PayloadAction<Card>) => {
       const index = state.cardsData.findIndex(
         (card) => card.id === action.payload.id
       );

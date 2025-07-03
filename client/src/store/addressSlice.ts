@@ -1,28 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-export interface Address {
-  id: string; // correspondente ao ObjectId do Mongo
-  street: string;
-  number: string;
-  city: string;
-  neighborhood: string;
-  gps?: string;
-  complement?: string;
-  type: "house" | "department" | "store" | "hotel" | "restaurant";
-  photo?: string;
-  userId: string;
-  active: boolean;
-  confirmed: boolean;
-  group: string;
-  visited: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  customName?: string; // nome personalizado para o endereço
-  __typename?: string; // usado pelo GraphQL, opcional
-}
+import type { AddressData } from "../types/address.types";
 
 interface AddressState {
-  addressesData: Address[];
+  addressesData: AddressData[];
   sessionExpiry: number | null;
 }
 
@@ -35,7 +15,10 @@ const addressSlice = createSlice({
   name: "addresses",
   initialState,
   reducers: {
-    setAddresses: (state, action: PayloadAction<{ addresses: Address[] }>) => {
+    setAddresses: (
+      state,
+      action: PayloadAction<{ addresses: AddressData[] }>
+    ) => {
       state.addressesData = action.payload.addresses;
       state.sessionExpiry = Date.now() + 60 * 60 * 1000; // 1 hora
     },
@@ -43,10 +26,10 @@ const addressSlice = createSlice({
       state.addressesData = [];
       state.sessionExpiry = null;
     },
-    addAddress: (state, action: PayloadAction<Address>) => {
+    addAddress: (state, action: PayloadAction<AddressData>) => {
       state.addressesData.push(action.payload);
     },
-    updateAddress: (state, action: PayloadAction<Address>) => {
+    updateAddress: (state, action: PayloadAction<AddressData>) => {
       const index = state.addressesData.findIndex(
         (addr) => addr.id === action.payload.id
       );

@@ -7,21 +7,22 @@ import MapSection from "../Address/components/MapSection";
 import PhotoAddress from "../Address/components/PhotoAddress";
 import { useToastMessage } from "../../hooks/useToastMessage";
 import { useFetchCards, useUpdateCard } from "../../graphql/hooks/useCards";
+import type { Address } from "../../types/address.types";
 
 type UpadateCardProps = {
   id: string;
 };
 
-interface Address {
-  id: string;
-  street: string;
-  number: string;
-  neighborhood: string;
-  city: string;
-  complement?: string;
-  customName?: string;
-  photo?: string;
-}
+// interface Address {
+//   id: string;
+//   street: string;
+//   number: string;
+//   neighborhood: string;
+//   city: string;
+//   complement?: string;
+//   customName?: string;
+//   photo?: string;
+// }
 
 const getRandomColor = () => {
   const letters = "0123456789ABCDEF";

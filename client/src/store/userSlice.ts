@@ -1,18 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-export interface User {
-  id: string;
-  isAdmin: boolean;
-  name: string;
-  profilePicture: string;
-  group: string;
-  isSS: boolean;
-  myCards: object;
-  myTotalCards: object;
-  comments: object;
-  codUser: string;
-  isSCards: boolean;
-}
+import type { User } from "../types/user.types";
 
 interface UserState {
   userData: User | null;

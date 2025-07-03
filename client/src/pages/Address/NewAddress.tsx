@@ -20,7 +20,7 @@ import PhotoComponent from "./components/PhotoComponent";
 import InputField from "./ui/InputField";
 import { imagesAddresses, typeAddress } from "../../constants/address";
 import CompletedForm from "./components/CompletedForm";
-import type { AddressFormData } from "./types/adress.types";
+import type { AddressFormData } from "../../types/address.types";
 import { useNewAddress } from "../../graphql/hooks/useAddress";
 
 type AddressType = keyof typeof typeAddress;

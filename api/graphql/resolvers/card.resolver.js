@@ -46,8 +46,6 @@ const cardResolver = {
       const decodedToken = verifyAuthorization(req);
       if (!decodedToken) throw new Error("Você não tem permissão.");
 
-      console.log("chamado");
-
       try {
         // Busca apenas os cartões atribuídos ao usuário
         const cards = await Card.find({

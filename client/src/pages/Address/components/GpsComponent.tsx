@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
-import type { AddressFormData } from "../types/adress.types";
+import { MapPinCheckInside, MapPinPlus, Trash2 } from "lucide-react";
+import type { AddressFormData } from "../../../types/address.types";
 
 const isValidLat = (lat: string) =>
   /^-?([1-8]?\d(\.\d+)?|90(\.0+)?)$/.test(lat);
@@ -59,7 +60,7 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
   const handleLocationClick = () => {
     setIsFetchingGps(true);
     if (!navigator.geolocation) {
-      setError("Geolocalização não suportada.");
+      setError("Geolocalización no compatible.");
       setIsFetchingGps(false);
       return;
     }
@@ -74,7 +75,7 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
         setIsFetchingGps(false);
       },
       (err) => {
-        setError(`Erro ao obter localização: ${err.message}`);
+        setError(`Error al obtener la ubicación: ${err.message}`);
         setIsFetchingGps(false);
       }
     );
@@ -92,13 +93,13 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
       const clipboardText = await navigator.clipboard.readText();
       const coords = extractCoords(clipboardText);
       if (!coords) {
-        setError("Formato inválido. Use: -8.507273, -35.007018");
+        setError("Formato no válido. Usar: -8.507273, -35.007018");
         return;
       }
 
       const { lat: pastedLat, lng: pastedLng } = coords;
       if (!isValidLat(pastedLat) || !isValidLng(pastedLng)) {
-        setError("Latitude ou longitude inválida.");
+        setError("Latitud o longitud no válida.");
         return;
       }
 
@@ -106,7 +107,7 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
       setLng(pastedLng);
       setError("");
     } catch {
-      setError("Não foi possível acessar a área de transferência.");
+      setError("No se puede acceder al portapapeles.");
     }
   };
 
@@ -121,26 +122,27 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
           type="button"
           onClick={handleLocationClick}
           disabled={isFetchingGps}
-          className="px-4 py-2 bg-destaque-primary text-white rounded-lg text-sm disabled:opacity-50"
+          className="px-4 py-2 bg-destaque-primary text-white rounded-lg text-sm disabled:opacity-50 inline-flex gap-2 items-center"
         >
-          {isFetchingGps ? "Obtendo..." : "GPS Atual"}
+          <MapPinCheckInside size={18} />{" "}
+          {isFetchingGps ? "Obteniendo..." : "GPS actual"}
         </button>
 
         <button
           type="button"
           onClick={handlePaste}
-          className="px-4 py-2 bg-second-drk text-white rounded-lg text-sm"
+          className="px-4 py-2 bg-second-drk text-white rounded-lg text-sm inline-flex gap-2 items-center"
         >
-          Colar GPS
+          <MapPinPlus size={18} /> Pegar GPS
         </button>
 
         <button
           type="button"
           onClick={handleClear}
           disabled={!lat && !lng}
-          className="px-4 py-2 bg-tertiary-drk text-white rounded-lg text-sm disabled:opacity-50 border dark:border-neutral-600"
+          className="px-4 py-2 bg-tertiary-drk text-white rounded-lg text-sm disabled:opacity-50 border dark:border-neutral-600 inline-flex gap-2 items-center"
         >
-          Limpar
+          <Trash2 size={18} /> Borrar
         </button>
       </div>
 
@@ -173,9 +175,9 @@ const GpsInput = ({ setFormData, formData }: GpsInputProps) => {
         <h3 className="font-medium text-[var(--color-destaque-primary)] flex items-center gap-2">
           Dica rápida
         </h3>
-        <p className="text-[var(--color-destaque-second)] dark:text-[var(--color-tertiary-lgt)] text-sm mt-1">
-          Puedes obtener las coordenadas GPS utilizando Google Maps. Simplemente
-          mantenga presionada la ubicación deseada en el mapa.
+        <p className="text-[var(--color-destaque-second)] dark:text-[var(--color-tertiary-lgt)] text-sm mt-1 inline-flex">
+          Puedes obtener coordenadas GPS con Google Maps. Solo mantén presionada
+          la ubicación deseada en el mapa. Luego, usa el botón "Pegar GPS".
         </p>
       </div>
     </div>

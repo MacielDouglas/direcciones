@@ -1,19 +1,7 @@
 import { imagesAddresses, typeAddress } from "../../../constants/address";
+import type { AddressFormData } from "../../../types/address.types";
 
 type AddressType = keyof typeof typeAddress;
-
-interface FormData {
-  type: AddressType;
-  customName?: string;
-  photo?: string;
-  street?: string;
-  number?: string;
-  neighborhood?: string;
-  city?: string;
-  complement?: string;
-  gps?: string;
-  confirmed?: boolean;
-}
 
 interface AddressTypeOption {
   value: AddressType;
@@ -22,7 +10,7 @@ interface AddressTypeOption {
 }
 
 interface CompletedFormProps {
-  formData: FormData;
+  formData: AddressFormData;
   validateForm: () => Record<string, string>;
   addressTypes: AddressTypeOption[];
 }

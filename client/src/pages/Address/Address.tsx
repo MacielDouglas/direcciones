@@ -24,14 +24,15 @@ import ButtonEditAddress from "./components/buttons/ButtonEditAddress";
 import DisableAddressButton from "./components/buttons/DisableAddressButton";
 import MapSection from "./components/MapSection";
 import { useToastMessage } from "../../hooks/useToastMessage";
-
-type AddressProps = {
-  id: string;
-};
+import ModalAddress from "./ui/ModalAddress";
 
 type Location = {
   lat: number;
   lng: number;
+};
+
+type AddressProps = {
+  id: string;
 };
 
 const Address: React.FC<AddressProps> = ({ id }) => {
@@ -47,7 +48,6 @@ const Address: React.FC<AddressProps> = ({ id }) => {
 
   const [deleteAddressInput] = useMutation(DELETE_ADDRESS, {
     onCompleted: async (data) => {
-      console.log(data);
       dispatch(
         setAddresses({
           addresses: addresses.filter(
@@ -95,13 +95,6 @@ const Address: React.FC<AddressProps> = ({ id }) => {
     );
   }, []);
 
-  const device = useMemo(() => {
-    const ua = navigator.userAgent;
-    if (/iPhone|iPad/i.test(ua)) return "ios";
-    if (/Android/i.test(ua)) return "android";
-    return "desktop";
-  }, []);
-
   if (!address) return <AddressSkeleton />;
 
   const {
@@ -134,24 +127,6 @@ const Address: React.FC<AddressProps> = ({ id }) => {
     restaurant: <Utensils size={28} />,
     hotel: <Bed size={28} />,
   };
-
-  const handleOpenMap = (app: "google" | "waze" | "apple") => {
-    const origin = userLocation
-      ? `${userLocation.lat},${userLocation.lng}`
-      : "";
-    const destination = `${latitude},${longitude}`;
-
-    const urls = {
-      google: `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`,
-      waze: `https://waze.com/ul?ll=${destination}&navigate=yes`,
-      apple: `maps://maps.apple.com/?saddr=${origin}&daddr=${destination}&dirflg=w`,
-    };
-
-    window.open(urls[app], "_blank");
-    setIsModalOpen(false);
-  };
-
-  // const handleEdit = () => navigate(`/addresses?tab=update-address&id=${id}`);
 
   const handleDelete = async () => {
     await deleteAddressInput({
@@ -257,94 +232,16 @@ const Address: React.FC<AddressProps> = ({ id }) => {
           )}
         </div>
       </div>
-
       {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 "
-          onClick={() => setIsModalOpen(false)}
-        >
-          {isDeleteOpen ? (
-            <>
-              <div
-                className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg w-full max-w-xl p-4 "
-                onClick={() => setIsDeleteOpen(false)}
-              >
-                <h2 className="text-2xl font-semibold mb-4 text-center">
-                  ¿Estás seguro de que deseas eliminar esta dirección?
-                </h2>
-                <div className="flex flex-col gap-4">
-                  <button
-                    onClick={() => handleDelete()}
-                    className="w-full bg-red-600 text-white py-2 rounded-lg"
-                  >
-                    ELIMINAR DIRECCIÓN
-                  </button>{" "}
-                  <button
-                    onClick={() => [
-                      setIsModalOpen(false),
-                      setIsDeleteOpen(false),
-                    ]}
-                    className="w-full py-2 text-sm text-gray-500 dark:text-gray-300 mt-2"
-                  >
-                    Cancelar
-                  </button>{" "}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div
-              className="bg-white dark:bg-zinc-900 rounded-xl shadow-lg w-full max-w-xs p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-base font-semibold mb-4 text-center">
-                Abrir com:
-              </h2>
-              <div className="flex flex-col gap-3">
-                {(device === "android" || device === "ios") && (
-                  <>
-                    <button
-                      onClick={() => handleOpenMap("google")}
-                      className="w-full bg-blue-600 text-white py-2 rounded-lg"
-                    >
-                      Google Maps
-                    </button>
-                    <button
-                      onClick={() => handleOpenMap("waze")}
-                      className="w-full bg-purple-600 text-white py-2 rounded-lg"
-                    >
-                      Waze
-                    </button>
-                  </>
-                )}
-
-                {device === "ios" && (
-                  <button
-                    onClick={() => handleOpenMap("apple")}
-                    className="w-full bg-black text-white py-2 rounded-lg"
-                  >
-                    Apple Maps
-                  </button>
-                )}
-
-                {device === "desktop" && (
-                  <button
-                    onClick={() => handleOpenMap("google")}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg"
-                  >
-                    Abrir no Google Maps
-                  </button>
-                )}
-
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="w-full py-2 text-sm text-gray-500 dark:text-gray-300 mt-2"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <ModalAddress
+          address={address}
+          setIsModalOpen={setIsModalOpen}
+          isDeleteOpen={isDeleteOpen}
+          setIsDeleteOpen={setIsDeleteOpen}
+          handleDelete={handleDelete}
+          userLocation={userLocation}
+          isReturnCard={false}
+        />
       )}
     </div>
   );

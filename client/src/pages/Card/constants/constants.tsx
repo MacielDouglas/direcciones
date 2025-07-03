@@ -7,7 +7,9 @@ import {
   Send,
   SendHorizontal,
 } from "lucide-react";
-import type { Address, ButtonTypeOption } from "../types/card.types";
+import type { ButtonTypeOption } from "../../../types/cards.types";
+import type { Address } from "../../../types/address.types";
+// import type { Address, ButtonTypeOption } from "../types/card.types";
 
 export const addressIcons = {
   house: <Home size={18} />,

@@ -19,8 +19,9 @@ import MapSection from "./Address/components/MapSection";
 import PhotoAddress from "./Address/components/PhotoAddress";
 import ButtonEditAddress from "./Address/components/buttons/ButtonEditAddress";
 import DisableAddressButton from "./Address/components/buttons/DisableAddressButton";
-import type { Address } from "./Address/types/adress.types";
 import { removeMyCard } from "../store/myCardsSlice";
+import type { AddressData } from "../types/address.types";
+import ModalAddress from "./Address/ui/ModalAddress";
 
 const addressIcons = {
   house: <Home size={24} />,
@@ -30,15 +31,38 @@ const addressIcons = {
   restaurant: <Utensils size={24} />,
 } as const;
 
+type Location = {
+  lat: number;
+  lng: number;
+};
+
 const MyCards = () => {
   const userId = useSelector(selectUserId);
   const myCards = useSelector(selectAllMyCard);
   const { fetchMyCards, loading } = useFetchMyCards();
   const { returnCardMutation } = useReturnCard();
 
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectCard, setSelectCard] = useState({ cardId: "", cardNumber: "" });
+  const [selectCard, setSelectCard] = useState<{
+    cardId: string | null;
+    cardNumber: number;
+  }>({ cardId: userId, cardNumber: 0 });
+  const [userLocation, setUserLocation] = useState<Location | null>(null);
+  const [isReturnCard, setIsReturnCard] = useState(false);
+
+  useEffect(() => {
+    navigator.geolocation?.getCurrentPosition(
+      (pos) =>
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      (err) => console.error("Erro ao obter localização do usuário:", err)
+    );
+  }, []);
 
   const dispatch = useDispatch();
 
@@ -52,7 +76,9 @@ const MyCards = () => {
         returnCardInput: { cardId: selectCard.cardId, userId: userId },
       },
     });
-    dispatch(removeMyCard(selectCard.cardId));
+    if (selectCard.cardId) {
+      dispatch(removeMyCard(selectCard.cardId));
+    }
     // await fetchMyCards({ variables: { myCardsId: userId } });
     setIsModalOpen(false);
   };
@@ -93,7 +119,7 @@ const MyCards = () => {
                   </h3>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400 flex items-center gap-2">
                     <CalendarDays /> Asignada en:{" "}
-                    <strong>{formatDate(card.startDate)}</strong>
+                    <strong>{formatDate(card.startDate ?? "")}</strong>
                   </p>
                   <button
                     className="bg-zinc-800 dark:bg-zinc-900 rounded-xl p-2 text-zinc-100 w-3/5 sm:w-auto hover:bg-zinc-800 transition"
@@ -103,6 +129,7 @@ const MyCards = () => {
                         cardId: card.id,
                         cardNumber: card.number,
                       });
+                      setIsReturnCard(true);
                     }}
                   >
                     concluir tarjeta
@@ -188,7 +215,7 @@ const MyCards = () => {
                   street={selectedAddress.street}
                 />
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => [setIsModalOpen(true), setIsReturnCard(false)]}
                   className="bg-blue-600 text-white py-3 rounded-md text-sm shadow-md mt-2 w-3/5"
                 >
                   Ver en el mapa
@@ -228,28 +255,16 @@ const MyCards = () => {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-[90%] max-w-md shadow-xl relative text-xl">
-            <h2>
-              ¿Estás seguro de que deseas devolver la tarjeta:{" "}
-              {selectCard.cardNumber}?
-            </h2>
-            <div className="mt-6 flex justify-end gap-4">
-              <button
-                className="bg-zinc-950 text-white px-4 py-2 rounded"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={handleReturnCard}
-              >
-                Devolver
-              </button>
-            </div>
-          </div>
-        </div>
+        <ModalAddress
+          setIsModalOpen={setIsModalOpen}
+          address={selectedAddress!}
+          isDeleteOpen={false}
+          userLocation={userLocation}
+          isReturnCard={isReturnCard}
+          handleReturnCard={handleReturnCard}
+          handleDelete={() => {}}
+          setIsDeleteOpen={() => {}}
+        />
       )}
     </div>
   );

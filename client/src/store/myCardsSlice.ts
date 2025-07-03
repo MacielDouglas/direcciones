@@ -1,28 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-export interface Street {
-  id: string;
-  street: string;
-  number: string;
-  neighborhood: string;
-  city: string;
-  complement?: string;
-  gps?: string;
-  group: string;
-  type: "house" | "department" | "store" | "hotel" | "restaurant";
-  confirmed: boolean;
-  visited: boolean;
-  active: boolean;
-  photo?: string;
-}
-
-interface Card {
-  id: string;
-  number: string;
-  startDate: string;
-  endDate: string;
-  street: Street[];
-}
+import type { Card } from "../types/cards.types";
 
 interface MyCardState {
   myCardData: Card[];

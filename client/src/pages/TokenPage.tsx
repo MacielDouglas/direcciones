@@ -13,13 +13,11 @@ const TokenPage = () => {
   const name = useSelector(selectUserName);
   const codUser = useSelector(selectCodUser);
   const { showToast } = useToastMessage();
-  console.log(codUser);
-  console.log(name);
 
   const { logoutUser, loading } = useLogout();
 
   const copyToken = () => {
-    navigator.clipboard.writeText(codUser);
+    navigator.clipboard.writeText(String(codUser));
     showToast({
       message: "¡Token copiado!",
       type: "success",

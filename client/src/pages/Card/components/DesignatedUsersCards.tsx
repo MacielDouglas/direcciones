@@ -5,8 +5,9 @@ import { selectAllUsersOthers } from "../../../store/selectors/ohterUsersSelecto
 import { selectAllCards } from "../../../store/selectors/cardsSelectors";
 import { useNavigate } from "react-router-dom";
 import { useDesignateCard } from "../../../graphql/hooks/useCards";
-import type { Card } from "../types/card.types";
+// import type { Card } from "../types/card.types";
 import { addressIcons, getNeighborhoodSummary } from "../constants/constants";
+import type { Card } from "../../../types/cards.types";
 // import { Dispatch, SetStateAction } from "react";
 
 import type { Dispatch, SetStateAction } from "react";
