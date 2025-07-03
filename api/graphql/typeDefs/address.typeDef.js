@@ -49,6 +49,7 @@ const addressTypeDef = `#graphql
     confirmed: Boolean!
     visited: Boolean!
     customName: String
+    
   }
 
   input UpdateAddressInput {
@@ -65,6 +66,7 @@ const addressTypeDef = `#graphql
     confirmed: Boolean
     group: String
     visited: Boolean
+    customName: String
   }
 
   type Mutation {
