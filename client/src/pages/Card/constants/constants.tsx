@@ -8,8 +8,7 @@ import {
   SendHorizontal,
 } from "lucide-react";
 import type { ButtonTypeOption } from "../../../types/cards.types";
-import type { Address } from "../../../types/address.types";
-// import type { Address, ButtonTypeOption } from "../types/card.types";
+import type { AddressData } from "../../../types/address.types";
 
 export const addressIcons = {
   house: <Home size={18} />,
@@ -32,7 +31,7 @@ export const buttonTypeOptions: ButtonTypeOption[] = [
   },
 ];
 
-export const getNeighborhoodSummary = (streets: Address[]) => {
+export const getNeighborhoodSummary = (streets: AddressData[]) => {
   const neighborhoods = Array.from(new Set(streets.map((s) => s.neighborhood)));
   return neighborhoods.join(", ");
 };

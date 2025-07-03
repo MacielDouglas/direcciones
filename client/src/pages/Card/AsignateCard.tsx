@@ -14,7 +14,6 @@ import ButtonSteps from "../Address/ui/ButtonSteps";
 import { ProgressSteps, Step } from "../Address/ui/ProgressSteps";
 import DesignatedUsersCards from "./components/DesignatedUsersCards";
 import type { ButtonTypeOption, Card } from "../../types/cards.types";
-// import type { ButtonTypeOption, Card } from "./types/card.types";
 
 const buttonTypeOptions: ButtonTypeOption[] = [
   {
