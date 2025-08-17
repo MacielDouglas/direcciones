@@ -130,10 +130,10 @@ const SearchAddress = () => {
             : "text-orange-600";
 
           const statusText = !address.active
-            ? "Endereço inativo"
+            ? "EN ESTA DIRECCIÓN NO HAY PERSONAS DEL IDIOMA"
             : address.confirmed
-            ? "Endereço confirmado"
-            : "Necessita confirmação";
+            ? "Dirección confirmada"
+            : "Necesita confirmación";
 
           return (
             <li key={index}>

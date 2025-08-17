@@ -172,7 +172,7 @@ const Address: React.FC<AddressProps> = ({ id }) => {
             }`}
           >
             {!active
-              ? "DIRECCIÓN DESACTIVADA"
+              ? "NO HAY PERSONAS DEL IDIOMA EN ESTA DIRECCIÓN"
               : confirmed
               ? "Dirección confirmada"
               : "NECESITA CONFIRMACIÓN"}

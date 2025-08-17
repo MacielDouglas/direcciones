@@ -109,7 +109,9 @@ const DesignatedUsersCards = ({
                 }`}
               >
                 <div className="flex justify-between">
-                  <p className="font-semibold">{usr.name}</p>{" "}
+                  <p className="font-semibold   dark:text-orange-500">
+                    {usr.name}
+                  </p>{" "}
                   <p>Tarjetas: {skd.length}</p>
                 </div>
                 <div className="space-y-6">

@@ -167,6 +167,11 @@ const MyCards = () => {
                           {address.complement}
                         </div>
                       )}
+                      {!address.active && (
+                        <p className="mt-2 text-center text-sm font-medium">
+                          NO HAY PERSONAS DEL IDIOMA EN ESTA DIRECCIÓN
+                        </p>
+                      )}
                       <p className="mt-2 text-center text-sm font-medium">
                         {address.confirmed ? (
                           <span className="text-blue-500">Confirmado</span>
@@ -239,6 +244,11 @@ const MyCards = () => {
               <div className="text-sm italic text-zinc-500">
                 {selectedAddress.complement}
               </div>
+            )}
+            {!selectedAddress.active && (
+              <p className="mt-2 text-center text-lg font-medium">
+                EN ESTA DIRECCIÓN NO HAY PERSONAS DEL IDIOMA
+              </p>
             )}
             <p className="mt-4 text-lg text-center font-medium">
               {selectedAddress.confirmed ? (
