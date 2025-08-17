@@ -107,8 +107,10 @@ const DesignatedCard = ({
                   <MapPin /> {card.street.length} direcciones
                 </p>
 
+                {console.log(card)}
+
                 {designated && (
-                  <p className="font-semibold text-base text-neutral-500">
+                  <p className="font-semibold text-base text-black dark:text-orange-500">
                     {card.usersAssigned?.length
                       ? users
                           .filter(
